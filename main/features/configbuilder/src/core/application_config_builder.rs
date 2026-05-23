@@ -2,8 +2,10 @@
 
 use std::path::PathBuf;
 
-use crate::api::application_config_builder::{APP_NAME, APP_VERSION};
 use crate::api::traits::config_builder::ConfigBuilder;
+
+const APP_NAME: &str = env!("CARGO_PKG_NAME");
+const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 use crate::api::traits::loader::Loader;
 use crate::core::DefaultConfigBuilder;
 

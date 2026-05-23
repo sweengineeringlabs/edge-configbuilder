@@ -2,7 +2,6 @@
 
 use std::path::PathBuf;
 
-use crate::api::default_config_builder::DEFAULT_VERSION;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;
 use crate::core::DefaultSectionLoader;
@@ -17,7 +16,7 @@ impl DefaultConfigBuilder {
     pub(crate) fn new() -> Self {
         Self {
             name: String::new(),
-            version: DEFAULT_VERSION.to_string(),
+            version: "0.1.0".to_string(),
             config_dirs: Vec::new(),
         }
     }

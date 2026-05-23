@@ -3,12 +3,13 @@
 use std::env;
 use std::path::PathBuf;
 
-use crate::api::default_section_loader::{
-    CONFIG_DIR_ENV_VAR, FALLBACK_CONFIG_DIR, MAX_CONFIG_FILE_BYTES,
-};
-use crate::api::default_validator::NOT_A_DIR_MSG;
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
+use crate::core::default_validator::NOT_A_DIR_MSG;
+
+const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576;
+const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
+const FALLBACK_CONFIG_DIR: &str = "config";
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
