@@ -1,13 +1,15 @@
 //! Tests for `ConfigBuilder` trait via `create_config_builder`.
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _, Loader as _};
+use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _, ConfigError, Loader as _};
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]
 struct Cfg {
     value: String,
 }
+
+// ── builder fluent API ───────────────────────────────────────────────────────
 
 /// @covers: create_config_builder
 #[test]
@@ -31,19 +33,7 @@ fn test_with_version_sets_application_version() {
     assert_eq!(b.version(), "2.0.0");
 }
 
-/// @covers: create_config_builder
-#[test]
-fn test_name_returns_configured_application_name() {
-    let b = create_config_builder().with_name("edge-config");
-    assert_eq!(b.name(), "edge-config");
-}
-
-/// @covers: create_config_builder
-#[test]
-fn test_version_returns_configured_application_version() {
-    let b = create_config_builder().with_version("1.2.3");
-    assert_eq!(b.version(), "1.2.3");
-}
+// ── build_loader happy paths ─────────────────────────────────────────────────
 
 /// @covers: create_config_builder / build_loader
 #[test]
@@ -142,4 +132,55 @@ fn test_build_loader_later_config_dir_wins_on_conflict() {
         .unwrap();
 
     assert_eq!(cfg.value, "high");
+}
+
+// ── build_loader sad paths ───────────────────────────────────────────────────
+
+/// @covers: create_config_builder / build_loader
+#[test]
+fn test_build_loader_load_section_returns_parse_error_for_malformed_toml() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("application.toml"), b"not = [broken toml").unwrap();
+
+    let err = create_config_builder()
+        .with_config_dir(dir.path())
+        .build_loader()
+        .load_section::<Cfg>("any")
+        .unwrap_err();
+
+    assert!(matches!(err, ConfigError::Parse(_)));
+}
+
+/// @covers: create_config_builder / build_loader
+#[test]
+fn test_build_loader_load_section_returns_io_error_for_oversized_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let oversized = vec![b'#'; 1_048_577];
+    std::fs::write(dir.path().join("application.toml"), &oversized).unwrap();
+
+    let err = create_config_builder()
+        .with_config_dir(dir.path())
+        .build_loader()
+        .load_section::<Cfg>("any")
+        .unwrap_err();
+
+    assert!(matches!(err, ConfigError::Io(_)));
+    assert!(err.to_string().contains("1 MiB"));
+}
+
+/// @covers: create_config_builder / build_loader / validate
+#[test]
+fn test_build_loader_validate_returns_error_when_config_dir_is_a_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("not_a_dir.toml");
+    std::fs::write(&file, b"").unwrap();
+
+    let err = create_config_builder()
+        .with_config_dir(&file)
+        .build_loader()
+        .validate()
+        .unwrap_err();
+
+    assert!(matches!(err, ConfigError::Io(_)));
+    assert!(err.to_string().contains("not a directory"));
 }
