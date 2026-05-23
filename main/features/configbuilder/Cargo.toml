@@ -62,6 +62,22 @@ path = "tests/loader_e2e_test.rs"
 name = "config_builder_e2e_test"
 path = "tests/config_builder_e2e_test.rs"
 
+[[test]]
+name = "application_config_builder_e2e_test"
+path = "tests/application_config_builder_e2e_test.rs"
+
+[[test]]
+name = "default_config_builder_e2e_test"
+path = "tests/default_config_builder_e2e_test.rs"
+
+[[test]]
+name = "default_section_loader_e2e_test"
+path = "tests/default_section_loader_e2e_test.rs"
+
+[[test]]
+name = "default_validator_e2e_test"
+path = "tests/default_validator_e2e_test.rs"
+
 [[example]]
 name = "load_section"
 path = "examples/load_section.rs"

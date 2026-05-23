@@ -1,8 +1,0 @@
-# swe-edge-configbuilder — application configuration.
-#
-# Standalone TOML section loader with XDG path resolution.
-
-[observability.tracing]
-enabled = true
-format  = "pretty"   # pretty | json
-level   = "info"     # trace | debug | info | warn | error

@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::validator::Validator;
+use crate::core::ApplicationConfigBuilder;
 use crate::core::DefaultConfigBuilder;
 use crate::core::DefaultSectionLoader;
 use crate::core::DefaultValidator;
@@ -37,4 +38,12 @@ pub fn create_validator() -> impl Validator {
 /// Create an application config builder.
 pub fn create_config_builder() -> impl ConfigBuilder {
     DefaultConfigBuilder::new()
+}
+
+/// Create an application config builder pre-seeded with this package's name and version.
+///
+/// Uses XDG Base Directory resolution for the package name so callers do not
+/// need to call [`ConfigBuilder::with_name`] manually.
+pub fn create_application_config_builder() -> impl ConfigBuilder {
+    ApplicationConfigBuilder::new()
 }

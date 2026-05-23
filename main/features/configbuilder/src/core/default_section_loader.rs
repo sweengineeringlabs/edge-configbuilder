@@ -3,11 +3,12 @@
 use std::env;
 use std::path::PathBuf;
 
+use crate::api::default_section_loader::{
+    CONFIG_DIR_ENV_VAR, FALLBACK_CONFIG_DIR, MAX_CONFIG_FILE_BYTES,
+};
+use crate::api::default_validator::NOT_A_DIR_MSG;
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
-
-/// Refuse to read a config file larger than this.
-const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576; // 1 MiB
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
@@ -22,9 +23,9 @@ impl DefaultSectionLoader {
     /// Resolve the config directory from `SWE_EDGE_CONFIG_DIR`, falling back
     /// to `config/` relative to the working directory.
     pub(crate) fn new() -> Self {
-        let dir = env::var("SWE_EDGE_CONFIG_DIR")
+        let dir = env::var(CONFIG_DIR_ENV_VAR)
             .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from("config"));
+            .unwrap_or_else(|_| PathBuf::from(FALLBACK_CONFIG_DIR));
         Self {
             config_dirs: vec![dir],
         }
@@ -54,7 +55,7 @@ impl DefaultSectionLoader {
         }
 
         // Explicit override — highest file-level priority.
-        if let Ok(v) = env::var("SWE_EDGE_CONFIG_DIR") {
+        if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
             dirs.push(PathBuf::from(v));
         }
 
@@ -125,7 +126,7 @@ impl Loader for DefaultSectionLoader {
         for dir in &self.config_dirs {
             if dir.exists() && !dir.is_dir() {
                 return Err(ConfigError::Io(format!(
-                    "{}: config path exists but is not a directory",
+                    "{}: {NOT_A_DIR_MSG}",
                     dir.display()
                 )));
             }
