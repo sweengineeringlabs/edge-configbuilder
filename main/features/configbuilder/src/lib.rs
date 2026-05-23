@@ -22,6 +22,7 @@
 mod api;
 mod core;
 mod saf;
+pub mod spi;
 
 pub use crate::api::traits::config_builder::ConfigBuilder;
 pub use crate::api::traits::loader::Loader;

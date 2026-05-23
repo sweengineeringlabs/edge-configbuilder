@@ -166,9 +166,14 @@ mod tests {
     }
 
     #[test]
-    fn test_new_defaults_to_config_dir() {
-        let l = DefaultSectionLoader::new();
-        assert_eq!(l.config_dirs, vec![PathBuf::from("config")]);
+    fn test_new_returns_usable_loader_for_absent_section() {
+        // Uses SWE_EDGE_CONFIG_DIR if set, otherwise "config/" relative to CWD.
+        // Tests behavior rather than internal state so the result is the same
+        // regardless of whether the env var is set in the test runner.
+        let result: Result<Sec, _> =
+            DefaultSectionLoader::new().load_section("swe_edge_nonexistent_section_xyz");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Sec::default());
     }
 
     #[test]
