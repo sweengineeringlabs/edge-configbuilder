@@ -1,0 +1,67 @@
+[package]
+name             = "swe-edge-configbuilder"
+version.workspace     = true
+edition.workspace     = true
+license.workspace     = true
+rust-version.workspace = true
+authors.workspace     = true
+repository.workspace  = true
+description  = "Standalone, runtime-independent TOML section loader for swe-edge services."
+keywords     = ["config", "toml", "xdg", "loader", "swe"]
+categories   = ["config"]
+
+[package.metadata.struct-engine]
+application_type = "lib"
+service_type     = "config"
+
+[lib]
+name = "swe_edge_configbuilder"
+path = "src/lib.rs"
+
+[dependencies]
+serde     = { version = "1.0", features = ["derive"] }
+toml      = "0.8"
+dirs      = "5"
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
+
+[[test]]
+name = "section_loader_int_test"
+path = "tests/section_loader_int_test.rs"
+
+[[test]]
+name = "section_loader_e2e_test"
+path = "tests/section_loader_e2e_test.rs"
+
+[[test]]
+name = "config_error_e2e_test"
+path = "tests/config_error_e2e_test.rs"
+
+[[test]]
+name = "validator_e2e_test"
+path = "tests/validator_e2e_test.rs"
+
+[[test]]
+name = "traits_e2e_test"
+path = "tests/traits_e2e_test.rs"
+
+[[test]]
+name = "configbuilder_svc_e2e_test"
+path = "tests/configbuilder_svc_e2e_test.rs"
+
+[[test]]
+name = "loader_e2e_test"
+path = "tests/loader_e2e_test.rs"
+
+[[test]]
+name = "config_builder_e2e_test"
+path = "tests/config_builder_e2e_test.rs"
+
+[[example]]
+name = "load_section"
+path = "examples/load_section.rs"
