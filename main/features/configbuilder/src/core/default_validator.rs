@@ -1,6 +1,5 @@
+use crate::api::default_validator::NOT_A_DIR_MSG;
 use crate::api::error::config_error::ConfigError;
-
-const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 use crate::api::traits::validator::Validator;
 use std::path::Path;
 

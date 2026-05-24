@@ -1,6 +1,7 @@
 use std::env;
 use std::path::PathBuf;
 
+use crate::api::default_config_builder::DEFAULT_VERSION;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::validator::Validator;
@@ -57,7 +58,7 @@ pub fn create_validator() -> impl Validator {
 pub fn create_config_builder() -> impl ConfigBuilder {
     DefaultConfigBuilder {
         name: String::new(),
-        version: "0.1.0".to_string(),
+        version: DEFAULT_VERSION.to_string(),
         config_dirs: Vec::new(),
     }
 }
