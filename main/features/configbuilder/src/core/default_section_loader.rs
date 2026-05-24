@@ -1,15 +1,13 @@
 //! `DefaultSectionLoader` — layered TOML section extractor.
 
-use std::env;
 use std::path::PathBuf;
 
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
-use crate::core::default_validator::NOT_A_DIR_MSG;
+
+const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 
 const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576;
-const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
-const FALLBACK_CONFIG_DIR: &str = "config";
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
@@ -21,48 +19,6 @@ pub(crate) struct DefaultSectionLoader {
 }
 
 impl DefaultSectionLoader {
-    /// Resolve the config directory from `SWE_EDGE_CONFIG_DIR`, falling back
-    /// to `config/` relative to the working directory.
-    pub(crate) fn new() -> Self {
-        let dir = env::var(CONFIG_DIR_ENV_VAR)
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from(FALLBACK_CONFIG_DIR));
-        Self {
-            config_dirs: vec![dir],
-        }
-    }
-
-    /// Build the full XDG Base Directory chain for `app_name`.
-    ///
-    /// Applied in order (last wins):
-    /// 1. Each entry in `$XDG_CONFIG_DIRS/<app_name>/` (lowest priority)
-    /// 2. `$XDG_CONFIG_HOME/<app_name>/`
-    /// 3. `$SWE_EDGE_CONFIG_DIR/` (if set)
-    pub(crate) fn xdg(app_name: &str) -> Self {
-        let mut dirs: Vec<PathBuf> = Vec::new();
-
-        // XDG_CONFIG_DIRS — system-wide, colon-separated, spec order reversed so
-        // lower-priority entries are applied first and higher-priority entries win.
-        let xdg_config_dirs = env::var("XDG_CONFIG_DIRS").unwrap_or_else(|_| "/etc/xdg".to_owned());
-        for segment in xdg_config_dirs.split(':').rev() {
-            if !segment.is_empty() {
-                dirs.push(PathBuf::from(segment).join(app_name));
-            }
-        }
-
-        // XDG_CONFIG_HOME — user-level, higher priority than CONFIG_DIRS.
-        if let Some(home) = dirs::config_dir() {
-            dirs.push(home.join(app_name));
-        }
-
-        // Explicit override — highest file-level priority.
-        if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
-            dirs.push(PathBuf::from(v));
-        }
-
-        Self { config_dirs: dirs }
-    }
-
     fn merge_toml(base: toml::Value, overlay: toml::Value) -> toml::Value {
         match (base, overlay) {
             (toml::Value::Table(mut b), toml::Value::Table(o)) => {
@@ -168,17 +124,6 @@ mod tests {
     }
 
     #[test]
-    fn test_new_returns_usable_loader_for_absent_section() {
-        // Uses SWE_EDGE_CONFIG_DIR if set, otherwise "config/" relative to CWD.
-        // Tests behavior rather than internal state so the result is the same
-        // regardless of whether the env var is set in the test runner.
-        let result: Result<Sec, _> =
-            DefaultSectionLoader::new().load_section("swe_edge_nonexistent_section_xyz");
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), Sec::default());
-    }
-
-    #[test]
     fn test_load_section_reads_top_level_key() {
         let dir = TempDir::new().unwrap();
         write_toml(
@@ -261,13 +206,6 @@ mod tests {
         write_toml(dir.path(), "application.toml", "not = [broken toml");
         let err = loader_in(dir.path()).load_section::<Sec>("s").unwrap_err();
         assert!(matches!(err, ConfigError::Parse(_)));
-    }
-
-    #[test]
-    fn test_xdg_unknown_app_returns_default() {
-        let loader = DefaultSectionLoader::xdg("swe-edge-test-nonexistent-xyz-789");
-        let sec: Sec = loader.load_section("any").unwrap();
-        assert_eq!(sec, Sec::default());
     }
 
     #[test]
