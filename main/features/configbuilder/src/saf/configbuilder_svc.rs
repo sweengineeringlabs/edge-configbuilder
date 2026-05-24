@@ -54,20 +54,11 @@ pub fn create_validator() -> impl Validator {
     DefaultValidator
 }
 
-/// Create an application config builder.
-pub fn create_config_builder() -> impl ConfigBuilder {
-    DefaultConfigBuilder {
-        name: String::new(),
-        version: DEFAULT_VERSION.to_string(),
-        config_dirs: Vec::new(),
-    }
-}
-
-/// Create an application config builder pre-seeded with this package's name and version.
+/// Create a config builder pre-seeded with this package's name and version.
 ///
 /// Uses XDG Base Directory resolution for the package name so callers do not
 /// need to call [`ConfigBuilder::with_name`] manually.
-pub fn create_application_config_builder() -> impl ConfigBuilder {
+pub fn create_config_builder() -> impl ConfigBuilder {
     DefaultConfigBuilder {
         name: env!("CARGO_PKG_NAME").to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),

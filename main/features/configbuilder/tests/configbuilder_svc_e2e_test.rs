@@ -2,7 +2,7 @@
 
 use std::io::Write as _;
 use swe_edge_configbuilder::{
-    create_application_config_builder, create_loader, create_loader_for_dir, create_loader_xdg,
+    create_config_builder, create_loader, create_loader_for_dir, create_loader_xdg,
     create_validator, ConfigBuilder as _, ConfigError, Loader as _, Validator as _,
 };
 
@@ -66,17 +66,17 @@ fn test_validate_path_file_returns_error() {
     assert!(err.to_string().contains("not a directory"));
 }
 
-/// @covers: create_application_config_builder
+/// @covers: create_config_builder
 #[test]
-fn test_create_application_config_builder_is_pre_seeded_with_package_name() {
-    let builder = create_application_config_builder();
+fn test_create_config_builder_is_pre_seeded_with_package_name() {
+    let builder = create_config_builder();
     assert_eq!(builder.name(), env!("CARGO_PKG_NAME"));
 }
 
-/// @covers: create_application_config_builder
+/// @covers: create_config_builder
 #[test]
-fn test_create_application_config_builder_returns_usable_loader_for_absent_section() {
-    let result: Result<Cfg, _> = create_application_config_builder()
+fn test_create_config_builder_returns_usable_loader_for_absent_section() {
+    let result: Result<Cfg, _> = create_config_builder()
         .build_loader()
         .load_section("nonexistent_xyz");
     assert!(result.is_ok());

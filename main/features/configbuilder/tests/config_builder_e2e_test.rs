@@ -13,10 +13,10 @@ struct Cfg {
 
 /// @covers: create_config_builder
 #[test]
-fn test_create_config_builder_returns_empty_name_and_default_version() {
+fn test_create_config_builder_returns_package_name_and_version() {
     let b = create_config_builder();
-    assert_eq!(b.name(), "");
-    assert_eq!(b.version(), "0.1.0");
+    assert_eq!(b.name(), env!("CARGO_PKG_NAME"));
+    assert_eq!(b.version(), env!("CARGO_PKG_VERSION"));
 }
 
 /// @covers: create_config_builder

@@ -20,6 +20,6 @@ fn test_create_config_builder_default_version_is_semver() {
 
 /// @covers: api/default_config_builder::DEFAULT_VERSION
 #[test]
-fn test_create_config_builder_default_name_is_empty() {
-    assert_eq!(create_config_builder().name(), "");
+fn test_create_config_builder_default_name_is_package_name() {
+    assert_eq!(create_config_builder().name(), env!("CARGO_PKG_NAME"));
 }
