@@ -10,8 +10,9 @@ use crate::api::traits::loader::Loader;
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
 /// Each directory's `application.toml` is merged in order; later entries win.
-/// Construct via [`DefaultSectionLoader::new`], [`DefaultSectionLoader::with_dir`], or
-/// [`DefaultSectionLoader::xdg`].
+/// Merging is **recursive**: when both the base and overlay contain a TOML table at
+/// the same key path, their sub-keys are merged rather than the overlay replacing
+/// the entire table. Arrays and scalars are always replaced by the overlay value.
 pub(crate) struct DefaultSectionLoader {
     pub(crate) config_dirs: Vec<PathBuf>,
 }
@@ -21,7 +22,11 @@ impl DefaultSectionLoader {
         match (base, overlay) {
             (toml::Value::Table(mut b), toml::Value::Table(o)) => {
                 for (k, v) in o {
-                    b.insert(k, v);
+                    let merged = match b.remove(&k) {
+                        Some(base_v) => Self::merge_toml(base_v, v),
+                        None => v,
+                    };
+                    b.insert(k, merged);
                 }
                 toml::Value::Table(b)
             }
@@ -186,6 +191,54 @@ mod tests {
         let sec: Sec = loader.load_section("s").unwrap();
         assert_eq!(sec.value, "hi");
         assert_eq!(sec.count, 9);
+    }
+
+    #[derive(Debug, Default, serde::Deserialize, PartialEq)]
+    #[serde(default)]
+    struct Server {
+        host: String,
+        tls: Tls,
+    }
+
+    #[derive(Debug, Default, serde::Deserialize, PartialEq)]
+    #[serde(default)]
+    struct Tls {
+        cert: String,
+        key: String,
+    }
+
+    #[test]
+    fn test_load_section_deep_merges_nested_tables_across_dirs() {
+        // Regression: shallow merge replaced the entire `tls` subtable, dropping
+        // any key in the base that was absent from the overlay.
+        let low = TempDir::new().unwrap();
+        let high = TempDir::new().unwrap();
+        write_toml(
+            low.path(),
+            "application.toml",
+            "[s]\nhost = \"localhost\"\n\n[s.tls]\ncert = \"old.pem\"\nkey = \"key.pem\"",
+        );
+        write_toml(
+            high.path(),
+            "application.toml",
+            "[s.tls]\ncert = \"new.pem\"",
+        );
+        let loader = DefaultSectionLoader {
+            config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
+        };
+        let srv: Server = loader.load_section("s").unwrap();
+        assert_eq!(
+            srv.host, "localhost",
+            "host must survive overlay of sibling subtable"
+        );
+        assert_eq!(
+            srv.tls.cert, "new.pem",
+            "cert must be overridden by high-priority dir"
+        );
+        assert_eq!(
+            srv.tls.key, "key.pem",
+            "key must not be lost when only cert is overridden"
+        );
     }
 
     #[test]
