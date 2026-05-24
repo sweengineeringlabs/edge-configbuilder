@@ -28,3 +28,4 @@ pub use crate::api::traits::config_builder::ConfigBuilder;
 pub use crate::api::traits::loader::Loader;
 pub use crate::api::traits::validator::Validator;
 pub use saf::*;
+pub use spi::ConfigSection;
