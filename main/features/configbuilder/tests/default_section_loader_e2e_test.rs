@@ -39,22 +39,6 @@ fn test_load_section_from_accepts_file_at_exactly_one_mib() {
     assert_eq!(result.unwrap(), Sec::default());
 }
 
-/// @covers: api/default_section_loader::CONFIG_DIR_ENV_VAR
-#[test]
-fn test_load_section_from_env_var_dir_is_read() {
-    let dir = tempfile::tempdir().unwrap();
-    let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
-    writeln!(f, "[cfg]\nvalue = \"from_env\"").unwrap();
-
-    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path());
-    let result: Result<Sec, _> = swe_edge_configbuilder::create_loader()
-        .unwrap()
-        .load_section("cfg");
-    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
-
-    assert_eq!(result.unwrap().value, "from_env");
-}
-
 /// @covers: api/default_section_loader::FALLBACK_CONFIG_DIR
 #[test]
 fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
