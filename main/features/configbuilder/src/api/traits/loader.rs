@@ -6,7 +6,7 @@ use crate::api::error::config_error::ConfigError;
 /// `Ok(T::default())` when the requested key is absent from every source.
 ///
 /// Environment variable substitution ({{VAR_NAME}} syntax) is optionally supported.
-pub(crate) trait Loader {
+pub trait Loader {
     /// Load the section at `key` (dotted path, e.g. `"outer.inner"`) from all
     /// configured directories.
     ///

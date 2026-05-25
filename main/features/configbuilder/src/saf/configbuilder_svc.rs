@@ -142,6 +142,7 @@ impl ConfigBuilderImpl {
 }
 
 #[allow(dead_code)]
+#[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImpl {
     fn name(&self) -> &str {
         ConfigBuilderImpl::name(self)
@@ -169,6 +170,7 @@ impl ConfigBuilder for ConfigBuilderImpl {
 }
 
 #[allow(dead_code)]
+#[allow(refining_impl_trait)]
 impl ConfigBuilderSvc for ConfigBuilderImpl {
     fn name(&self) -> &str {
         ConfigBuilderImpl::name(self)
@@ -461,6 +463,7 @@ impl ConfigBuilderImplWithSubstitution {
 }
 
 #[allow(dead_code)]
+#[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImplWithSubstitution {
     fn name(&self) -> &str {
         ConfigBuilderImplWithSubstitution::name(self)

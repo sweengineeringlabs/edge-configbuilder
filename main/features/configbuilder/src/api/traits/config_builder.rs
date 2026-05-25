@@ -37,5 +37,6 @@ pub(crate) trait ConfigBuilder: Sized {
     /// Returns [`ConfigError::Io`] if any configured directory path points to a
     /// file rather than a directory, or if an environment-variable-supplied path
     /// contains `..` traversal components.
+    #[allow(dead_code)]
     fn build_loader(self) -> Result<impl Loader, ConfigError>;
 }

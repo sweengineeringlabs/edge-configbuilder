@@ -1,6 +1,6 @@
 //! Load a typed configuration section from application.toml via ConfigBuilder.
 
-use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _, Loader as _};
+use swe_edge_configbuilder::{create_config_builder, Loader as _};
 
 #[derive(Debug, Default, serde::Deserialize)]
 #[serde(default)]

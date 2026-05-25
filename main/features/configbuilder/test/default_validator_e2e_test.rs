@@ -1,7 +1,7 @@
 //! Contract tests for the validator error message constant.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{create_validator, Validator as _};
+use swe_edge_configbuilder::create_validator;
 
 /// @covers: api/default_validator::NOT_A_DIR_MSG
 #[test]
