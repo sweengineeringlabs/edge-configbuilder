@@ -160,7 +160,11 @@ mod tests {
     #[test]
     fn test_load_section_returns_default_when_section_absent_from_existing_toml() {
         let dir = TempDir::new().unwrap();
-        write_toml(dir.path(), "application.toml", "[other_section]\nvalue = \"x\"");
+        write_toml(
+            dir.path(),
+            "application.toml",
+            "[other_section]\nvalue = \"x\"",
+        );
         let sec: Sec = loader_in(dir.path()).load_section("nonexistent").unwrap();
         assert_eq!(sec, Sec::default());
     }

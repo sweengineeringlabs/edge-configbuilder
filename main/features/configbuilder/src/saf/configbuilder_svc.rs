@@ -1,7 +1,6 @@
 use std::env;
 use std::path::PathBuf;
 
-use crate::api::default_config_builder::DEFAULT_VERSION;
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;

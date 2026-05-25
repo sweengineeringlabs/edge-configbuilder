@@ -47,7 +47,9 @@ fn test_load_section_from_env_var_dir_is_read() {
     writeln!(f, "[cfg]\nvalue = \"from_env\"").unwrap();
 
     std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path());
-    let result: Result<Sec, _> = swe_edge_configbuilder::create_loader().load_section("cfg");
+    let result: Result<Sec, _> = swe_edge_configbuilder::create_loader()
+        .unwrap()
+        .load_section("cfg");
     std::env::remove_var("SWE_EDGE_CONFIG_DIR");
 
     assert_eq!(result.unwrap().value, "from_env");
@@ -61,7 +63,10 @@ fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
         .unwrap()
         .load_section("nonexistent_xyz");
     assert!(
-        matches!(result, Err(swe_edge_configbuilder::ConfigError::NotFound(_))),
+        matches!(
+            result,
+            Err(swe_edge_configbuilder::ConfigError::NotFound(_))
+        ),
         "fallback config dir with no application.toml must return NotFound: {result:?}"
     );
 }
