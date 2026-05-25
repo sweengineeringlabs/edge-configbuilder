@@ -1,4 +1,4 @@
-//! `DefaultSectionLoader` — layered TOML section extractor.
+//! `DefaultSectionLoader` — layered TOML section extractor with optional substitution.
 
 use std::path::PathBuf;
 
@@ -6,6 +6,8 @@ use crate::api::default_section_loader::MAX_CONFIG_FILE_BYTES;
 use crate::api::default_validator::NOT_A_DIR_MSG;
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
+use crate::api::traits::substitution_policy::SubstitutionPolicy;
+use crate::core::Substituter;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
@@ -13,8 +15,12 @@ use crate::api::traits::loader::Loader;
 /// Merging is **recursive**: when both the base and overlay contain a TOML table at
 /// the same key path, their sub-keys are merged rather than the overlay replacing
 /// the entire table. Arrays and scalars are always replaced by the overlay value.
+///
+/// Optionally applies environment variable substitution (`{{VAR_NAME}}` syntax)
+/// if created with a substitution policy.
 pub(crate) struct DefaultSectionLoader {
     pub(crate) config_dirs: Vec<PathBuf>,
+    pub(crate) substitution_policy: Option<Box<dyn SubstitutionPolicy>>,
 }
 
 impl DefaultSectionLoader {
@@ -68,6 +74,18 @@ impl Loader for DefaultSectionLoader {
             }
             let text = std::fs::read_to_string(&path)
                 .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
+
+            // Apply substitution if policy is configured
+            let text = if let Some(ref policy) = self.substitution_policy {
+                let substituter =
+                    Substituter::new(policy.as_ref(), format!("{}:{}", path.display(), key));
+                substituter
+                    .substitute(&text)
+                    .map_err(|e| ConfigError::Io(e.to_string()))?
+            } else {
+                text
+            };
+
             let val: toml::Value =
                 toml::from_str(&text).map_err(|e| ConfigError::Parse(e.to_string()))?;
             if let Some(section) = Self::extract_dotted(&val, key) {
@@ -121,6 +139,7 @@ mod tests {
     fn loader_in(dir: &Path) -> DefaultSectionLoader {
         DefaultSectionLoader {
             config_dirs: vec![dir.to_path_buf()],
+            substitution_policy: None,
         }
     }
 
@@ -191,6 +210,7 @@ mod tests {
         write_toml(high.path(), "application.toml", "[s]\nvalue = \"high\"");
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
+            substitution_policy: None,
         };
         let sec: Sec = loader.load_section("s").unwrap();
         assert_eq!(sec.value, "high");
@@ -204,6 +224,7 @@ mod tests {
         write_toml(high.path(), "application.toml", "[s]\nvalue = \"hi\"");
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
+            substitution_policy: None,
         };
         let sec: Sec = loader.load_section("s").unwrap();
         assert_eq!(sec.value, "hi");
@@ -242,6 +263,7 @@ mod tests {
         );
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
+            substitution_policy: None,
         };
         let srv: Server = loader.load_section("s").unwrap();
         assert_eq!(
@@ -280,6 +302,7 @@ mod tests {
     fn test_validate_accepts_nonexistent_dir() {
         let loader = DefaultSectionLoader {
             config_dirs: vec![PathBuf::from("/nonexistent/swe-edge-test-xyz")],
+            substitution_policy: None,
         };
         assert!(loader.validate().is_ok());
     }
@@ -289,6 +312,7 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir.path().to_path_buf()],
+            substitution_policy: None,
         };
         assert!(loader.validate().is_ok());
     }
@@ -300,6 +324,7 @@ mod tests {
         std::fs::write(&file, b"").unwrap();
         let loader = DefaultSectionLoader {
             config_dirs: vec![file.clone()],
+            substitution_policy: None,
         };
         let err = loader.validate().unwrap_err();
         assert!(matches!(err, ConfigError::Io(_)));

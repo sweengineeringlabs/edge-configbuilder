@@ -5,10 +5,13 @@ use crate::api::error::config_error::ConfigError;
 /// Implementations merge config directories in order (later wins) and return
 /// `Ok(T::default())` when the requested key is absent from every source.
 ///
-/// Obtain a concrete instance via the `saf/` factory functions.
-pub trait Loader {
+/// Environment variable substitution ({{VAR_NAME}} syntax) is optionally supported.
+pub(crate) trait Loader {
     /// Load the section at `key` (dotted path, e.g. `"outer.inner"`) from all
     /// configured directories.
+    ///
+    /// If the loader was created with a substitution policy, {{VAR_NAME}} placeholders
+    /// will be substituted with environment variable values after loading.
     fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default;

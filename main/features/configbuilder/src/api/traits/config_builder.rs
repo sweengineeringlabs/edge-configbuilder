@@ -7,7 +7,7 @@ use std::path::PathBuf;
 /// The `Sized` bound allows implementors to use `Self` in fluent builder
 /// returns. Obtain a concrete instance via the `saf/` factory functions —
 /// callers never name the concrete type.
-pub trait ConfigBuilder: Sized {
+pub(crate) trait ConfigBuilder: Sized {
     /// Return the configured application name.
     fn name(&self) -> &str;
 
@@ -25,7 +25,7 @@ pub trait ConfigBuilder: Sized {
     /// Multiple calls accumulate directories — later entries win on key conflicts.
     fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self;
 
-    /// Consume the builder and return a ready-to-use [`Loader`].
+    /// Consume the builder and return a ready-to-use loader.
     ///
     /// Resolution order (first match wins):
     /// 1. Explicit dirs added via [`with_config_dir`] — used verbatim.

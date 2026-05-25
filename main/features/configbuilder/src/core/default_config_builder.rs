@@ -32,6 +32,61 @@ impl DefaultConfigBuilder {
     }
 }
 
+impl DefaultConfigBuilder {
+    pub(crate) fn build_loader_internal(self) -> Result<DefaultSectionLoader, ConfigError> {
+        if !self.config_dirs.is_empty() {
+            let loader = DefaultSectionLoader {
+                config_dirs: self.config_dirs,
+                substitution_policy: None,
+            };
+            loader.validate()?;
+            return Ok(loader);
+        }
+
+        if !self.name.is_empty() {
+            let mut dirs: Vec<PathBuf> = Vec::new();
+            let xdg_config_dirs =
+                env::var("XDG_CONFIG_DIRS").unwrap_or_else(|_| "/etc/xdg".to_owned());
+            for segment in xdg_config_dirs.split(':').rev() {
+                if !segment.is_empty() {
+                    let seg_path = PathBuf::from(segment);
+                    Self::reject_traversal(&seg_path)?;
+                    dirs.push(seg_path.join(&self.name));
+                }
+            }
+            if let Some(home) = dirs::config_dir() {
+                dirs.push(home.join(&self.name));
+            }
+            if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
+                let p = PathBuf::from(&v);
+                Self::reject_traversal(&p)?;
+                dirs.push(p);
+            }
+            let loader = DefaultSectionLoader {
+                config_dirs: dirs,
+                substitution_policy: None,
+            };
+            loader.validate()?;
+            return Ok(loader);
+        }
+
+        let dir = match env::var(CONFIG_DIR_ENV_VAR) {
+            Ok(v) => {
+                let p = PathBuf::from(&v);
+                Self::reject_traversal(&p)?;
+                p
+            }
+            Err(_) => PathBuf::from(FALLBACK_CONFIG_DIR),
+        };
+        let loader = DefaultSectionLoader {
+            config_dirs: vec![dir],
+            substitution_policy: None,
+        };
+        loader.validate()?;
+        Ok(loader)
+    }
+}
+
 impl ConfigBuilder for DefaultConfigBuilder {
     fn name(&self) -> &str {
         &self.name
@@ -57,51 +112,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
     }
 
     fn build_loader(self) -> Result<impl Loader, ConfigError> {
-        if !self.config_dirs.is_empty() {
-            let loader = DefaultSectionLoader {
-                config_dirs: self.config_dirs,
-            };
-            loader.validate()?;
-            return Ok(loader);
-        }
-
-        if !self.name.is_empty() {
-            let mut dirs: Vec<PathBuf> = Vec::new();
-            let xdg_config_dirs =
-                env::var("XDG_CONFIG_DIRS").unwrap_or_else(|_| "/etc/xdg".to_owned());
-            for segment in xdg_config_dirs.split(':').rev() {
-                if !segment.is_empty() {
-                    let seg_path = PathBuf::from(segment);
-                    Self::reject_traversal(&seg_path)?;
-                    dirs.push(seg_path.join(&self.name));
-                }
-            }
-            if let Some(home) = dirs::config_dir() {
-                dirs.push(home.join(&self.name));
-            }
-            if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
-                let p = PathBuf::from(&v);
-                Self::reject_traversal(&p)?;
-                dirs.push(p);
-            }
-            let loader = DefaultSectionLoader { config_dirs: dirs };
-            loader.validate()?;
-            return Ok(loader);
-        }
-
-        let dir = match env::var(CONFIG_DIR_ENV_VAR) {
-            Ok(v) => {
-                let p = PathBuf::from(&v);
-                Self::reject_traversal(&p)?;
-                p
-            }
-            Err(_) => PathBuf::from(FALLBACK_CONFIG_DIR),
-        };
-        let loader = DefaultSectionLoader {
-            config_dirs: vec![dir],
-        };
-        loader.validate()?;
-        Ok(loader)
+        self.build_loader_internal()
     }
 }
 
@@ -212,6 +223,21 @@ mod tests {
         assert!(
             DefaultConfigBuilder::reject_traversal(std::path::Path::new("/etc/xdg/myapp")).is_ok(),
             "expected ok for absolute path without '..'"
+        );
+    }
+
+    #[test]
+    fn test_build_loader_internal() {
+        let dir = tempfile::tempdir().unwrap();
+        let builder = DefaultConfigBuilder {
+            name: String::new(),
+            version: String::new(),
+            config_dirs: vec![dir.path().to_path_buf()],
+        };
+        let result = builder.build_loader_internal();
+        assert!(
+            result.is_ok(),
+            "expected ok loader from explicit config_dir"
         );
     }
 }

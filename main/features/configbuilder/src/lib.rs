@@ -24,8 +24,9 @@ mod core;
 mod saf;
 pub mod spi;
 
-pub use crate::api::traits::config_builder::ConfigBuilder;
-pub use crate::api::traits::loader::Loader;
-pub use crate::api::traits::validator::Validator;
+pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
+pub use crate::api::types::{
+    AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
+};
 pub use saf::*;
 pub use spi::ConfigSection;
