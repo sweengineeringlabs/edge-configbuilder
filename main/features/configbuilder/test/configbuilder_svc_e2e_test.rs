@@ -1,4 +1,5 @@
 //! Tests for public config service factory functions.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
 use swe_edge_configbuilder::{

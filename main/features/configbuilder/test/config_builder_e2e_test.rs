@@ -1,4 +1,5 @@
 //! Tests for `ConfigBuilder` trait via `create_config_builder`.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
 use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _, ConfigError, Loader as _};

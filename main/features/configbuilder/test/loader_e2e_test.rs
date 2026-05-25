@@ -1,4 +1,5 @@
 //! Smoke tests for `create_loader` — verifies the factory produces usable instances.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::{
     create_loader, create_loader_for_dir, create_loader_xdg, ConfigError, Loader as _,

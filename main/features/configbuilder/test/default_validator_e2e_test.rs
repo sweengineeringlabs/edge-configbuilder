@@ -1,4 +1,5 @@
 //! Contract tests for the validator error message constant.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::{create_validator, Validator as _};
 

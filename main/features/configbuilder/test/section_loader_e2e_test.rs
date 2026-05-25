@@ -1,4 +1,5 @@
 //! Tests for the public section-loading operations on `Loader`.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
 use swe_edge_configbuilder::{

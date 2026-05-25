@@ -1,4 +1,5 @@
 //! Integration tests for swe-edge-config section loading.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
 use tempfile::TempDir;

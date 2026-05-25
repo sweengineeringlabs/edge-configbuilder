@@ -13,3 +13,7 @@ repository   = "https://github.com/sweengineeringlabs/edge"
 [workspace.lints.rust]
 unsafe_code  = "deny"
 missing_docs = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"

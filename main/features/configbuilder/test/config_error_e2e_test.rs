@@ -1,4 +1,5 @@
 //! Tests for `ConfigError` display formatting.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::ConfigError;
 

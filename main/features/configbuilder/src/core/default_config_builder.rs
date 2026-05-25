@@ -8,20 +8,6 @@ use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;
 use crate::core::DefaultSectionLoader;
 
-/// Reject paths that contain `..` components — guards against env-var traversal.
-pub(crate) fn reject_traversal(path: &Path) -> Result<(), ConfigError> {
-    if path
-        .components()
-        .any(|c| matches!(c, std::path::Component::ParentDir))
-    {
-        return Err(ConfigError::Io(format!(
-            "{}: path traversal via '..' is not permitted",
-            path.display()
-        )));
-    }
-    Ok(())
-}
-
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
 const FALLBACK_CONFIG_DIR: &str = "config";
 
@@ -29,6 +15,21 @@ pub(crate) struct DefaultConfigBuilder {
     pub(crate) name: String,
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
+}
+
+impl DefaultConfigBuilder {
+    fn reject_traversal(path: &Path) -> Result<(), ConfigError> {
+        if path
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+        {
+            return Err(ConfigError::Io(format!(
+                "{}: path traversal via '..' is not permitted",
+                path.display()
+            )));
+        }
+        Ok(())
+    }
 }
 
 impl ConfigBuilder for DefaultConfigBuilder {
@@ -71,7 +72,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
             for segment in xdg_config_dirs.split(':').rev() {
                 if !segment.is_empty() {
                     let seg_path = PathBuf::from(segment);
-                    reject_traversal(&seg_path)?;
+                    Self::reject_traversal(&seg_path)?;
                     dirs.push(seg_path.join(&self.name));
                 }
             }
@@ -80,7 +81,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
             }
             if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
                 let p = PathBuf::from(&v);
-                reject_traversal(&p)?;
+                Self::reject_traversal(&p)?;
                 dirs.push(p);
             }
             let loader = DefaultSectionLoader { config_dirs: dirs };
@@ -91,7 +92,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
         let dir = match env::var(CONFIG_DIR_ENV_VAR) {
             Ok(v) => {
                 let p = PathBuf::from(&v);
-                reject_traversal(&p)?;
+                Self::reject_traversal(&p)?;
                 p
             }
             Err(_) => PathBuf::from(FALLBACK_CONFIG_DIR),
@@ -105,6 +106,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::api::error::config_error::ConfigError;
@@ -200,7 +202,7 @@ mod tests {
     #[test]
     fn test_reject_traversal_rejects_dotdot_path() {
         assert!(
-            reject_traversal(std::path::Path::new("../../etc")).is_err(),
+            DefaultConfigBuilder::reject_traversal(std::path::Path::new("../../etc")).is_err(),
             "expected Io error for '..' path"
         );
     }
@@ -208,7 +210,7 @@ mod tests {
     #[test]
     fn test_reject_traversal_accepts_absolute_path() {
         assert!(
-            reject_traversal(std::path::Path::new("/etc/xdg/myapp")).is_ok(),
+            DefaultConfigBuilder::reject_traversal(std::path::Path::new("/etc/xdg/myapp")).is_ok(),
             "expected ok for absolute path without '..'"
         );
     }

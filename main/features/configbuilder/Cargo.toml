@@ -32,51 +32,51 @@ workspace = true
 
 [[test]]
 name = "section_loader_int_test"
-path = "tests/section_loader_int_test.rs"
+path = "test/section_loader_int_test.rs"
 
 [[test]]
 name = "section_loader_e2e_test"
-path = "tests/section_loader_e2e_test.rs"
+path = "test/section_loader_e2e_test.rs"
 
 [[test]]
 name = "config_error_e2e_test"
-path = "tests/config_error_e2e_test.rs"
+path = "test/config_error_e2e_test.rs"
 
 [[test]]
 name = "validator_e2e_test"
-path = "tests/validator_e2e_test.rs"
+path = "test/validator_e2e_test.rs"
 
 [[test]]
 name = "traits_e2e_test"
-path = "tests/traits_e2e_test.rs"
+path = "test/traits_e2e_test.rs"
 
 [[test]]
 name = "configbuilder_svc_e2e_test"
-path = "tests/configbuilder_svc_e2e_test.rs"
+path = "test/configbuilder_svc_e2e_test.rs"
 
 [[test]]
 name = "loader_e2e_test"
-path = "tests/loader_e2e_test.rs"
+path = "test/loader_e2e_test.rs"
 
 [[test]]
 name = "config_builder_e2e_test"
-path = "tests/config_builder_e2e_test.rs"
+path = "test/config_builder_e2e_test.rs"
 
 [[test]]
 name = "application_config_builder_e2e_test"
-path = "tests/application_config_builder_e2e_test.rs"
+path = "test/application_config_builder_e2e_test.rs"
 
 [[test]]
 name = "default_config_builder_e2e_test"
-path = "tests/default_config_builder_e2e_test.rs"
+path = "test/default_config_builder_e2e_test.rs"
 
 [[test]]
 name = "default_section_loader_e2e_test"
-path = "tests/default_section_loader_e2e_test.rs"
+path = "test/default_section_loader_e2e_test.rs"
 
 [[test]]
 name = "default_validator_e2e_test"
-path = "tests/default_validator_e2e_test.rs"
+path = "test/default_validator_e2e_test.rs"
 
 [[example]]
 name = "load_section"

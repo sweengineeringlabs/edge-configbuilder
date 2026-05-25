@@ -34,7 +34,7 @@ use crate::api::traits::loader::Loader;
 /// ```
 pub trait ConfigSection: serde::de::DeserializeOwned + Default + Send + Sync + 'static {
     /// The top-level TOML key for this section (e.g. `"mtls"`, `"authz"`).
-    fn section_name() -> &'static str;
+    fn section_name() -> &'static str; // @allow: no_stub_fn_bodies — required trait method, no default
 
     /// Load this section from `loader`, returning `Self::default()` when the
     /// key is absent. Override only when custom merge logic is required.

@@ -1,4 +1,5 @@
 //! Tests for `Loader::validate` behaviour via `create_loader_for_dir`.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::{create_loader_for_dir, Loader as _};
 

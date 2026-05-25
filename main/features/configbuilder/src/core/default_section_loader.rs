@@ -103,6 +103,7 @@ impl Loader for DefaultSectionLoader {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::api::error::config_error::ConfigError;
