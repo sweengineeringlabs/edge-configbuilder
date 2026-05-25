@@ -56,12 +56,13 @@ fn test_load_section_from_returns_default_when_key_absent() {
 
 /// @covers: create_loader_for_dir
 #[test]
-fn test_load_section_from_returns_default_when_no_application_toml() {
+fn test_load_section_from_returns_not_found_when_no_application_toml() {
     let dir = TempDir::new().unwrap();
-    let cfg: AppSection = create_loader_for_dir(dir.path())
-        .load_section("any_key")
-        .unwrap();
-    assert_eq!(cfg, AppSection::default());
+    let result: Result<AppSection, _> = create_loader_for_dir(dir.path()).load_section("any_key");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for empty dir, got {result:?}"
+    );
 }
 
 /// @covers: create_loader_for_dir
@@ -92,9 +93,12 @@ fn test_load_section_from_rejects_oversized_file() {
 
 /// @covers: create_loader_xdg
 #[test]
-fn test_load_section_xdg_unknown_app_returns_default() {
-    let cfg: AppSection = create_loader_xdg("swe-edge-config-test-nonexistent-xyz")
-        .load_section("application.completion")
-        .unwrap();
-    assert_eq!(cfg, AppSection::default());
+fn test_load_section_xdg_unknown_app_returns_not_found() {
+    let result: Result<AppSection, _> = create_loader_xdg("swe-edge-config-test-nonexistent-xyz")
+        .unwrap()
+        .load_section("application.completion");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for unknown XDG app, got {result:?}"
+    );
 }

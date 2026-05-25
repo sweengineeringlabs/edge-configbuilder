@@ -55,13 +55,13 @@ fn test_load_section_from_env_var_dir_is_read() {
 
 /// @covers: api/default_section_loader::FALLBACK_CONFIG_DIR
 #[test]
-fn test_load_section_without_env_var_returns_default_for_absent_section() {
+fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
     std::env::remove_var("SWE_EDGE_CONFIG_DIR");
-    let result: Result<Sec, _> =
-        swe_edge_configbuilder::create_loader().load_section("nonexistent_xyz");
+    let result: Result<Sec, _> = swe_edge_configbuilder::create_loader()
+        .unwrap()
+        .load_section("nonexistent_xyz");
     assert!(
-        result.is_ok(),
-        "fallback config dir must not error on absent section"
+        matches!(result, Err(swe_edge_configbuilder::ConfigError::NotFound(_))),
+        "fallback config dir with no application.toml must return NotFound: {result:?}"
     );
-    assert_eq!(result.unwrap(), Sec::default());
 }

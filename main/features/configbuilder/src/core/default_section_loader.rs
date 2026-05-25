@@ -49,12 +49,14 @@ impl Loader for DefaultSectionLoader {
         T: serde::de::DeserializeOwned + Default,
     {
         let mut merged = toml::Value::Table(toml::map::Map::new());
+        let mut any_file_found = false;
 
         for dir in &self.config_dirs {
             let path = dir.join("application.toml");
             if !path.exists() {
                 continue;
             }
+            any_file_found = true;
             let meta = std::fs::metadata(&path)
                 .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
             if meta.len() > MAX_CONFIG_FILE_BYTES {
@@ -74,6 +76,11 @@ impl Loader for DefaultSectionLoader {
         }
 
         if matches!(merged, toml::Value::Table(ref t) if t.is_empty()) {
+            if !any_file_found {
+                return Err(ConfigError::NotFound(format!(
+                    "no application.toml found in any configured directory for section '{key}'"
+                )));
+            }
             return Ok(T::default());
         }
 
@@ -98,6 +105,7 @@ impl Loader for DefaultSectionLoader {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::api::error::config_error::ConfigError;
     use std::io::Write as _;
     use std::path::Path;
     use tempfile::TempDir;
@@ -140,16 +148,20 @@ mod tests {
     }
 
     #[test]
-    fn test_load_section_returns_default_when_key_absent() {
+    fn test_load_section_returns_not_found_when_no_application_toml() {
         let dir = TempDir::new().unwrap();
-        let sec: Sec = loader_in(dir.path()).load_section("nonexistent").unwrap();
-        assert_eq!(sec, Sec::default());
+        let result: Result<Sec, _> = loader_in(dir.path()).load_section("nonexistent");
+        assert!(
+            matches!(result, Err(ConfigError::NotFound(_))),
+            "expected NotFound when no application.toml exists, got {result:?}"
+        );
     }
 
     #[test]
-    fn test_load_section_returns_default_when_no_application_toml() {
+    fn test_load_section_returns_default_when_section_absent_from_existing_toml() {
         let dir = TempDir::new().unwrap();
-        let sec: Sec = loader_in(dir.path()).load_section("any").unwrap();
+        write_toml(dir.path(), "application.toml", "[other_section]\nvalue = \"x\"");
+        let sec: Sec = loader_in(dir.path()).load_section("nonexistent").unwrap();
         assert_eq!(sec, Sec::default());
     }
 

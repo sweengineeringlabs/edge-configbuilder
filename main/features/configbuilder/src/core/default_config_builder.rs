@@ -1,11 +1,26 @@
 //! `DefaultConfigBuilder` — default `ConfigBuilder` implementation.
 
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use crate::api::error::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader;
 use crate::core::DefaultSectionLoader;
+
+/// Reject paths that contain `..` components — guards against env-var traversal.
+pub(crate) fn reject_traversal(path: &Path) -> Result<(), ConfigError> {
+    if path
+        .components()
+        .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
+        return Err(ConfigError::Io(format!(
+            "{}: path traversal via '..' is not permitted",
+            path.display()
+        )));
+    }
+    Ok(())
+}
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
 const FALLBACK_CONFIG_DIR: &str = "config";
@@ -40,11 +55,13 @@ impl ConfigBuilder for DefaultConfigBuilder {
         self
     }
 
-    fn build_loader(self) -> impl Loader {
+    fn build_loader(self) -> Result<impl Loader, ConfigError> {
         if !self.config_dirs.is_empty() {
-            return DefaultSectionLoader {
+            let loader = DefaultSectionLoader {
                 config_dirs: self.config_dirs,
             };
+            loader.validate()?;
+            return Ok(loader);
         }
 
         if !self.name.is_empty() {
@@ -53,30 +70,44 @@ impl ConfigBuilder for DefaultConfigBuilder {
                 env::var("XDG_CONFIG_DIRS").unwrap_or_else(|_| "/etc/xdg".to_owned());
             for segment in xdg_config_dirs.split(':').rev() {
                 if !segment.is_empty() {
-                    dirs.push(PathBuf::from(segment).join(&self.name));
+                    let seg_path = PathBuf::from(segment);
+                    reject_traversal(&seg_path)?;
+                    dirs.push(seg_path.join(&self.name));
                 }
             }
             if let Some(home) = dirs::config_dir() {
                 dirs.push(home.join(&self.name));
             }
             if let Ok(v) = env::var(CONFIG_DIR_ENV_VAR) {
-                dirs.push(PathBuf::from(v));
+                let p = PathBuf::from(&v);
+                reject_traversal(&p)?;
+                dirs.push(p);
             }
-            return DefaultSectionLoader { config_dirs: dirs };
+            let loader = DefaultSectionLoader { config_dirs: dirs };
+            loader.validate()?;
+            return Ok(loader);
         }
 
-        let dir = env::var(CONFIG_DIR_ENV_VAR)
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from(FALLBACK_CONFIG_DIR));
-        DefaultSectionLoader {
+        let dir = match env::var(CONFIG_DIR_ENV_VAR) {
+            Ok(v) => {
+                let p = PathBuf::from(&v);
+                reject_traversal(&p)?;
+                p
+            }
+            Err(_) => PathBuf::from(FALLBACK_CONFIG_DIR),
+        };
+        let loader = DefaultSectionLoader {
             config_dirs: vec![dir],
-        }
+        };
+        loader.validate()?;
+        Ok(loader)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::api::error::config_error::ConfigError;
     use std::io::Write as _;
 
     fn blank() -> DefaultConfigBuilder {
@@ -135,26 +166,50 @@ mod tests {
         let sec: Sec = blank()
             .with_config_dir(dir.path())
             .build_loader()
+            .unwrap()
             .load_section("svc")
             .unwrap();
         assert_eq!(sec.value, "ok");
     }
 
     #[test]
-    fn test_build_loader_with_name_only_returns_usable_loader() {
-        let sec: Sec = blank()
+    fn test_build_loader_with_unknown_name_returns_not_found() {
+        let result: Result<Sec, _> = blank()
             .with_name("swe-edge-nonexistent-test-xyz")
             .build_loader()
-            .load_section("any")
-            .unwrap();
-        assert_eq!(sec, Sec::default());
+            .unwrap()
+            .load_section("any");
+        assert!(
+            matches!(result, Err(ConfigError::NotFound(_))),
+            "expected NotFound for unknown app, got {result:?}"
+        );
     }
 
     #[test]
-    fn test_build_loader_no_name_no_dirs_returns_usable_loader() {
+    fn test_build_loader_no_name_no_dirs_returns_not_found() {
         let result: Result<Sec, _> = blank()
             .build_loader()
+            .unwrap()
             .load_section("nonexistent_section_xyz");
-        assert!(result.is_ok());
+        assert!(
+            matches!(result, Err(ConfigError::NotFound(_))),
+            "expected NotFound for absent section with no config, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_reject_traversal_rejects_dotdot_path() {
+        assert!(
+            reject_traversal(std::path::Path::new("../../etc")).is_err(),
+            "expected Io error for '..' path"
+        );
+    }
+
+    #[test]
+    fn test_reject_traversal_accepts_absolute_path() {
+        assert!(
+            reject_traversal(std::path::Path::new("/etc/xdg/myapp")).is_ok(),
+            "expected ok for absolute path without '..'"
+        );
     }
 }

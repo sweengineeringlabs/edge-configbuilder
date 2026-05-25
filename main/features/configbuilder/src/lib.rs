@@ -13,7 +13,7 @@
 //! struct CompletionConfig { model: String, max_tokens: u32 }
 //!
 //! let cfg: CompletionConfig =
-//!     create_loader().load_section("application.completion")?;
+//!     create_loader()?.load_section("application.completion")?;
 //! ```
 
 #![deny(unsafe_code)]

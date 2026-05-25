@@ -14,10 +14,14 @@ struct Cfg {
 
 /// @covers: create_loader
 #[test]
-fn test_load_section_absent_key_returns_default() {
-    let result: Result<Cfg, _> = create_loader().load_section("nonexistent_config_svc_xyz");
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), Cfg::default());
+fn test_load_section_absent_key_returns_not_found() {
+    let result: Result<Cfg, _> = create_loader()
+        .unwrap()
+        .load_section("nonexistent_config_svc_xyz");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for absent key, got {result:?}"
+    );
 }
 
 /// @covers: create_loader_for_dir
@@ -34,13 +38,17 @@ fn test_load_section_from_reads_section() {
 
 /// @covers: create_loader_xdg
 #[test]
-fn test_load_section_xdg_unknown_app_returns_default() {
-    let result: Result<Cfg, _> =
-        create_loader_xdg("swe-edge-config-svc-nonexistent-xyz").load_section("cfg");
-    assert!(result.is_ok());
+fn test_load_section_xdg_unknown_app_returns_not_found() {
+    let result: Result<Cfg, _> = create_loader_xdg("swe-edge-config-svc-nonexistent-xyz")
+        .unwrap()
+        .load_section("cfg");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for unknown XDG app, got {result:?}"
+    );
 }
 
-/// @covers: create_loader_for_dir
+/// @covers: create_loader_for_dir / validate
 #[test]
 fn test_validate_section_dir_nonexistent_ok() {
     assert!(create_loader_for_dir("/nonexistent/config-svc-test-xyz")
@@ -75,10 +83,13 @@ fn test_create_config_builder_is_pre_seeded_with_package_name() {
 
 /// @covers: create_config_builder
 #[test]
-fn test_create_config_builder_returns_usable_loader_for_absent_section() {
+fn test_create_config_builder_returns_not_found_for_absent_section() {
     let result: Result<Cfg, _> = create_config_builder()
         .build_loader()
+        .unwrap()
         .load_section("nonexistent_xyz");
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), Cfg::default());
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for absent section, got {result:?}"
+    );
 }

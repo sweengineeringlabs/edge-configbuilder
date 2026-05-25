@@ -10,7 +10,13 @@ struct BrokerConfig {
 }
 
 fn main() {
-    let loader = create_config_builder().with_name("my-app").build_loader();
+    let loader = match create_config_builder().with_name("my-app").build_loader() {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("failed to build config loader: {e}");
+            return;
+        }
+    };
 
     match loader.load_section::<BrokerConfig>("application.broker") {
         Ok(cfg) => println!("host={} port={}", cfg.host, cfg.port),

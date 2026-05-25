@@ -1,3 +1,4 @@
+use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
 use std::path::PathBuf;
 
@@ -30,5 +31,11 @@ pub trait ConfigBuilder: Sized {
     /// 1. Explicit dirs added via [`with_config_dir`] — used verbatim.
     /// 2. App name set via [`with_name`] — resolved through the XDG chain.
     /// 3. No name, no dirs — falls back to `SWE_EDGE_CONFIG_DIR` or `config/`.
-    fn build_loader(self) -> impl Loader;
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError::Io`] if any configured directory path points to a
+    /// file rather than a directory, or if an environment-variable-supplied path
+    /// contains `..` traversal components.
+    fn build_loader(self) -> Result<impl Loader, ConfigError>;
 }

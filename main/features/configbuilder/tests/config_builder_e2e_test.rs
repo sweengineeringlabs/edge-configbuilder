@@ -46,6 +46,7 @@ fn test_build_loader_with_explicit_dir_reads_written_section() {
         .with_name("my-svc")
         .with_config_dir(dir.path())
         .build_loader()
+        .unwrap()
         .load_section("my_svc")
         .unwrap();
 
@@ -77,6 +78,7 @@ fn test_build_loader_loads_message_broker_style_config() {
         .with_name("message-broker")
         .with_config_dir(dir.path())
         .build_loader()
+        .unwrap()
         .load_section("message_broker")
         .unwrap();
 
@@ -86,28 +88,34 @@ fn test_build_loader_loads_message_broker_style_config() {
 
 /// @covers: create_config_builder / build_loader
 ///
-/// XDG path with unknown app name — no file on disk, loader returns defaults.
+/// XDG path with unknown app name — no file on disk, loader returns NotFound.
 #[test]
-fn test_build_loader_with_name_unknown_app_returns_default() {
-    let cfg: Cfg = create_config_builder()
+fn test_build_loader_with_name_unknown_app_returns_not_found() {
+    let result: Result<Cfg, _> = create_config_builder()
         .with_name("swe-edge-configbuilder-nonexistent-xyz")
         .build_loader()
-        .load_section("any_section")
-        .unwrap();
-    assert_eq!(cfg, Cfg::default());
+        .unwrap()
+        .load_section("any_section");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound for unknown app, got {result:?}"
+    );
 }
 
 /// @covers: create_config_builder / build_loader
 ///
 /// No name, no dir — falls back to `SWE_EDGE_CONFIG_DIR` or `config/`;
-/// absent section returns default without panicking.
+/// absent application.toml returns NotFound.
 #[test]
-fn test_build_loader_no_name_no_dir_returns_default_for_absent_section() {
-    let cfg: Cfg = create_config_builder()
+fn test_build_loader_no_name_no_dir_returns_not_found_for_absent_section() {
+    let result: Result<Cfg, _> = create_config_builder()
         .build_loader()
-        .load_section("nonexistent_section_xyz")
-        .unwrap();
-    assert_eq!(cfg, Cfg::default());
+        .unwrap()
+        .load_section("nonexistent_section_xyz");
+    assert!(
+        matches!(result, Err(ConfigError::NotFound(_))),
+        "expected NotFound when no config files exist, got {result:?}"
+    );
 }
 
 /// @covers: create_config_builder / build_loader
@@ -128,6 +136,7 @@ fn test_build_loader_later_config_dir_wins_on_conflict() {
         .with_config_dir(low.path())
         .with_config_dir(high.path())
         .build_loader()
+        .unwrap()
         .load_section("s")
         .unwrap();
 
@@ -145,6 +154,7 @@ fn test_build_loader_load_section_returns_parse_error_for_malformed_toml() {
     let err = create_config_builder()
         .with_config_dir(dir.path())
         .build_loader()
+        .unwrap()
         .load_section::<Cfg>("any")
         .unwrap_err();
 
@@ -161,6 +171,7 @@ fn test_build_loader_load_section_returns_io_error_for_oversized_file() {
     let err = create_config_builder()
         .with_config_dir(dir.path())
         .build_loader()
+        .unwrap()
         .load_section::<Cfg>("any")
         .unwrap_err();
 
@@ -170,7 +181,7 @@ fn test_build_loader_load_section_returns_io_error_for_oversized_file() {
 
 /// @covers: create_config_builder / build_loader / validate
 #[test]
-fn test_build_loader_validate_returns_error_when_config_dir_is_a_file() {
+fn test_build_loader_returns_error_when_config_dir_is_a_file() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("not_a_dir.toml");
     std::fs::write(&file, b"").unwrap();
@@ -178,8 +189,8 @@ fn test_build_loader_validate_returns_error_when_config_dir_is_a_file() {
     let err = create_config_builder()
         .with_config_dir(&file)
         .build_loader()
-        .validate()
-        .unwrap_err();
+        .err()
+        .expect("expected build_loader to fail when config_dir is a file");
 
     assert!(matches!(err, ConfigError::Io(_)));
     assert!(err.to_string().contains("not a directory"));
