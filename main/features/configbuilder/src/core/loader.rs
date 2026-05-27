@@ -8,11 +8,11 @@ use crate::api::error::config_error::ConfigError;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::types::feature_metadata::FeatureMetadata;
-use crate::api::types::feature_record::FeatureRecord;
-use crate::api::types::feature_state::FeatureState;
-use crate::api::types::loaded_feature::LoadedFeature;
-use crate::api::types::override_source::OverrideSource;
+use crate::api::types::feature::feature_metadata::FeatureMetadata;
+use crate::api::types::feature::feature_record::FeatureRecord;
+use crate::api::types::feature::feature_state::FeatureState;
+use crate::api::types::feature::loaded_feature::LoadedFeature;
+use crate::api::types::feature::override_source::OverrideSource;
 use crate::core::Substituter;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
@@ -288,7 +288,7 @@ impl FeatureLoader for DefaultSectionLoader {
 mod tests {
     use super::*;
     use crate::api::error::config_error::ConfigError;
-    use crate::api::types::feature_state::FeatureState;
+    use crate::api::types::feature::feature_state::FeatureState;
     use std::io::Write as _;
     use std::path::Path;
     use tempfile::TempDir;
@@ -620,7 +620,7 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::override_source::OverrideSource::ExplicitTomlFlag)
+                Some(crate::api::types::feature::override_source::OverrideSource::ExplicitTomlFlag)
             ),
             "expected ExplicitTomlFlag override source"
         );
@@ -647,7 +647,7 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::override_source::OverrideSource::EnvVar { .. })
+                Some(crate::api::types::feature::override_source::OverrideSource::EnvVar { .. })
             ),
             "expected EnvVar override source"
         );
@@ -674,7 +674,7 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::override_source::OverrideSource::EnvVar { .. })
+                Some(crate::api::types::feature::override_source::OverrideSource::EnvVar { .. })
             ),
             "expected EnvVar override source"
         );

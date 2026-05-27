@@ -5,7 +5,7 @@
 /// When [`FeatureRecord::override_source`] is `Some`, the feature's enabled/disabled
 /// state was forced by one of these mechanisms rather than simple section presence.
 ///
-/// [`FeatureRecord::override_source`]: crate::api::types::feature_record::FeatureRecord::override_source
+/// [`FeatureRecord::override_source`]: crate::api::types::feature::feature_record::FeatureRecord::override_source
 #[derive(Debug, Clone)]
 pub enum OverrideSource {
     /// An environment variable forced this feature on or off.
@@ -29,8 +29,8 @@ pub enum OverrideSource {
     /// The feature is treated as disabled so startup can continue.  The `reason`
     /// field carries the original validation error message for operator inspection.
     ///
-    /// [`OnError`]: crate::api::types::on_error::OnError
-    /// [`OnError::Disable`]: crate::api::types::on_error::OnError::Disable
+    /// [`OnError`]: crate::api::types::feature::on_error::OnError
+    /// [`OnError::Disable`]: crate::api::types::feature::on_error::OnError::Disable
     ValidationError {
         /// The string representation of the `validate_enabled` error.
         reason: String,

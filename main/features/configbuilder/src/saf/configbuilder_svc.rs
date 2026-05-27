@@ -8,11 +8,11 @@ use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::traits::validator::Validator;
-use crate::api::types::feature_record::FeatureRecord;
-use crate::api::types::feature_state::FeatureState;
-use crate::api::types::loaded_feature::LoadedFeature;
-use crate::api::types::on_error::OnError;
-use crate::api::types::override_source::OverrideSource;
+use crate::api::types::feature::feature_record::FeatureRecord;
+use crate::api::types::feature::feature_state::FeatureState;
+use crate::api::types::feature::loaded_feature::LoadedFeature;
+use crate::api::types::feature::on_error::OnError;
+use crate::api::types::feature::override_source::OverrideSource;
 use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
 use crate::spi::OptionalSection;
 
