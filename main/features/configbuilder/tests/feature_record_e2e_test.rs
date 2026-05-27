@@ -1,6 +1,6 @@
 //! Tests for `FeatureRecord` — startup feature state snapshot.
 
-use swe_edge_configbuilder::{FeatureRecord, OverrideSource};
+use swe_edge_configbuilder::{FeatureMetadata, FeatureRecord, OverrideSource};
 
 #[test]
 fn test_feature_record_enabled_section_without_override() {
@@ -8,6 +8,8 @@ fn test_feature_record_enabled_section_without_override() {
         section_name: "cache".to_owned(),
         enabled: true,
         override_source: None,
+        requires: &[],
+        metadata: FeatureMetadata::default(),
     };
     assert_eq!(record.section_name, "cache");
     assert!(record.enabled);
@@ -20,6 +22,8 @@ fn test_feature_record_disabled_section_without_override() {
         section_name: "message_broker".to_owned(),
         enabled: false,
         override_source: None,
+        requires: &[],
+        metadata: FeatureMetadata::default(),
     };
     assert!(!record.enabled);
     assert!(record.override_source.is_none());
@@ -31,6 +35,8 @@ fn test_feature_record_disabled_by_explicit_toml_flag() {
         section_name: "analytics".to_owned(),
         enabled: false,
         override_source: Some(OverrideSource::ExplicitTomlFlag),
+        requires: &[],
+        metadata: FeatureMetadata::default(),
     };
     assert!(!record.enabled);
     assert!(matches!(
@@ -48,6 +54,8 @@ fn test_feature_record_overridden_by_env_var() {
             var_name: "SWE_EDGE_FEATURE_TRACING".to_owned(),
             value: "false".to_owned(),
         }),
+        requires: &[],
+        metadata: FeatureMetadata::default(),
     };
     assert!(matches!(
         record.override_source,
@@ -61,6 +69,8 @@ fn test_feature_record_clone_produces_equal_record() {
         section_name: "auth".to_owned(),
         enabled: true,
         override_source: None,
+        requires: &[],
+        metadata: FeatureMetadata::default(),
     };
     let cloned = original.clone();
     assert_eq!(original.section_name, cloned.section_name);

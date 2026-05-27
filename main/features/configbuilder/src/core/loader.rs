@@ -8,6 +8,7 @@ use crate::api::error::config_error::ConfigError;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::types::feature_metadata::FeatureMetadata;
 use crate::api::types::feature_record::FeatureRecord;
 use crate::api::types::feature_state::FeatureState;
 use crate::api::types::loaded_feature::LoadedFeature;
@@ -214,6 +215,8 @@ impl FeatureLoader for DefaultSectionLoader {
                         var_name,
                         value: std::env::var(Self::feature_env_var_name(key)).unwrap_or_default(),
                     }),
+                    requires: &[],
+                    metadata: FeatureMetadata::default(),
                 },
             });
         }
@@ -235,6 +238,8 @@ impl FeatureLoader for DefaultSectionLoader {
                     section_name: key.to_owned(),
                     enabled: false,
                     override_source: None,
+                    requires: &[],
+                    metadata: FeatureMetadata::default(),
                 },
             });
         }
@@ -248,6 +253,8 @@ impl FeatureLoader for DefaultSectionLoader {
                         section_name: key.to_owned(),
                         enabled: false,
                         override_source: Some(OverrideSource::ExplicitTomlFlag),
+                        requires: &[],
+                        metadata: FeatureMetadata::default(),
                     },
                 });
             }
@@ -269,6 +276,8 @@ impl FeatureLoader for DefaultSectionLoader {
                 section_name: key.to_owned(),
                 enabled: true,
                 override_source,
+                requires: &[],
+                metadata: FeatureMetadata::default(),
             },
         })
     }
@@ -516,7 +525,6 @@ mod tests {
 
     #[test]
     fn test_load_optional_section_missing_required_field_returns_parse_error() {
-        #[allow(dead_code)]
         #[derive(Debug, serde::Deserialize)]
         struct Strict {
             required: String, // no Default, no Option — must be present

@@ -22,4 +22,17 @@ pub enum OverrideSource {
     /// This lets operators keep config values in place while temporarily
     /// disabling the feature — useful for staged rollouts and quick kill-switches.
     ExplicitTomlFlag,
+
+    /// The section was present and deserialised but `validate_enabled` failed,
+    /// and the feature's [`OnError`] policy is [`OnError::Disable`].
+    ///
+    /// The feature is treated as disabled so startup can continue.  The `reason`
+    /// field carries the original validation error message for operator inspection.
+    ///
+    /// [`OnError`]: crate::api::types::on_error::OnError
+    /// [`OnError::Disable`]: crate::api::types::on_error::OnError::Disable
+    ValidationError {
+        /// The string representation of the `validate_enabled` error.
+        reason: String,
+    },
 }

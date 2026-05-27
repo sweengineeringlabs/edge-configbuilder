@@ -4,7 +4,6 @@ use std::fmt;
 
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
-use crate::api::traits::facade::{ConfigBuilderSvc, PathValidatorSvc, SectionLoaderSvc};
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
@@ -12,6 +11,7 @@ use crate::api::traits::validator::Validator;
 use crate::api::types::feature_record::FeatureRecord;
 use crate::api::types::feature_state::FeatureState;
 use crate::api::types::loaded_feature::LoadedFeature;
+use crate::api::types::on_error::OnError;
 use crate::api::types::override_source::OverrideSource;
 use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
 use crate::spi::OptionalSection;
@@ -26,7 +26,6 @@ pub struct SectionLoaderImpl {
 
 impl SectionLoaderImpl {
     /// Load the section at `key` (dotted path, e.g. `"outer.inner"`) from all configured directories.
-    #[allow(dead_code)]
     pub fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
@@ -36,29 +35,13 @@ impl SectionLoaderImpl {
     }
 
     /// Validate that all configured directories are accessible.
-    #[allow(dead_code)]
     pub fn validate(&self) -> Result<(), ConfigError> {
         use crate::api::traits::loader::Loader;
         self.inner.validate()
     }
 }
 
-#[allow(dead_code)]
 impl Loader for SectionLoaderImpl {
-    fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
-    where
-        T: serde::de::DeserializeOwned + Default,
-    {
-        SectionLoaderImpl::load_section(self, key)
-    }
-
-    fn validate(&self) -> Result<(), ConfigError> {
-        SectionLoaderImpl::validate(self)
-    }
-}
-
-#[allow(dead_code)]
-impl SectionLoaderSvc for SectionLoaderImpl {
     fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
@@ -107,21 +90,12 @@ pub struct PathValidatorImpl;
 
 impl PathValidatorImpl {
     /// Returns `Ok(())` when `target` is a valid config path, `Err` otherwise.
-    #[allow(dead_code)]
     pub fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
         DefaultValidator.validate_path(target)
     }
 }
 
-#[allow(dead_code)]
 impl Validator for PathValidatorImpl {
-    fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
-        PathValidatorImpl::validate_path(self, target)
-    }
-}
-
-#[allow(dead_code)]
-impl PathValidatorSvc for PathValidatorImpl {
     fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
         PathValidatorImpl::validate_path(self, target)
     }
@@ -134,21 +108,18 @@ pub struct ConfigBuilderImpl {
 
 impl ConfigBuilderImpl {
     /// Return the configured application name.
-    #[allow(dead_code)]
     pub fn name(&self) -> &str {
         use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.name()
     }
 
     /// Return the configured application version.
-    #[allow(dead_code)]
     pub fn version(&self) -> &str {
         use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.version()
     }
 
     /// Set the application name; used by `build_loader` to resolve XDG paths.
-    #[allow(dead_code)]
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
         use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_name(name);
@@ -156,7 +127,6 @@ impl ConfigBuilderImpl {
     }
 
     /// Set the application version string.
-    #[allow(dead_code)]
     pub fn with_version(mut self, version: impl Into<String>) -> Self {
         use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_version(version);
@@ -164,7 +134,6 @@ impl ConfigBuilderImpl {
     }
 
     /// Append an explicit config directory; takes precedence over XDG resolution.
-    #[allow(dead_code)]
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_config_dir(dir);
@@ -172,7 +141,6 @@ impl ConfigBuilderImpl {
     }
 
     /// Consume the builder and return a ready-to-use section loader.
-    #[allow(dead_code)]
     pub fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
         Ok(SectionLoaderImpl {
             inner: self.inner.build_loader_internal()?,
@@ -180,37 +148,8 @@ impl ConfigBuilderImpl {
     }
 }
 
-#[allow(dead_code)]
 #[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImpl {
-    fn name(&self) -> &str {
-        ConfigBuilderImpl::name(self)
-    }
-
-    fn version(&self) -> &str {
-        ConfigBuilderImpl::version(self)
-    }
-
-    fn with_name(self, name: impl Into<String>) -> Self {
-        ConfigBuilderImpl::with_name(self, name)
-    }
-
-    fn with_version(self, version: impl Into<String>) -> Self {
-        ConfigBuilderImpl::with_version(self, version)
-    }
-
-    fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self {
-        ConfigBuilderImpl::with_config_dir(self, dir)
-    }
-
-    fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
-        ConfigBuilderImpl::build_loader(self)
-    }
-}
-
-#[allow(dead_code)]
-#[allow(refining_impl_trait)]
-impl ConfigBuilderSvc for ConfigBuilderImpl {
     fn name(&self) -> &str {
         ConfigBuilderImpl::name(self)
     }
@@ -337,7 +276,6 @@ pub fn create_config_builder() -> ConfigBuilderImpl {
 /// //       url = "postgresql://{{DB_HOST}}:{{DB_PORT}}/mydb"
 /// let config: MyConfig = loader.load_section("section")?;
 /// ```
-#[allow(dead_code)]
 pub fn create_loader_with_substitution(
     policy: Box<dyn SubstitutionPolicy>,
 ) -> Result<SectionLoaderImpl, ConfigError> {
@@ -364,7 +302,6 @@ pub fn create_loader_with_substitution(
 /// let policy = PrefixWhitelistPolicy::new(vec!["APP_".into()]);
 /// let loader = create_loader_for_dir_with_substitution("/etc/myapp", Box::new(policy));
 /// ```
-#[allow(dead_code)]
 pub fn create_loader_for_dir_with_substitution(
     dir: impl Into<PathBuf>,
     policy: Box<dyn SubstitutionPolicy>,
@@ -404,7 +341,6 @@ pub fn create_loader_for_dir_with_substitution(
 /// let loader = create_loader_xdg_with_substitution("myapp", Box::new(policy))?;
 /// // Searches: ~/.config/myapp/application.toml, /etc/xdg/myapp/application.toml, etc.
 /// ```
-#[allow(dead_code)]
 pub fn create_loader_xdg_with_substitution(
     app_name: &str,
     policy: Box<dyn SubstitutionPolicy>,
@@ -458,24 +394,102 @@ impl FeatureRegistry {
         }
     }
 
-    /// Load an optional section, validate cross-field constraints if enabled,
-    /// and record the outcome for the startup summary.
+    /// Load an optional section, apply graceful-degradation policy if validation
+    /// fails, and record the outcome for the startup summary.
+    ///
+    /// Applies `on_error` policy when `validate_enabled` rejects a section:
+    /// - [`OnError::Fail`] — propagates the error; startup halts.
+    /// - [`OnError::Disable`] — records the feature as disabled with
+    ///   [`OverrideSource::ValidationError`] and continues startup.
+    ///
+    /// The env var `SWE_EDGE_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable` overrides
+    /// the trait default.
     ///
     /// # Returns
     ///
     /// - `Ok(Enabled(T))` — section present, all controls say on, validation passed.
-    /// - `Ok(Disabled)` — section absent, env var says off, or `enabled = false`.
-    /// - `Err` — I/O error, parse failure, or `validate_enabled` rejection.
+    /// - `Ok(Disabled)` — section absent, env var says off, `enabled = false`, or
+    ///   validation failed with `on_error = Disable`.
+    /// - `Err` — I/O error, parse failure, or `validate_enabled` rejection with
+    ///   `on_error = Fail`.
     pub fn load<T>(&mut self, loader: &impl FeatureLoader) -> Result<FeatureState<T>, ConfigError>
     where
         T: OptionalSection,
     {
         let loaded: LoadedFeature<T> = loader.load_feature(T::section_name())?;
-        if let FeatureState::Enabled(ref value) = loaded.state {
-            value.validate_enabled()?;
+
+        let validation_result = if let FeatureState::Enabled(ref value) = loaded.state {
+            Some(value.validate_enabled())
+        } else {
+            None
+        };
+
+        let (final_state, final_override) = match validation_result {
+            Some(Ok(())) | None => (loaded.state, loaded.record.override_source),
+            Some(Err(e)) => match resolve_on_error::<T>(T::section_name()) {
+                OnError::Fail => return Err(e),
+                OnError::Disable => (
+                    FeatureState::Disabled,
+                    Some(OverrideSource::ValidationError {
+                        reason: e.to_string(),
+                    }),
+                ),
+            },
+        };
+
+        self.records.push(FeatureRecord {
+            section_name: loaded.record.section_name,
+            enabled: final_state.is_enabled(),
+            override_source: final_override,
+            requires: T::requires(),
+            metadata: T::metadata(),
+        });
+
+        Ok(final_state)
+    }
+
+    /// Check that every enabled feature's declared dependencies are also enabled.
+    ///
+    /// Call this after all features have been loaded.  Reports every violation
+    /// in a single error so operators can fix all dependency issues in one pass.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError::Validation`] listing every unsatisfied dependency.
+    pub fn validate_dependencies(&self) -> Result<(), ConfigError> {
+        let enabled: std::collections::HashSet<&str> = self
+            .records
+            .iter()
+            .filter(|r| r.enabled)
+            .map(|r| r.section_name.as_str())
+            .collect();
+
+        let violations: Vec<String> = self
+            .records
+            .iter()
+            .filter(|r| r.enabled)
+            .flat_map(|r| {
+                r.requires.iter().filter_map(|dep| {
+                    if enabled.contains(dep) {
+                        None
+                    } else {
+                        Some(format!(
+                            "'{}' requires '{}' but '{}' is not enabled",
+                            r.section_name, dep, dep
+                        ))
+                    }
+                })
+            })
+            .collect();
+
+        if violations.is_empty() {
+            Ok(())
+        } else {
+            Err(ConfigError::validation(
+                "feature_dependencies",
+                violations.join("; "),
+            ))
         }
-        self.records.push(loaded.record);
-        Ok(loaded.state)
     }
 
     /// All feature records collected so far, in load order.
@@ -536,16 +550,49 @@ impl fmt::Display for FeatureSummary {
         )?;
         for record in &self.records {
             let status = if record.enabled { "ON " } else { "OFF" };
-            let note = match &record.override_source {
+            let override_note = match &record.override_source {
                 None => String::new(),
                 Some(OverrideSource::ExplicitTomlFlag) => " [disabled by enabled=false]".to_owned(),
                 Some(OverrideSource::EnvVar { var_name, value }) => {
                     format!(" [env {var_name}={value}]")
                 }
+                Some(OverrideSource::ValidationError { reason }) => {
+                    format!(" [DEGRADED: {reason}]")
+                }
             };
-            writeln!(f, "  [{status}] {}{note}", record.section_name)?;
+            let description = if record.metadata.description.is_empty() {
+                String::new()
+            } else {
+                format!("  — {}", record.metadata.description)
+            };
+            let owner = if record.metadata.owner.is_empty() {
+                String::new()
+            } else {
+                format!(" (owner: {})", record.metadata.owner)
+            };
+            let deprecated = match record.metadata.deprecated_since {
+                None => String::new(),
+                Some(v) => format!(" [DEPRECATED since {v}]"),
+            };
+            writeln!(
+                f,
+                "  [{status}] {}{override_note}{description}{owner}{deprecated}",
+                record.section_name
+            )?;
         }
         Ok(())
+    }
+}
+
+fn resolve_on_error<T: OptionalSection>(key: &str) -> OnError {
+    let var_name = format!(
+        "SWE_EDGE_FEATURE_{}_ON_ERROR",
+        key.to_uppercase().replace('.', "_")
+    );
+    match std::env::var(&var_name).as_deref() {
+        Ok("disable") => OnError::Disable,
+        Ok("fail") => OnError::Fail,
+        _ => T::on_error(),
     }
 }
 
@@ -572,7 +619,6 @@ impl fmt::Display for FeatureSummary {
 ///     .with_config_dir("/etc/myapp")
 ///     .build_loader()?;
 /// ```
-#[allow(dead_code)]
 pub fn create_config_builder_with_substitution(
     policy: Box<dyn SubstitutionPolicy>,
 ) -> ConfigBuilderImplWithSubstitution {
@@ -592,7 +638,6 @@ pub struct ConfigBuilderImplWithSubstitution {
     policy: Box<dyn SubstitutionPolicy>,
 }
 
-#[allow(dead_code)]
 impl ConfigBuilderImplWithSubstitution {
     /// Return the configured application name.
     pub fn name(&self) -> &str {
@@ -635,7 +680,6 @@ impl ConfigBuilderImplWithSubstitution {
     }
 }
 
-#[allow(dead_code)]
 #[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImplWithSubstitution {
     fn name(&self) -> &str {

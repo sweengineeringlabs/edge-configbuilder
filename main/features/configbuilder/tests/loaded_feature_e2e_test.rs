@@ -1,6 +1,6 @@
 //! Tests for `LoadedFeature<T>` — full result of loading an optional config section.
 
-use swe_edge_configbuilder::{FeatureRecord, FeatureState, LoadedFeature};
+use swe_edge_configbuilder::{FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature};
 
 #[test]
 fn test_loaded_feature_enabled_state_and_record_accessible() {
@@ -10,6 +10,8 @@ fn test_loaded_feature_enabled_state_and_record_accessible() {
             section_name: "my_section".to_owned(),
             enabled: true,
             override_source: None,
+            requires: &[],
+            metadata: FeatureMetadata::default(),
         },
     };
     assert!(loaded.state.is_enabled());
@@ -24,6 +26,8 @@ fn test_loaded_feature_record_section_name_matches_state() {
             section_name: "feature_x".to_owned(),
             enabled: false,
             override_source: None,
+            requires: &[],
+            metadata: FeatureMetadata::default(),
         },
     };
     assert!(loaded.state.is_disabled());
@@ -39,6 +43,8 @@ fn test_loaded_feature_enabled_record_flag_matches_state() {
             section_name: "broker".to_owned(),
             enabled: true,
             override_source: None,
+            requires: &[],
+            metadata: FeatureMetadata::default(),
         },
     };
     // The record.enabled field must agree with the state variant.

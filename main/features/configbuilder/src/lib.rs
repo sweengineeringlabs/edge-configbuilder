@@ -28,8 +28,8 @@ pub use crate::api::traits::feature_loader::FeatureLoader;
 pub use crate::api::traits::loader::Loader;
 pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::types::{
-    AllowAllPolicy, CompositePolicy, FeatureRecord, FeatureState, LoadedFeature, OverrideSource,
-    PatternWhitelistPolicy, PrefixWhitelistPolicy,
+    AllowAllPolicy, CompositePolicy, FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature,
+    OnError, OverrideSource, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
 pub use saf::*;
 pub use spi::{ConfigSection, OptionalSection};

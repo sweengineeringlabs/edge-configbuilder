@@ -1,8 +1,13 @@
 //! End-to-end tests for `FeatureRegistry` and `FeatureSummary`.
 
+#![allow(unsafe_code)]
+
 use swe_edge_configbuilder::{
-    create_loader_for_dir, ConfigError, FeatureRegistry, FeatureState, OptionalSection,
+    create_loader_for_dir, ConfigError, FeatureMetadata, FeatureRegistry, FeatureState, OnError,
+    OptionalSection, OverrideSource,
 };
+
+static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 use tempfile::TempDir;
 
 fn write_toml(dir: &std::path::Path, content: &str) {
@@ -46,6 +51,59 @@ impl OptionalSection for BrokerConfig {
             ));
         }
         Ok(())
+    }
+}
+
+/// Same validation rules as `BrokerConfig` but degrades gracefully on error.
+#[derive(Debug, serde::Deserialize, PartialEq)]
+struct BrokerConfigDisable {
+    host: String,
+    port: u16,
+    #[serde(default)]
+    tls_enabled: bool,
+    cert_path: Option<String>,
+}
+
+impl OptionalSection for BrokerConfigDisable {
+    fn section_name() -> &'static str {
+        "broker_disable"
+    }
+
+    fn on_error() -> OnError {
+        OnError::Disable
+    }
+
+    fn validate_enabled(&self) -> Result<(), ConfigError> {
+        if self.tls_enabled && self.cert_path.is_none() {
+            return Err(ConfigError::validation(
+                Self::section_name(),
+                "cert_path is required when tls_enabled = true",
+            ));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, serde::Deserialize, Default, PartialEq)]
+struct AnalyticsConfig {
+    endpoint: String,
+}
+
+impl OptionalSection for AnalyticsConfig {
+    fn section_name() -> &'static str {
+        "analytics"
+    }
+
+    fn requires() -> &'static [&'static str] {
+        &["cache"]
+    }
+
+    fn metadata() -> FeatureMetadata {
+        FeatureMetadata {
+            description: "Event analytics pipeline",
+            owner: "data-team",
+            deprecated_since: None,
+        }
     }
 }
 
@@ -264,5 +322,216 @@ fn test_feature_summary_display_shows_total_counts() {
     assert!(
         output.contains("2/2"),
         "summary header must show '2/2 enabled', got: {output}"
+    );
+}
+
+// ── validate_dependencies ─────────────────────────────────────────────────────
+
+#[test]
+fn test_validate_dependencies_returns_ok_when_no_features_loaded() {
+    let registry = FeatureRegistry::new();
+    assert!(registry.validate_dependencies().is_ok());
+}
+
+#[test]
+fn test_validate_dependencies_returns_ok_when_required_feature_is_enabled() {
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[cache]\nurl = \"redis://localhost\"\n[analytics]\nendpoint = \"https://ingest.local\"",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<CacheConfig>(&loader).unwrap();
+    registry.load::<AnalyticsConfig>(&loader).unwrap();
+
+    assert!(
+        registry.validate_dependencies().is_ok(),
+        "analytics requires cache, which is enabled — must be Ok"
+    );
+}
+
+#[test]
+fn test_validate_dependencies_returns_err_when_required_feature_is_disabled() {
+    let dir = TempDir::new().unwrap();
+    // cache is absent → Disabled; analytics requires cache
+    write_toml(
+        dir.path(),
+        "[analytics]\nendpoint = \"https://ingest.local\"",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<CacheConfig>(&loader).unwrap();
+    registry.load::<AnalyticsConfig>(&loader).unwrap();
+
+    let result = registry.validate_dependencies();
+    assert!(
+        result.is_err(),
+        "analytics requires cache but cache is disabled — must be Err"
+    );
+    let err = result.unwrap_err();
+    let msg = format!("{err:?}");
+    assert!(
+        msg.contains("analytics") && msg.contains("cache"),
+        "error must name both the dependent and the missing feature, got: {msg}"
+    );
+}
+
+#[test]
+fn test_validate_dependencies_returns_ok_when_dependent_feature_is_also_disabled() {
+    let dir = TempDir::new().unwrap();
+    // both absent: analytics is Disabled, so its `requires` constraint is ignored
+    write_toml(dir.path(), "[other]\nkey = \"x\"");
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<CacheConfig>(&loader).unwrap();
+    registry.load::<AnalyticsConfig>(&loader).unwrap();
+
+    assert!(
+        registry.validate_dependencies().is_ok(),
+        "disabled features do not need their dependencies satisfied"
+    );
+}
+
+// ── graceful degradation (OnError::Disable) ───────────────────────────────────
+
+#[test]
+fn test_feature_registry_load_disable_on_error_returns_disabled_state() {
+    let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let dir = TempDir::new().unwrap();
+    // tls_enabled=true but no cert_path → validate_enabled fails
+    write_toml(
+        dir.path(),
+        "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let result: Result<FeatureState<BrokerConfigDisable>, _> = registry.load(&loader);
+
+    assert!(
+        result.is_ok(),
+        "OnError::Disable must not propagate validation errors, got {result:?}"
+    );
+    assert!(
+        result.unwrap().is_disabled(),
+        "state must be Disabled when validation fails with OnError::Disable"
+    );
+}
+
+#[test]
+fn test_feature_registry_load_disable_on_error_stores_record_with_validation_error_override() {
+    let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<BrokerConfigDisable>(&loader).unwrap();
+
+    assert_eq!(registry.records().len(), 1);
+    let record = &registry.records()[0];
+    assert!(!record.enabled, "record.enabled must be false");
+    assert!(
+        matches!(
+            record.override_source,
+            Some(OverrideSource::ValidationError { .. })
+        ),
+        "override_source must be ValidationError, got {:?}",
+        record.override_source
+    );
+}
+
+#[test]
+fn test_feature_registry_load_disable_on_error_summary_shows_off() {
+    let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<BrokerConfigDisable>(&loader).unwrap();
+
+    let output = registry.summary().to_string();
+    assert!(
+        output.contains("OFF"),
+        "gracefully degraded feature must appear as OFF in summary, got: {output}"
+    );
+}
+
+// ── env var override for on_error ─────────────────────────────────────────────
+
+#[test]
+fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
+    let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    // SAFETY: single-threaded access guaranteed by ENV_LOCK; no other thread reads this var concurrently.
+    unsafe { std::env::set_var("SWE_EDGE_FEATURE_BROKER_DISABLE_ON_ERROR", "fail") };
+
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let result = registry.load::<BrokerConfigDisable>(&loader);
+
+    // SAFETY: restoring env state; same lock guarantees exclusivity.
+    unsafe { std::env::remove_var("SWE_EDGE_FEATURE_BROKER_DISABLE_ON_ERROR") };
+
+    assert!(
+        result.is_err(),
+        "env var on_error=fail must override trait on_error=Disable and propagate the error"
+    );
+}
+
+// ── metadata in Display ───────────────────────────────────────────────────────
+
+#[test]
+fn test_feature_summary_display_shows_metadata_description() {
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[cache]\nurl = \"redis://localhost\"\n[analytics]\nendpoint = \"https://ingest.local\"",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<CacheConfig>(&loader).unwrap();
+    registry.load::<AnalyticsConfig>(&loader).unwrap();
+
+    let output = registry.summary().to_string();
+    assert!(
+        output.contains("Event analytics pipeline"),
+        "summary must include feature description from metadata, got: {output}"
+    );
+}
+
+#[test]
+fn test_feature_summary_display_shows_metadata_owner() {
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[analytics]\nendpoint = \"https://ingest.local\"",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    registry.load::<AnalyticsConfig>(&loader).unwrap();
+
+    let output = registry.summary().to_string();
+    assert!(
+        output.contains("data-team"),
+        "summary must include owner from metadata, got: {output}"
     );
 }
