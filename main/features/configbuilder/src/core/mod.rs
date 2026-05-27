@@ -1,7 +1,7 @@
 mod configbuilder;
 mod loader;
 mod substitution;
-pub(crate) mod topo;
+pub(crate) mod topology;
 mod validator;
 
 pub(crate) use configbuilder::DefaultConfigBuilder;

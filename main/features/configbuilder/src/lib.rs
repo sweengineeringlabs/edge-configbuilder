@@ -41,7 +41,7 @@ pub use spi::{ConfigSection, OptionalSection};
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod __internal {
-    pub use crate::core::topo::topo_sort;
+    pub use crate::core::topology::topo_sort;
 }
 
 /// Load a set of optional feature sections in dependency order.
