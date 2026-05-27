@@ -9,7 +9,7 @@ use crate::api::feature::types::feature_state::FeatureState;
 /// strongly-typed config value and the metadata record in one call.
 /// [`FeatureRegistry`] uses the record to build the startup feature summary.
 ///
-/// [`FeatureLoader::load_feature`]: crate::api::traits::feature_loader::FeatureLoader::load_feature
+/// [`FeatureLoader::load_feature`]: crate::api::feature::traits::feature_loader::FeatureLoader::load_feature
 /// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
 #[derive(Debug)]
 pub struct LoadedFeature<T> {

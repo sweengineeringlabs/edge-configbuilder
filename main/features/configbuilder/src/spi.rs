@@ -17,15 +17,15 @@
 //! Override [`OptionalSection::metadata`] to annotate the feature with description,
 //! owner, and deprecation information for richer startup summaries.
 //!
-//! [`Loader`]: crate::api::traits::loader::Loader
-//! [`Validator`]: crate::api::traits::validator::Validator
+//! [`Loader`]: crate::api::loader::traits::loader::Loader
+//! [`Validator`]: crate::api::loader::traits::validator::Validator
 
+use crate::api::feature::traits::feature_loader::FeatureLoader;
 use crate::api::feature::types::feature_metadata::FeatureMetadata;
 use crate::api::feature::types::feature_state::FeatureState;
 use crate::api::feature::types::on_error::OnError;
 use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::traits::feature_loader::FeatureLoader;
-use crate::api::traits::loader::Loader;
+use crate::api::loader::traits::loader::Loader;
 
 /// Marks a typed struct as the owner of a named TOML section.
 ///

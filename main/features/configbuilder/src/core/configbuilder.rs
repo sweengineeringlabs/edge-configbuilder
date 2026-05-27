@@ -4,8 +4,8 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::traits::config_builder::ConfigBuilder;
-use crate::api::traits::loader::Loader as _;
+use crate::api::loader::traits::config_builder::ConfigBuilder;
+use crate::api::loader::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";

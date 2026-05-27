@@ -13,7 +13,7 @@ pub enum ConfigError {
 
     /// No `application.toml` was found in any configured directory.
     ///
-    /// Returned by [`crate::api::traits::loader::Loader::load_section`] when
+    /// Returned by [`crate::api::loader::traits::loader::Loader::load_section`] when
     /// every candidate directory either does not exist or contains no
     /// `application.toml` file. This usually indicates a misconfigured config
     /// path rather than an intentionally absent section.

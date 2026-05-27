@@ -27,7 +27,7 @@ use crate::api::loader::errors::config_error::ConfigError;
 /// - [`load_feature`] — full result including metadata record (use this with [`FeatureRegistry`])
 /// - [`load_optional_section`] — state only, no metadata (use this for ad-hoc loading)
 ///
-/// [`Loader`]: crate::api::traits::loader::Loader
+/// [`Loader`]: crate::api::loader::traits::loader::Loader
 /// [`load_feature`]: FeatureLoader::load_feature
 /// [`load_optional_section`]: FeatureLoader::load_optional_section
 /// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry

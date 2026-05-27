@@ -1,5 +1,5 @@
 use crate::api::loader::errors::substitution_error::SubstitutionError;
-use crate::api::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
 use regex::Regex;
 use std::env;
 

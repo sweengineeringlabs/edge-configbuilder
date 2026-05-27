@@ -24,16 +24,16 @@ mod core;
 mod saf;
 pub mod spi;
 
+pub use crate::api::feature::traits::feature_loader::FeatureLoader;
 pub use crate::api::feature::types::{
     FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
 };
+pub use crate::api::loader::traits::loader::Loader;
+pub use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::loader::types::{
     AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
 pub use crate::api::preflight::types::{PreflightIssue, PreflightIssueKind, PreflightReport};
-pub use crate::api::traits::feature_loader::FeatureLoader;
-pub use crate::api::traits::loader::Loader;
-pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use saf::*;
 pub use spi::{ConfigSection, OptionalSection};
 
