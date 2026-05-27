@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
-use crate::api::traits::loader::Loader;
+use crate::api::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
@@ -110,10 +110,6 @@ impl ConfigBuilder for DefaultConfigBuilder {
         self.config_dirs.push(dir.into());
         self
     }
-
-    fn build_loader(self) -> Result<impl Loader, ConfigError> {
-        self.build_loader_internal()
-    }
 }
 
 #[cfg(test)]
@@ -178,7 +174,7 @@ mod tests {
         writeln!(f, "[svc]\nvalue = \"ok\"").unwrap();
         let sec: Sec = blank()
             .with_config_dir(dir.path())
-            .build_loader()
+            .build_loader_internal()
             .unwrap()
             .load_section("svc")
             .unwrap();
@@ -189,7 +185,7 @@ mod tests {
     fn test_build_loader_with_unknown_name_returns_not_found() {
         let result: Result<Sec, _> = blank()
             .with_name("swe-edge-nonexistent-test-xyz")
-            .build_loader()
+            .build_loader_internal()
             .unwrap()
             .load_section("any");
         assert!(
@@ -201,7 +197,7 @@ mod tests {
     #[test]
     fn test_build_loader_no_name_no_dirs_returns_not_found() {
         let result: Result<Sec, _> = blank()
-            .build_loader()
+            .build_loader_internal()
             .unwrap()
             .load_section("nonexistent_section_xyz");
         assert!(

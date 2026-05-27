@@ -2,6 +2,7 @@
 
 #![allow(unsafe_code)]
 
+use std::sync::{Arc, Mutex};
 use swe_edge_configbuilder::{
     create_loader_for_dir, ConfigError, FeatureMetadata, FeatureRegistry, FeatureState, OnError,
     OptionalSection, OverrideSource,
@@ -492,6 +493,92 @@ fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
     assert!(
         result.is_err(),
         "env var on_error=fail must override trait on_error=Disable and propagate the error"
+    );
+}
+
+// ── on_load observers ─────────────────────────────────────────────────────────
+
+#[test]
+fn test_on_load_observer_is_called_after_each_successful_load() {
+    let dir = TempDir::new().unwrap();
+    write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let names: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+    let names_clone = Arc::clone(&names);
+    registry.on_load(move |r| names_clone.lock().unwrap().push(r.section_name.clone()));
+
+    registry.load::<CacheConfig>(&loader).unwrap();
+    registry.load::<BrokerConfig>(&loader).unwrap();
+
+    let captured = names.lock().unwrap();
+    assert_eq!(
+        *captured,
+        vec!["cache", "message_broker"],
+        "observer must be called once per successful load in load order"
+    );
+}
+
+#[test]
+fn test_on_load_observer_receives_correct_enabled_flag() {
+    let dir = TempDir::new().unwrap();
+    write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let states: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+    let states_clone = Arc::clone(&states);
+    registry.on_load(move |r| states_clone.lock().unwrap().push(r.enabled));
+
+    registry.load::<CacheConfig>(&loader).unwrap(); // present → enabled
+    registry.load::<BrokerConfig>(&loader).unwrap(); // absent  → disabled
+
+    assert_eq!(*states.lock().unwrap(), vec![true, false]);
+}
+
+#[test]
+fn test_on_load_multiple_observers_all_called_in_registration_order() {
+    let dir = TempDir::new().unwrap();
+    write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let log: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(Vec::new()));
+    let log1 = Arc::clone(&log);
+    let log2 = Arc::clone(&log);
+    registry.on_load(move |_| log1.lock().unwrap().push(1));
+    registry.on_load(move |_| log2.lock().unwrap().push(2));
+
+    registry.load::<CacheConfig>(&loader).unwrap();
+
+    assert_eq!(
+        *log.lock().unwrap(),
+        vec![1, 2],
+        "both observers must fire in registration order"
+    );
+}
+
+#[test]
+fn test_on_load_observer_not_called_when_load_returns_err() {
+    let dir = TempDir::new().unwrap();
+    write_toml(
+        dir.path(),
+        "[message_broker]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
+    );
+    let loader = create_loader_for_dir(dir.path());
+
+    let mut registry = FeatureRegistry::new();
+    let call_count: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
+    let count = Arc::clone(&call_count);
+    registry.on_load(move |_| *count.lock().unwrap() += 1);
+
+    let _ = registry.load::<BrokerConfig>(&loader); // Err(Validation{..})
+
+    assert_eq!(
+        *call_count.lock().unwrap(),
+        0,
+        "observer must not be called when load returns Err (no record committed)"
     );
 }
 

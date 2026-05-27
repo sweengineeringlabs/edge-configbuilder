@@ -148,7 +148,6 @@ impl ConfigBuilderImpl {
     }
 }
 
-#[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImpl {
     fn name(&self) -> &str {
         ConfigBuilderImpl::name(self)
@@ -168,10 +167,6 @@ impl ConfigBuilder for ConfigBuilderImpl {
 
     fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self {
         ConfigBuilderImpl::with_config_dir(self, dir)
-    }
-
-    fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
-        ConfigBuilderImpl::build_loader(self)
     }
 }
 
@@ -359,11 +354,16 @@ pub fn create_loader_xdg_with_substitution(
 // FeatureRegistry — startup feature collector
 // ============================================================================
 
+type FeatureObserver = Box<dyn Fn(&FeatureRecord)>;
+
 /// Collects feature-load metadata at startup for all optional TOML sections.
 ///
 /// Call [`FeatureRegistry::load`] once per feature during application startup.
 /// After loading all features, call [`FeatureRegistry::summary`] to obtain a
 /// [`FeatureSummary`] suitable for log output.
+///
+/// Register observability callbacks via [`FeatureRegistry::on_load`] to emit
+/// metrics or traces after each feature is resolved.
 ///
 /// # Example
 ///
@@ -371,6 +371,7 @@ pub fn create_loader_xdg_with_substitution(
 /// use swe_edge_configbuilder::{FeatureRegistry, OptionalSection};
 ///
 /// let mut registry = FeatureRegistry::new();
+/// registry.on_load(|r| tracing::info!(section = r.section_name, enabled = r.enabled));
 /// let broker = registry.load::<MessageBrokerConfig>(&loader)?;
 /// let cache  = registry.load::<CacheConfig>(&loader)?;
 ///
@@ -378,6 +379,7 @@ pub fn create_loader_xdg_with_substitution(
 /// ```
 pub struct FeatureRegistry {
     records: Vec<FeatureRecord>,
+    observers: Vec<FeatureObserver>,
 }
 
 impl Default for FeatureRegistry {
@@ -391,7 +393,28 @@ impl FeatureRegistry {
     pub fn new() -> Self {
         Self {
             records: Vec::new(),
+            observers: Vec::new(),
         }
+    }
+
+    /// Register a callback invoked once per feature immediately after it is
+    /// committed to the registry.
+    ///
+    /// The callback receives a shared reference to the [`FeatureRecord`] that
+    /// was just stored.  Multiple observers are called in registration order.
+    /// Callbacks are not invoked when [`load`] returns `Err` (hard failures).
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// registry.on_load(|r| {
+    ///     metrics::counter!("feature.loaded", 1, "section" => r.section_name.clone());
+    /// });
+    /// ```
+    ///
+    /// [`load`]: FeatureRegistry::load
+    pub fn on_load(&mut self, observer: impl Fn(&FeatureRecord) + 'static) {
+        self.observers.push(Box::new(observer));
     }
 
     /// Load an optional section, apply graceful-degradation policy if validation
@@ -444,6 +467,12 @@ impl FeatureRegistry {
             requires: T::requires(),
             metadata: T::metadata(),
         });
+
+        if let Some(record) = self.records.last() {
+            for observer in &self.observers {
+                observer(record);
+            }
+        }
 
         Ok(final_state)
     }
@@ -680,7 +709,6 @@ impl ConfigBuilderImplWithSubstitution {
     }
 }
 
-#[allow(refining_impl_trait)]
 impl ConfigBuilder for ConfigBuilderImplWithSubstitution {
     fn name(&self) -> &str {
         ConfigBuilderImplWithSubstitution::name(self)
@@ -700,9 +728,5 @@ impl ConfigBuilder for ConfigBuilderImplWithSubstitution {
 
     fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self {
         ConfigBuilderImplWithSubstitution::with_config_dir(self, dir)
-    }
-
-    fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
-        ConfigBuilderImplWithSubstitution::build_loader(self)
     }
 }
