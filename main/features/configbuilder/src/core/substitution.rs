@@ -1,4 +1,4 @@
-use crate::api::error::substitution_error::SubstitutionError;
+use crate::api::loader::errors::substitution_error::SubstitutionError;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use regex::Regex;
 use std::env;
@@ -98,7 +98,7 @@ impl<'a> Substituter<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::api::types::AllowAllPolicy;
+    use crate::api::loader::types::AllowAllPolicy;
 
     fn substituter(policy: &dyn SubstitutionPolicy) -> Substituter {
         Substituter::new(policy, "test_location".to_string())
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_policy_rejection() {
-        use crate::api::types::PrefixWhitelistPolicy;
+        use crate::api::loader::types::PrefixWhitelistPolicy;
         let policy = PrefixWhitelistPolicy::new(vec!["ALLOWED_".to_string()]);
         let sub = substituter(&policy);
         let result = sub.substitute("{{FORBIDDEN_VAR}}");

@@ -29,7 +29,7 @@ pub enum OnError {
     /// Use this for optional/enhancement features (analytics, tracing exporters,
     /// feature flags) where a config mistake should not block the critical path.
     ///
-    /// [`FeatureRecord::override_source`]: crate::api::types::feature::feature_record::FeatureRecord::override_source
-    /// [`OverrideSource::ValidationError`]: crate::api::types::feature::override_source::OverrideSource::ValidationError
+    /// [`FeatureRecord::override_source`]: crate::api::feature::types::feature_record::FeatureRecord::override_source
+    /// [`OverrideSource::ValidationError`]: crate::api::feature::types::override_source::OverrideSource::ValidationError
     Disable,
 }

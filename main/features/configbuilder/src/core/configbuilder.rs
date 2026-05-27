@@ -3,7 +3,7 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
-use crate::api::error::config_error::ConfigError;
+use crate::api::loader::errors::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
@@ -116,7 +116,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    use crate::api::error::config_error::ConfigError;
+    use crate::api::loader::errors::config_error::ConfigError;
     use std::io::Write as _;
 
     fn blank() -> DefaultConfigBuilder {

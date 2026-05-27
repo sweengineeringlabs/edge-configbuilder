@@ -1,8 +1,8 @@
 //! [`FeatureLoader`] — presence-aware section loading with full metadata.
 
-use crate::api::error::config_error::ConfigError;
-use crate::api::types::feature::feature_state::FeatureState;
-use crate::api::types::feature::loaded_feature::LoadedFeature;
+use crate::api::feature::types::feature_state::FeatureState;
+use crate::api::feature::types::loaded_feature::LoadedFeature;
+use crate::api::loader::errors::config_error::ConfigError;
 
 /// Load optional TOML sections with configurable enable/disable precedence.
 ///
@@ -64,7 +64,7 @@ pub trait FeatureLoader {
     /// or [`FeatureRegistry`] when you need observability.
     ///
     /// [`load_feature`]: FeatureLoader::load_feature
-    /// [`FeatureRecord`]: crate::api::types::feature::feature_record::FeatureRecord
+    /// [`FeatureRecord`]: crate::api::feature::types::feature_record::FeatureRecord
     /// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
     fn load_optional_section<T>(&self, key: &str) -> Result<FeatureState<T>, ConfigError>
     where

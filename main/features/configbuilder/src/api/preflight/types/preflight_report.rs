@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::api::error::config_error::ConfigError;
+use crate::api::loader::errors::config_error::ConfigError;
 
 /// Category of a preflight issue.
 #[derive(Debug, Clone, PartialEq, Eq)]

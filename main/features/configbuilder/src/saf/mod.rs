@@ -1,6 +1,6 @@
 mod configbuilder_svc;
 
-pub use crate::api::error::config_error::ConfigError;
+pub use crate::api::loader::errors::config_error::ConfigError;
 pub use configbuilder_svc::create_config_builder;
 pub use configbuilder_svc::create_config_builder_with_substitution;
 pub use configbuilder_svc::create_loader;

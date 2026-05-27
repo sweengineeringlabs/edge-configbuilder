@@ -1,4 +1,4 @@
-use crate::api::error::config_error::ConfigError;
+use crate::api::loader::errors::config_error::ConfigError;
 
 /// Load typed TOML sections from a layered config chain.
 ///

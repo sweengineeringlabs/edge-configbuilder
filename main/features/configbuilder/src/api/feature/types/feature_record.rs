@@ -1,7 +1,7 @@
 //! [`FeatureRecord`] — a snapshot of one feature's state and why it got there.
 
-use crate::api::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::types::feature::override_source::OverrideSource;
+use crate::api::feature::types::feature_metadata::FeatureMetadata;
+use crate::api::feature::types::override_source::OverrideSource;
 
 /// A snapshot of one optional feature's resolved state.
 ///

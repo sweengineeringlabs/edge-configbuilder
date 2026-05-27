@@ -20,12 +20,12 @@
 //! [`Loader`]: crate::api::traits::loader::Loader
 //! [`Validator`]: crate::api::traits::validator::Validator
 
-use crate::api::error::config_error::ConfigError;
+use crate::api::feature::types::feature_metadata::FeatureMetadata;
+use crate::api::feature::types::feature_state::FeatureState;
+use crate::api::feature::types::on_error::OnError;
+use crate::api::loader::errors::config_error::ConfigError;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
-use crate::api::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::types::feature::feature_state::FeatureState;
-use crate::api::types::feature::on_error::OnError;
 
 /// Marks a typed struct as the owner of a named TOML section.
 ///
@@ -142,8 +142,8 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     ///
     /// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
     /// [`validate_enabled`]: OptionalSection::validate_enabled
-    /// [`FeatureRecord::override_source`]: crate::api::types::feature::feature_record::FeatureRecord::override_source
-    /// [`OverrideSource::ValidationError`]: crate::api::types::feature::override_source::OverrideSource::ValidationError
+    /// [`FeatureRecord::override_source`]: crate::api::feature::types::feature_record::FeatureRecord::override_source
+    /// [`OverrideSource::ValidationError`]: crate::api::feature::types::override_source::OverrideSource::ValidationError
     fn on_error() -> OnError {
         OnError::Fail
     }

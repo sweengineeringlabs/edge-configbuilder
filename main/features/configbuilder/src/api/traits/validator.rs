@@ -1,4 +1,4 @@
-use crate::api::error::config_error::ConfigError;
+use crate::api::loader::errors::config_error::ConfigError;
 use std::path::Path;
 
 /// Validates a configuration value before it is used.
