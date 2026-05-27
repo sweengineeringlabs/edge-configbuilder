@@ -1,12 +1,20 @@
 use std::path::PathBuf;
 
+use std::fmt;
+
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::facade::{ConfigBuilderSvc, PathValidatorSvc, SectionLoaderSvc};
+use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::traits::validator::Validator;
+use crate::api::types::feature_record::FeatureRecord;
+use crate::api::types::feature_state::FeatureState;
+use crate::api::types::loaded_feature::LoadedFeature;
+use crate::api::types::override_source::OverrideSource;
 use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
+use crate::spi::OptionalSection;
 
 /// Public facade for loading typed TOML sections from config directories.
 ///
@@ -61,6 +69,37 @@ impl SectionLoaderSvc for SectionLoaderImpl {
     fn validate(&self) -> Result<(), ConfigError> {
         SectionLoaderImpl::validate(self)
     }
+}
+
+impl FeatureLoader for SectionLoaderImpl {
+    fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        self.inner.load_feature(key)
+    }
+}
+
+/// Load the section at `key` as an optional feature, returning `Disabled` when absent.
+///
+/// Presence of the section in any config file enables the feature; absence
+/// disables it without raising an error.  Use [`OptionalSection::load_optional`]
+/// when the section type also needs cross-field validation.
+///
+/// # Errors
+///
+/// Returns [`ConfigError::Io`] for unreadable files or size-limit violations,
+/// and [`ConfigError::Parse`] for malformed TOML or deserialisation failures.
+///
+/// [`OptionalSection::load_optional`]: crate::spi::OptionalSection::load_optional
+pub fn load_feature_section<T>(
+    loader: &impl FeatureLoader,
+    key: &str,
+) -> Result<FeatureState<T>, ConfigError>
+where
+    T: serde::de::DeserializeOwned,
+{
+    loader.load_optional_section(key)
 }
 
 /// Public facade for path validation.
@@ -379,6 +418,140 @@ pub fn create_loader_xdg_with_substitution(
     loader.substitution_policy = Some(policy);
     Ok(SectionLoaderImpl { inner: loader })
 }
+
+// ============================================================================
+// FeatureRegistry — startup feature collector
+// ============================================================================
+
+/// Collects feature-load metadata at startup for all optional TOML sections.
+///
+/// Call [`FeatureRegistry::load`] once per feature during application startup.
+/// After loading all features, call [`FeatureRegistry::summary`] to obtain a
+/// [`FeatureSummary`] suitable for log output.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use swe_edge_configbuilder::{FeatureRegistry, OptionalSection};
+///
+/// let mut registry = FeatureRegistry::new();
+/// let broker = registry.load::<MessageBrokerConfig>(&loader)?;
+/// let cache  = registry.load::<CacheConfig>(&loader)?;
+///
+/// tracing::info!("{}", registry.summary());
+/// ```
+pub struct FeatureRegistry {
+    records: Vec<FeatureRecord>,
+}
+
+impl Default for FeatureRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl FeatureRegistry {
+    /// Create an empty registry.
+    pub fn new() -> Self {
+        Self {
+            records: Vec::new(),
+        }
+    }
+
+    /// Load an optional section, validate cross-field constraints if enabled,
+    /// and record the outcome for the startup summary.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(Enabled(T))` — section present, all controls say on, validation passed.
+    /// - `Ok(Disabled)` — section absent, env var says off, or `enabled = false`.
+    /// - `Err` — I/O error, parse failure, or `validate_enabled` rejection.
+    pub fn load<T>(&mut self, loader: &impl FeatureLoader) -> Result<FeatureState<T>, ConfigError>
+    where
+        T: OptionalSection,
+    {
+        let loaded: LoadedFeature<T> = loader.load_feature(T::section_name())?;
+        if let FeatureState::Enabled(ref value) = loaded.state {
+            value.validate_enabled()?;
+        }
+        self.records.push(loaded.record);
+        Ok(loaded.state)
+    }
+
+    /// All feature records collected so far, in load order.
+    pub fn records(&self) -> &[FeatureRecord] {
+        &self.records
+    }
+
+    /// Produce a startup summary of every registered feature.
+    pub fn summary(&self) -> FeatureSummary {
+        FeatureSummary {
+            records: self.records.clone(),
+        }
+    }
+}
+
+// ============================================================================
+// FeatureSummary — human-readable startup report
+// ============================================================================
+
+/// A point-in-time snapshot of every feature loaded through [`FeatureRegistry`].
+///
+/// Implements [`Display`] so you can log it directly: `tracing::info!("{}", summary)`.
+///
+/// [`Display`]: std::fmt::Display
+pub struct FeatureSummary {
+    records: Vec<FeatureRecord>,
+}
+
+impl FeatureSummary {
+    /// Number of features that resolved to enabled.
+    pub fn enabled_count(&self) -> usize {
+        self.records.iter().filter(|r| r.enabled).count()
+    }
+
+    /// Number of features that resolved to disabled.
+    pub fn disabled_count(&self) -> usize {
+        self.records.iter().filter(|r| !r.enabled).count()
+    }
+
+    /// Total number of registered features.
+    pub fn total_count(&self) -> usize {
+        self.records.len()
+    }
+
+    /// Whether every registered feature resolved to enabled.
+    pub fn all_enabled(&self) -> bool {
+        self.records.iter().all(|r| r.enabled)
+    }
+}
+
+impl fmt::Display for FeatureSummary {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "features: {}/{} enabled",
+            self.enabled_count(),
+            self.total_count()
+        )?;
+        for record in &self.records {
+            let status = if record.enabled { "ON " } else { "OFF" };
+            let note = match &record.override_source {
+                None => String::new(),
+                Some(OverrideSource::ExplicitTomlFlag) => " [disabled by enabled=false]".to_owned(),
+                Some(OverrideSource::EnvVar { var_name, value }) => {
+                    format!(" [env {var_name}={value}]")
+                }
+            };
+            writeln!(f, "  [{status}] {}{note}", record.section_name)?;
+        }
+        Ok(())
+    }
+}
+
+// ============================================================================
+// Factory functions with substitution policy support
+// ============================================================================
 
 /// Create a config builder that supports substitution and custom paths.
 ///
