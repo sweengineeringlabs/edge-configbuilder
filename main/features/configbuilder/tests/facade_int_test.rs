@@ -1,7 +1,4 @@
-use swe_edge_configbuilder::{
-    api::traits::facade::{ConfigBuilderSvc, PathValidatorSvc, SectionLoaderSvc},
-    create_config_builder, create_loader, create_validator,
-};
+use swe_edge_configbuilder::{create_config_builder, create_loader, create_validator};
 
 #[test]
 fn test_section_loader_svc_trait_impl() {

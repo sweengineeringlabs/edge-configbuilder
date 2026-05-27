@@ -2,8 +2,8 @@
 
 use std::path::PathBuf;
 
-use crate::api::default_section_loader::MAX_CONFIG_FILE_BYTES;
-use crate::api::default_validator::NOT_A_DIR_MSG;
+const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576;
+const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;

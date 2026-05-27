@@ -1,4 +1,4 @@
-use swe_edge_configbuilder::api::error::config_error::ConfigError;
+use swe_edge_configbuilder::ConfigError;
 
 #[test]
 fn test_substitution_error_variable_not_found_displays() {
