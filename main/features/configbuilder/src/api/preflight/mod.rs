@@ -1,3 +1,1 @@
-pub mod types;
-
-pub use types::{PreflightIssue, PreflightIssueKind, PreflightReport};
+//! Preflight dry-run reporting — types live in [`crate::api::types::preflight`].

@@ -25,15 +25,15 @@ mod saf;
 pub mod spi;
 
 pub use crate::api::feature::traits::feature_loader::FeatureLoader;
-pub use crate::api::feature::types::{
-    FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
-};
 pub use crate::api::loader::traits::loader::Loader;
 pub use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
-pub use crate::api::loader::types::{
+pub use crate::api::types::feature::{
+    FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
+};
+pub use crate::api::types::loader::{
     AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
-pub use crate::api::preflight::types::{PreflightIssue, PreflightIssueKind, PreflightReport};
+pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
 pub use saf::*;
 pub use spi::{ConfigSection, OptionalSection};
 
@@ -43,7 +43,7 @@ pub use spi::{ConfigSection, OptionalSection};
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod __internal {
-    pub use crate::core::topology::topo_sort;
+    pub use crate::api::types::topology::Topology;
 }
 
 /// Load a set of optional feature sections in dependency order.
@@ -71,7 +71,7 @@ macro_rules! load_in_order {
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::__internal::topo_sort(_names, _requires) {
+        match $crate::__internal::Topology::sort(_names, _requires) {
             Err(_msg) => Err($crate::ConfigError::validation("load_in_order", _msg)),
             Ok(_order) => {
                 let mut _result: Result<(), $crate::ConfigError> = Ok(());
@@ -126,7 +126,7 @@ macro_rules! preflight {
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::__internal::topo_sort(_names, _requires) {
+        match $crate::__internal::Topology::sort(_names, _requires) {
             Err(ref _msg) => {
                 _report.push($crate::PreflightIssue {
                     section: String::from("dependency_graph"),

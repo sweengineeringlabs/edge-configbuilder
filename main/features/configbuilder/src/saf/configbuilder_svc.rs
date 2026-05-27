@@ -3,16 +3,16 @@ use std::path::PathBuf;
 use std::fmt;
 
 use crate::api::feature::traits::feature_loader::FeatureLoader;
-use crate::api::feature::types::feature_record::FeatureRecord;
-use crate::api::feature::types::feature_state::FeatureState;
-use crate::api::feature::types::loaded_feature::LoadedFeature;
-use crate::api::feature::types::on_error::OnError;
-use crate::api::feature::types::override_source::OverrideSource;
 use crate::api::loader::errors::config_error::ConfigError;
 use crate::api::loader::traits::config_builder::ConfigBuilder;
 use crate::api::loader::traits::loader::Loader;
 use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::loader::traits::validator::Validator;
+use crate::api::types::feature::feature_record::FeatureRecord;
+use crate::api::types::feature::feature_state::FeatureState;
+use crate::api::types::feature::loaded_feature::LoadedFeature;
+use crate::api::types::feature::on_error::OnError;
+use crate::api::types::feature::override_source::OverrideSource;
 use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
 use crate::spi::OptionalSection;
 

@@ -1,7 +1,7 @@
 //! [`LoadedFeature`] — the full result of loading an optional config section.
 
-use crate::api::feature::types::feature_record::FeatureRecord;
-use crate::api::feature::types::feature_state::FeatureState;
+use crate::api::types::feature::feature_record::FeatureRecord;
+use crate::api::types::feature::feature_state::FeatureState;
 
 /// The full result of loading an optional feature section.
 ///
