@@ -1,9 +1,9 @@
-mod default_config_builder;
-mod default_section_loader;
-mod default_validator;
+mod configbuilder;
+mod loader;
 mod substitution;
+mod validator;
 
-pub(crate) use default_config_builder::DefaultConfigBuilder;
-pub(crate) use default_section_loader::DefaultSectionLoader;
-pub(crate) use default_validator::DefaultValidator;
+pub(crate) use configbuilder::DefaultConfigBuilder;
+pub(crate) use loader::DefaultSectionLoader;
 pub(crate) use substitution::Substituter;
+pub(crate) use validator::DefaultValidator;
