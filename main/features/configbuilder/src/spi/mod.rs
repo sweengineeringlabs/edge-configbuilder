@@ -17,12 +17,12 @@
 //! Override [`OptionalSection::metadata`] to annotate the feature with description,
 //! owner, and deprecation information for richer startup summaries.
 //!
-//! [`Loader`]: crate::api::loader::traits::loader::Loader
-//! [`Validator`]: crate::api::loader::traits::validator::Validator
+//! [`Loader`]: crate::api::traits::loader::Loader
+//! [`Validator`]: crate::api::traits::validator::Validator
 
-use crate::api::feature::traits::feature_loader::FeatureLoader;
-use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::loader::traits::loader::Loader;
+use crate::api::error::config_error::ConfigError;
+use crate::api::traits::feature_loader::FeatureLoader;
+use crate::api::traits::loader::Loader;
 use crate::api::types::feature::feature_metadata::FeatureMetadata;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::feature::on_error::OnError;

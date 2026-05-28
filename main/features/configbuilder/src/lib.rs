@@ -24,9 +24,9 @@ mod core;
 mod saf;
 pub mod spi;
 
-pub use crate::api::feature::traits::feature_loader::FeatureLoader;
-pub use crate::api::loader::traits::loader::Loader;
-pub use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
+pub use crate::api::traits::feature_loader::FeatureLoader;
+pub use crate::api::traits::loader::Loader;
+pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
 };

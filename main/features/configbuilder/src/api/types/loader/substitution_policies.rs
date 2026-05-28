@@ -1,6 +1,6 @@
 //! Built-in substitution policy implementations.
 
-use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::traits::substitution_policy::SubstitutionPolicy;
 
 /// Allows all environment variables to be substituted (no restrictions).
 ///

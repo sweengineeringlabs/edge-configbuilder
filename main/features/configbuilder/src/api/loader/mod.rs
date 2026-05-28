@@ -1,5 +1,1 @@
-pub mod errors;
-pub mod traits;
-
-pub use errors::{ConfigError, SubstitutionError};
-pub use traits::{Loader, SubstitutionPolicy};
+//! Loader interface — traits live in [`crate::api::traits`]; errors in [`crate::api::error`].

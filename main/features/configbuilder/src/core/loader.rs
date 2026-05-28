@@ -4,10 +4,10 @@ use std::path::PathBuf;
 
 const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576;
 const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
-use crate::api::feature::traits::feature_loader::FeatureLoader;
-use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::loader::traits::loader::Loader;
-use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::error::config_error::ConfigError;
+use crate::api::traits::feature_loader::FeatureLoader;
+use crate::api::traits::loader::Loader;
+use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::types::feature::feature_metadata::FeatureMetadata;
 use crate::api::types::feature::feature_record::FeatureRecord;
 use crate::api::types::feature::feature_state::FeatureState;
@@ -287,7 +287,7 @@ impl FeatureLoader for DefaultSectionLoader {
 #[allow(clippy::unwrap_used, clippy::expect_used, unsafe_code)]
 mod tests {
     use super::*;
-    use crate::api::loader::errors::config_error::ConfigError;
+    use crate::api::error::config_error::ConfigError;
     use crate::api::types::feature::feature_state::FeatureState;
     use std::io::Write as _;
     use std::path::Path;

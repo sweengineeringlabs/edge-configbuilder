@@ -3,9 +3,9 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
-use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::loader::traits::config_builder::ConfigBuilder;
-use crate::api::loader::traits::loader::Loader as _;
+use crate::api::error::config_error::ConfigError;
+use crate::api::traits::config_builder::ConfigBuilder;
+use crate::api::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
@@ -116,7 +116,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    use crate::api::loader::errors::config_error::ConfigError;
+    use crate::api::error::config_error::ConfigError;
     use std::io::Write as _;
 
     fn blank() -> DefaultConfigBuilder {

@@ -2,12 +2,12 @@ use std::path::PathBuf;
 
 use std::fmt;
 
-use crate::api::feature::traits::feature_loader::FeatureLoader;
-use crate::api::loader::errors::config_error::ConfigError;
-use crate::api::loader::traits::config_builder::ConfigBuilder;
-use crate::api::loader::traits::loader::Loader;
-use crate::api::loader::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::loader::traits::validator::Validator;
+use crate::api::error::config_error::ConfigError;
+use crate::api::traits::config_builder::ConfigBuilder;
+use crate::api::traits::feature_loader::FeatureLoader;
+use crate::api::traits::loader::Loader;
+use crate::api::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::traits::validator::Validator;
 use crate::api::types::feature::feature_record::FeatureRecord;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::feature::loaded_feature::LoadedFeature;
@@ -30,13 +30,13 @@ impl SectionLoaderImpl {
     where
         T: serde::de::DeserializeOwned + Default,
     {
-        use crate::api::loader::traits::loader::Loader;
+        use crate::api::traits::loader::Loader;
         self.inner.load_section(key)
     }
 
     /// Validate that all configured directories are accessible.
     pub fn validate(&self) -> Result<(), ConfigError> {
-        use crate::api::loader::traits::loader::Loader;
+        use crate::api::traits::loader::Loader;
         self.inner.validate()
     }
 }
@@ -109,33 +109,33 @@ pub struct ConfigBuilderImpl {
 impl ConfigBuilderImpl {
     /// Return the configured application name.
     pub fn name(&self) -> &str {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.name()
     }
 
     /// Return the configured application version.
     pub fn version(&self) -> &str {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.version()
     }
 
     /// Set the application name; used by `build_loader` to resolve XDG paths.
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_name(name);
         self
     }
 
     /// Set the application version string.
     pub fn with_version(mut self, version: impl Into<String>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_version(version);
         self
     }
 
     /// Append an explicit config directory; takes precedence over XDG resolution.
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_config_dir(dir);
         self
     }
@@ -670,33 +670,33 @@ pub struct ConfigBuilderImplWithSubstitution {
 impl ConfigBuilderImplWithSubstitution {
     /// Return the configured application name.
     pub fn name(&self) -> &str {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.name()
     }
 
     /// Return the configured application version.
     pub fn version(&self) -> &str {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner.version()
     }
 
     /// Set the application name.
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_name(name);
         self
     }
 
     /// Set the application version.
     pub fn with_version(mut self, version: impl Into<String>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_version(version);
         self
     }
 
     /// Add a config directory.
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
-        use crate::api::loader::traits::config_builder::ConfigBuilder;
+        use crate::api::traits::config_builder::ConfigBuilder;
         self.inner = self.inner.with_config_dir(dir);
         self
     }
