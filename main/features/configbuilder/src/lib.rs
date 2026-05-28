@@ -7,7 +7,7 @@
 //! # Usage
 //!
 //! ```rust,ignore
-//! use swe_edge_configbuilder::{create_loader, Loader};
+//! use swe_edge_configbuilder::create_loader;
 //!
 //! #[derive(serde::Deserialize, Default)]
 //! struct CompletionConfig { model: String, max_tokens: u32 }
@@ -31,13 +31,17 @@ pub use crate::api::traits::optional_section::OptionalSection;
 pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::traits::validator::Validator;
 pub use crate::api::types::application_config::ApplicationConfig;
+pub use crate::api::types::config_builder_impl::ConfigBuilderImpl;
 pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
 };
 pub use crate::api::types::loader::{
     AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
+pub use crate::api::types::path_validator_impl::PathValidatorImpl;
 pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
+pub use crate::api::types::section_loader_impl::SectionLoaderImpl;
+pub use crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
 pub use saf::*;
 
 #[doc(hidden)]

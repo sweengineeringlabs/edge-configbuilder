@@ -6,7 +6,7 @@
 ///
 /// Built-in implementations are provided: `AllowAllPolicy`, `PrefixWhitelistPolicy`,
 /// `PatternWhitelistPolicy`, and `CompositePolicy`.
-pub trait SubstitutionPolicy {
+pub trait SubstitutionPolicy: Send + Sync {
     /// Validate whether an environment variable is allowed to be substituted.
     ///
     /// # Arguments

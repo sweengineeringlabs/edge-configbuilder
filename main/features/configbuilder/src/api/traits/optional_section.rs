@@ -1,10 +1,10 @@
 //! [`OptionalSection`] — marks a typed struct as an opt-in TOML feature section.
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::types::feature::feature_metadata::FeatureMetadata;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::feature::on_error::OnError;
+use crate::api::types::section_loader_impl::SectionLoaderImpl;
 
 /// Marks a typed struct as an opt-in TOML feature section.
 ///
@@ -116,7 +116,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// [`on_error`]: OptionalSection::on_error
     /// [`requires`]: OptionalSection::requires
     /// [`FeatureRegistry::load`]: crate::api::types::feature_registry::FeatureRegistry::load
-    fn load_optional(loader: &impl FeatureLoader) -> Result<FeatureState<Self>, ConfigError>
+    fn load_optional(loader: &SectionLoaderImpl) -> Result<FeatureState<Self>, ConfigError>
     where
         Self: Sized,
     {

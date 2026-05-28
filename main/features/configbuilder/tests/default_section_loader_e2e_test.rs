@@ -1,7 +1,7 @@
 //! Contract tests for the section loader boundary constants.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{create_loader_for_dir, Loader as _};
+use swe_edge_configbuilder::create_loader_for_dir;
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]

@@ -1,13 +1,13 @@
 //! [`FeatureRegistry`] — startup feature collector and dependency validator.
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::optional_section::OptionalSection;
 use crate::api::types::feature::feature_record::FeatureRecord;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::feature::on_error::OnError;
 use crate::api::types::feature::override_source::OverrideSource;
 use crate::api::types::feature_summary::FeatureSummary;
+use crate::api::types::section_loader_impl::SectionLoaderImpl;
 
 type FeatureObserver = Box<dyn Fn(&FeatureRecord)>;
 
@@ -74,7 +74,7 @@ impl FeatureRegistry {
     ///
     /// The env var `SWE_EDGE_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable` overrides
     /// the trait default.
-    pub fn load<T>(&mut self, loader: &impl FeatureLoader) -> Result<FeatureState<T>, ConfigError>
+    pub fn load<T>(&mut self, loader: &SectionLoaderImpl) -> Result<FeatureState<T>, ConfigError>
     where
         T: OptionalSection,
     {

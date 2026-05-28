@@ -1,7 +1,7 @@
 //! [`ConfigSection`] — marks a typed struct as the owner of a named TOML section.
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::loader::Loader;
+use crate::api::types::section_loader_impl::SectionLoaderImpl;
 
 /// Marks a typed struct as the owner of a named TOML section.
 ///
@@ -28,7 +28,7 @@ pub trait ConfigSection: serde::de::DeserializeOwned + Default + Send + Sync + '
 
     /// Load this section from `loader`, returning `Self::default()` when the
     /// key is absent. Override only when custom merge logic is required.
-    fn load(loader: &impl Loader) -> Result<Self, ConfigError> {
+    fn load(loader: &SectionLoaderImpl) -> Result<Self, ConfigError> {
         loader.load_section(Self::section_name())
     }
 }

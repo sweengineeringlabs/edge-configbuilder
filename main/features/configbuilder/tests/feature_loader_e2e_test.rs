@@ -4,8 +4,7 @@
 #![allow(unsafe_code)]
 
 use swe_edge_configbuilder::{
-    create_loader_for_dir, load_feature_section, ConfigBuilder as _, ConfigError, FeatureLoader,
-    FeatureState,
+    create_loader_for_dir, load_feature_section, ConfigError, FeatureState,
 };
 use tempfile::TempDir;
 

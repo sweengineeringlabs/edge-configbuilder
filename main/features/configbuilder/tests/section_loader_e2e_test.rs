@@ -3,7 +3,7 @@
 
 use std::io::Write as _;
 use swe_edge_configbuilder::{
-    create_loader, create_loader_for_dir, create_loader_xdg, ConfigError, Loader as _,
+    create_loader, create_loader_for_dir, create_loader_xdg, ConfigError,
 };
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]

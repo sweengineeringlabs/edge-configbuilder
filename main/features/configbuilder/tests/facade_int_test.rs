@@ -1,7 +1,4 @@
-use swe_edge_configbuilder::{
-    create_config_builder, create_loader, create_validator, ConfigBuilder as _, Loader as _,
-    Validator as _,
-};
+use swe_edge_configbuilder::{create_config_builder, create_loader, create_validator};
 
 #[test]
 fn test_section_loader_svc_trait_impl() {

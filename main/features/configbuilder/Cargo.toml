@@ -75,3 +75,31 @@ path = "tests/preflight_issue_kind_e2e_test.rs"
 [[test]]
 name = "substituter_e2e_test"
 path = "tests/substituter_e2e_test.rs"
+
+[[test]]
+name = "section_loader_impl_e2e_test"
+path = "tests/section_loader_impl_e2e_test.rs"
+
+[[test]]
+name = "path_validator_impl_e2e_test"
+path = "tests/path_validator_impl_e2e_test.rs"
+
+[[test]]
+name = "config_builder_impl_e2e_test"
+path = "tests/config_builder_impl_e2e_test.rs"
+
+[[test]]
+name = "substitution_config_builder_impl_e2e_test"
+path = "tests/substitution_config_builder_impl_e2e_test.rs"
+
+[[test]]
+name = "loader_ops_e2e_test"
+path = "tests/loader_ops_e2e_test.rs"
+
+[[test]]
+name = "validator_ops_e2e_test"
+path = "tests/validator_ops_e2e_test.rs"
+
+[[test]]
+name = "raw_feature_e2e_test"
+path = "tests/raw_feature_e2e_test.rs"

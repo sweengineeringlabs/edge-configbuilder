@@ -1,7 +1,7 @@
 //! Contract tests for the default config builder constants.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _};
+use swe_edge_configbuilder::create_config_builder;
 
 /// @covers: api/default_config_builder::DEFAULT_VERSION
 #[test]

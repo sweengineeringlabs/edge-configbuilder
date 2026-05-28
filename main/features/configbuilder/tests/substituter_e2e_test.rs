@@ -5,9 +5,7 @@
 use std::io::Write as _;
 use tempfile::TempDir;
 
-use swe_edge_configbuilder::{
-    create_loader_for_dir_with_substitution, AllowAllPolicy, Loader as _,
-};
+use swe_edge_configbuilder::{create_loader_for_dir_with_substitution, AllowAllPolicy};
 
 fn write_toml(dir: &std::path::Path, content: &str) {
     let mut f = std::fs::File::create(dir.join("application.toml")).unwrap();

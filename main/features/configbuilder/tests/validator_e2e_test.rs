@@ -1,7 +1,7 @@
 //! Tests for `Validator::validate_path` via `create_loader_for_dir`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{create_loader_for_dir, Loader as _};
+use swe_edge_configbuilder::create_loader_for_dir;
 
 /// @covers: create_loader_for_dir
 #[test]

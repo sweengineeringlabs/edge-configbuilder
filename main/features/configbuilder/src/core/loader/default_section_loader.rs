@@ -7,12 +7,14 @@ const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
+use crate::api::traits::loader_ops::LoaderOps;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::types::feature::feature_metadata::FeatureMetadata;
 use crate::api::types::feature::feature_record::FeatureRecord;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::feature::loaded_feature::LoadedFeature;
 use crate::api::types::feature::override_source::OverrideSource;
+use crate::api::types::raw_feature::RawFeature;
 use crate::core::Substituter;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
@@ -53,79 +55,7 @@ impl DefaultSectionLoader {
         }
         Some(current.clone())
     }
-}
 
-impl Loader for DefaultSectionLoader {
-    fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
-    where
-        T: serde::de::DeserializeOwned + Default,
-    {
-        let mut any_file_found = false;
-        let mut merged = toml::Value::Table(toml::map::Map::new());
-
-        for dir in &self.config_dirs {
-            let path = dir.join("application.toml");
-            if !path.exists() {
-                continue;
-            }
-            any_file_found = true;
-            let meta = std::fs::metadata(&path)
-                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
-            if meta.len() > MAX_CONFIG_FILE_BYTES {
-                return Err(ConfigError::Io(format!(
-                    "{}: config file exceeds the 1 MiB limit ({} bytes)",
-                    path.display(),
-                    meta.len(),
-                )));
-            }
-            let text = std::fs::read_to_string(&path)
-                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
-
-            let text = if let Some(ref policy) = self.substitution_policy {
-                let substituter =
-                    Substituter::new(policy.as_ref(), format!("{}:{}", path.display(), key));
-                substituter
-                    .substitute(&text)
-                    .map_err(|e| ConfigError::Io(e.to_string()))?
-            } else {
-                text
-            };
-
-            let val: toml::Value =
-                toml::from_str(&text).map_err(|e| ConfigError::Parse(e.to_string()))?;
-            if let Some(section) = Self::extract_dotted(&val, key) {
-                merged = Self::merge_toml(merged, section);
-            }
-        }
-
-        if matches!(merged, toml::Value::Table(ref t) if t.is_empty()) {
-            if !any_file_found {
-                return Err(ConfigError::NotFound(format!(
-                    "no application.toml found in any configured directory for section '{key}'"
-                )));
-            }
-            return Ok(T::default());
-        }
-
-        merged
-            .try_into()
-            .map_err(|e: toml::de::Error| ConfigError::Parse(e.to_string()))
-    }
-
-    fn validate(&self) -> Result<(), ConfigError> {
-        for dir in &self.config_dirs {
-            if dir.exists() && !dir.is_dir() {
-                return Err(ConfigError::Io(format!(
-                    "{}: {NOT_A_DIR_MSG}",
-                    dir.display()
-                )));
-            }
-        }
-        Ok(())
-    }
-}
-
-impl DefaultSectionLoader {
     /// Convert a TOML section key to its `SWE_EDGE_FEATURE_*` env var name.
     fn feature_env_var_name(key: &str) -> String {
         let suffix = key.to_uppercase().replace('.', "_");
@@ -192,11 +122,97 @@ impl DefaultSectionLoader {
     }
 }
 
-impl FeatureLoader for DefaultSectionLoader {
-    fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
+impl Loader for DefaultSectionLoader {
+    fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
-        T: serde::de::DeserializeOwned,
+        T: serde::de::DeserializeOwned + Default,
     {
+        let val = self.load_section_value(key)?;
+        // Empty table == section absent but files found — return type default.
+        if val.as_table().map_or(false, |t| t.is_empty()) {
+            return Ok(T::default());
+        }
+        val.try_into()
+            .map_err(|e: toml::de::Error| ConfigError::Parse(e.to_string()))
+    }
+
+    fn validate(&self) -> Result<(), ConfigError> {
+        for dir in &self.config_dirs {
+            if dir.exists() && !dir.is_dir() {
+                return Err(ConfigError::Io(format!(
+                    "{}: {NOT_A_DIR_MSG}",
+                    dir.display()
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl LoaderOps for DefaultSectionLoader {
+    /// Load the raw merged TOML value at `key`.
+    ///
+    /// - Returns `Err(NotFound)` when no `application.toml` exists anywhere.
+    /// - Returns `Ok(empty table)` when files exist but the section is absent
+    ///   (caller interprets this as "use the type default").
+    /// - Returns `Ok(merged value)` when the section is present.
+    fn load_section_value(&self, key: &str) -> Result<toml::Value, ConfigError> {
+        let mut any_file_found = false;
+        let mut merged = toml::Value::Table(toml::map::Map::new());
+
+        for dir in &self.config_dirs {
+            let path = dir.join("application.toml");
+            if !path.exists() {
+                continue;
+            }
+            any_file_found = true;
+            let meta = std::fs::metadata(&path)
+                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
+            if meta.len() > MAX_CONFIG_FILE_BYTES {
+                return Err(ConfigError::Io(format!(
+                    "{}: config file exceeds the 1 MiB limit ({} bytes)",
+                    path.display(),
+                    meta.len(),
+                )));
+            }
+            let text = std::fs::read_to_string(&path)
+                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
+
+            let text = if let Some(ref policy) = self.substitution_policy {
+                let substituter =
+                    Substituter::new(policy.as_ref(), format!("{}:{}", path.display(), key));
+                substituter
+                    .substitute(&text)
+                    .map_err(|e| ConfigError::Io(e.to_string()))?
+            } else {
+                text
+            };
+
+            let val: toml::Value =
+                toml::from_str(&text).map_err(|e| ConfigError::Parse(e.to_string()))?;
+            if let Some(section) = Self::extract_dotted(&val, key) {
+                merged = Self::merge_toml(merged, section);
+            }
+        }
+
+        if matches!(merged, toml::Value::Table(ref t) if t.is_empty()) {
+            if !any_file_found {
+                return Err(ConfigError::NotFound(format!(
+                    "no application.toml found in any configured directory for section '{key}'"
+                )));
+            }
+            // Return the empty table as the absent-but-files-found sentinel.
+            return Ok(toml::Value::Table(toml::map::Map::new()));
+        }
+
+        Ok(merged)
+    }
+
+    fn validate_dirs(&self) -> Result<(), ConfigError> {
+        <Self as Loader>::validate(self)
+    }
+
+    fn load_feature_raw(&self, key: &str) -> Result<RawFeature, ConfigError> {
         let var_name = Self::feature_env_var_name(key);
 
         // ── 1. Env-var override (highest precedence) ─────────────────────────
@@ -206,8 +222,8 @@ impl FeatureLoader for DefaultSectionLoader {
         };
 
         if env_force == Some(false) {
-            return Ok(LoadedFeature {
-                state: FeatureState::Disabled,
+            return Ok(RawFeature {
+                value: None,
                 record: FeatureRecord {
                     section_name: key.to_owned(),
                     enabled: false,
@@ -232,8 +248,8 @@ impl FeatureLoader for DefaultSectionLoader {
                      is absent from all config files; add [{key}] to application.toml"
                 )));
             }
-            return Ok(LoadedFeature {
-                state: FeatureState::Disabled,
+            return Ok(RawFeature {
+                value: None,
                 record: FeatureRecord {
                     section_name: key.to_owned(),
                     enabled: false,
@@ -247,8 +263,8 @@ impl FeatureLoader for DefaultSectionLoader {
         // ── 3. Explicit `enabled = false` in TOML (skipped when env forces on) ─
         if env_force != Some(true) {
             if let Some(toml::Value::Boolean(false)) = merged.get("enabled") {
-                return Ok(LoadedFeature {
-                    state: FeatureState::Disabled,
+                return Ok(RawFeature {
+                    value: None,
                     record: FeatureRecord {
                         section_name: key.to_owned(),
                         enabled: false,
@@ -260,18 +276,14 @@ impl FeatureLoader for DefaultSectionLoader {
             }
         }
 
-        // ── 4. Deserialise ───────────────────────────────────────────────────
-        let value: T = merged
-            .try_into()
-            .map_err(|e: toml::de::Error| ConfigError::Parse(e.to_string()))?;
-
+        // ── 4. Feature is enabled — return the raw TOML value ────────────────
         let override_source = env_force.map(|_| OverrideSource::EnvVar {
             var_name,
             value: "true".into(),
         });
 
-        Ok(LoadedFeature {
-            state: FeatureState::Enabled(value),
+        Ok(RawFeature {
+            value: Some(merged),
             record: FeatureRecord {
                 section_name: key.to_owned(),
                 enabled: true,
@@ -279,6 +291,26 @@ impl FeatureLoader for DefaultSectionLoader {
                 requires: &[],
                 metadata: FeatureMetadata::default(),
             },
+        })
+    }
+}
+
+impl FeatureLoader for DefaultSectionLoader {
+    fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let raw = self.load_feature_raw(key)?;
+        let state = match raw.value {
+            None => FeatureState::Disabled,
+            Some(val) => FeatureState::Enabled(
+                val.try_into()
+                    .map_err(|e: toml::de::Error| ConfigError::Parse(e.to_string()))?,
+            ),
+        };
+        Ok(LoadedFeature {
+            state,
+            record: raw.record,
         })
     }
 }
