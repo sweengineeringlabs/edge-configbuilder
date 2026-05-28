@@ -1,3 +1,4 @@
 //! Loader interface — traits live in [`crate::api::traits`]; errors in [`crate::api::error`].
 
 pub mod default_section_loader;
+pub use default_section_loader::DefaultSectionLoader as DefaultSectionLoaderBound;

@@ -26,10 +26,11 @@ fn test_substituter_replaces_env_var_placeholder_with_value() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[db]\nurl = \"postgresql://{{DB_HOST}}/mydb\"");
 
-    // SAFETY: single-threaded test process; no concurrent env-var readers
+    // SAFETY: single-threaded test binary; no other thread reads or writes this var
     unsafe { std::env::set_var("DB_HOST", "localhost:5432") };
     let loader = create_loader_for_dir_with_substitution(dir.path(), Box::new(AllowAllPolicy));
     let cfg: DbConfig = loader.load_section("db").unwrap();
+    // SAFETY: cleanup — same invariant as above
     unsafe { std::env::remove_var("DB_HOST") };
 
     assert_eq!(cfg.url, "postgresql://localhost:5432/mydb");
@@ -44,6 +45,7 @@ fn test_substituter_returns_error_when_env_var_missing() {
         "[db]\nurl = \"postgresql://{{UNDEFINED_VAR_XYZ}}/mydb\"",
     );
 
+    // SAFETY: cleanup only — no other thread touches this var
     unsafe { std::env::remove_var("UNDEFINED_VAR_XYZ") };
     let loader = create_loader_for_dir_with_substitution(dir.path(), Box::new(AllowAllPolicy));
     let result: Result<DbConfig, _> = loader.load_section("db");

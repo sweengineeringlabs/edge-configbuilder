@@ -40,6 +40,15 @@ pub use crate::api::types::loader::{
 pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
 pub use saf::*;
 
+#[doc(hidden)]
+pub use crate::api::configbuilder::DefaultConfigBuilderBound;
+#[doc(hidden)]
+pub use crate::api::loader::DefaultSectionLoaderBound;
+#[doc(hidden)]
+pub use crate::api::substitution::SubstituterBound;
+#[doc(hidden)]
+pub use crate::api::validator::DefaultValidatorBound;
+
 /// Internal helpers exposed for use by `load_in_order!` and `preflight!` macros.
 ///
 /// Not part of the public API — subject to change without notice.
