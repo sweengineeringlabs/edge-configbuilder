@@ -23,13 +23,14 @@ mod api;
 mod core;
 mod saf;
 
-pub use crate::api::traits::config_builder::ConfigBuilder;
-pub use crate::api::traits::config_section::ConfigSection;
+pub use crate::api::traits::config::config_builder::ConfigBuilder;
+pub use crate::api::traits::config::config_section::ConfigSection;
 pub use crate::api::traits::feature_loader::FeatureLoader;
 pub use crate::api::traits::loader::Loader;
 pub use crate::api::traits::optional_section::OptionalSection;
 pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::traits::validator::Validator;
+pub use crate::api::types::application_config::ApplicationConfig;
 pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
 };

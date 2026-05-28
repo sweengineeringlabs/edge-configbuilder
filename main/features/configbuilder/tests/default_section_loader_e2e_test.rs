@@ -42,15 +42,19 @@ fn test_load_section_from_accepts_file_at_exactly_one_mib() {
 /// @covers: api/default_section_loader::FALLBACK_CONFIG_DIR
 #[test]
 fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
-    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+    // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no
+    // application.toml — the loader must return NotFound, not Ok(Default).
+    let dir = tempfile::tempdir().unwrap();
+    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
     let result: Result<Sec, _> = swe_edge_configbuilder::create_loader()
         .unwrap()
         .load_section("nonexistent_xyz");
+    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
     assert!(
         matches!(
             result,
             Err(swe_edge_configbuilder::ConfigError::NotFound(_))
         ),
-        "fallback config dir with no application.toml must return NotFound: {result:?}"
+        "config dir with no application.toml must return NotFound: {result:?}"
     );
 }

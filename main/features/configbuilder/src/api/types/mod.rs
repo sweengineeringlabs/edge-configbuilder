@@ -1,3 +1,4 @@
+pub mod application_config;
 pub mod feature;
 pub mod feature_registry;
 pub mod feature_summary;

@@ -1,0 +1,5 @@
+# Default runtime configuration for swe-edge-configbuilder.
+# Consumers override these values in their own config/ directory.
+
+[configbuilder]
+# config_dir = ""   # Optional: override the default XDG config resolution path

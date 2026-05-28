@@ -57,7 +57,7 @@ use crate::api::types::feature::on_error::OnError;
 /// }
 /// ```
 ///
-/// [`ConfigSection`]: crate::api::traits::config_section::ConfigSection
+/// [`ConfigSection`]: crate::api::traits::config::config_section::ConfigSection
 pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// The top-level TOML key for this section (e.g. `"message_broker"`).
     fn section_name() -> &'static str; // @allow: no_stub_fn_bodies — required trait method, no default

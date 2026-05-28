@@ -162,7 +162,7 @@ mod tests {
 
     #[derive(Debug, Default, serde::Deserialize, PartialEq)]
     #[serde(default)]
-    struct Sec {
+    struct DefaultConfigBuilderFixture {
         value: String,
     }
 
@@ -171,7 +171,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
         writeln!(f, "[svc]\nvalue = \"ok\"").unwrap();
-        let sec: Sec = blank()
+        let sec: DefaultConfigBuilderFixture = blank()
             .with_config_dir(dir.path())
             .build_loader_internal()
             .unwrap()
@@ -182,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_build_loader_with_unknown_name_returns_not_found() {
-        let result: Result<Sec, _> = blank()
+        let result: Result<DefaultConfigBuilderFixture, _> = blank()
             .with_name("swe-edge-nonexistent-test-xyz")
             .build_loader_internal()
             .unwrap()
@@ -194,14 +194,19 @@ mod tests {
     }
 
     #[test]
-    fn test_build_loader_no_name_no_dirs_returns_not_found() {
-        let result: Result<Sec, _> = blank()
+    fn test_build_loader_no_name_no_dirs_no_application_toml_returns_not_found() {
+        // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no
+        // application.toml — load_section must return NotFound.
+        let dir = tempfile::tempdir().unwrap();
+        std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
+        let result: Result<DefaultConfigBuilderFixture, _> = blank()
             .build_loader_internal()
             .unwrap()
             .load_section("nonexistent_section_xyz");
+        std::env::remove_var("SWE_EDGE_CONFIG_DIR");
         assert!(
             matches!(result, Err(ConfigError::NotFound(_))),
-            "expected NotFound for absent section with no config, got {result:?}"
+            "expected NotFound when no application.toml exists in config dir, got {result:?}"
         );
     }
 

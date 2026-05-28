@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::config_builder::ConfigBuilder;
+use crate::api::traits::config::config_builder::ConfigBuilder;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
@@ -213,7 +213,7 @@ pub fn create_config_builder() -> impl ConfigBuilder {
 /// Returns [`ConfigError::Io`] for unreadable files or size-limit violations,
 /// and [`ConfigError::Parse`] for malformed TOML or deserialisation failures.
 ///
-/// [`OptionalSection::load_optional`]: crate::api::optional_section::OptionalSection::load_optional
+/// [`OptionalSection::load_optional`]: crate::api::traits::optional_section::OptionalSection::load_optional
 pub fn load_feature_section<T>(
     loader: &impl FeatureLoader,
     key: &str,

@@ -1,5 +1,4 @@
-pub mod config_builder;
-pub mod config_section;
+pub mod config;
 pub mod feature_loader;
 pub mod loader;
 pub mod optional_section;

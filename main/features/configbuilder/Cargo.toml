@@ -28,9 +28,50 @@ regex     = "1"
 [dev-dependencies]
 tempfile = "3"
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
 
 [[example]]
 name = "load_section"
 path = "examples/load_section.rs"
+
+[[test]]
+name = "config_section_e2e_test"
+path = "tests/config_section_e2e_test.rs"
+
+[[test]]
+name = "feature_summary_e2e_test"
+path = "tests/feature_summary_e2e_test.rs"
+
+[[test]]
+name = "allow_all_policy_e2e_test"
+path = "tests/allow_all_policy_e2e_test.rs"
+
+[[test]]
+name = "composite_policy_e2e_test"
+path = "tests/composite_policy_e2e_test.rs"
+
+[[test]]
+name = "pattern_whitelist_policy_e2e_test"
+path = "tests/pattern_whitelist_policy_e2e_test.rs"
+
+[[test]]
+name = "prefix_whitelist_policy_e2e_test"
+path = "tests/prefix_whitelist_policy_e2e_test.rs"
+
+[[test]]
+name = "preflight_issue_e2e_test"
+path = "tests/preflight_issue_e2e_test.rs"
+
+[[test]]
+name = "preflight_issue_kind_e2e_test"
+path = "tests/preflight_issue_kind_e2e_test.rs"
+
+[[test]]
+name = "substituter_e2e_test"
+path = "tests/substituter_e2e_test.rs"
