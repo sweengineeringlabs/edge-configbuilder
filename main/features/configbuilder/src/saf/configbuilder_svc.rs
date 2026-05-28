@@ -7,133 +7,11 @@ use crate::api::traits::loader::Loader;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 use crate::api::traits::validator::Validator;
 use crate::api::types::feature::feature_state::FeatureState;
-use crate::api::types::feature::loaded_feature::LoadedFeature;
-use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
-
-// ============================================================================
-// Section loader facade
-// ============================================================================
-
-pub(crate) struct SectionLoaderImpl {
-    pub(crate) inner: DefaultSectionLoader,
-}
-
-impl Loader for SectionLoaderImpl {
-    fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
-    where
-        T: serde::de::DeserializeOwned + Default,
-    {
-        self.inner.load_section(key)
-    }
-
-    fn validate(&self) -> Result<(), ConfigError> {
-        self.inner.validate()
-    }
-}
-
-impl FeatureLoader for SectionLoaderImpl {
-    fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
-    where
-        T: serde::de::DeserializeOwned,
-    {
-        self.inner.load_feature(key)
-    }
-}
-
-// ============================================================================
-// Path validator facade
-// ============================================================================
-
-pub(crate) struct PathValidatorImpl;
-
-impl Validator for PathValidatorImpl {
-    fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
-        DefaultValidator.validate_path(target)
-    }
-}
-
-// ============================================================================
-// Config builder facade
-// ============================================================================
-
-pub(crate) struct ConfigBuilderImpl {
-    pub(crate) inner: DefaultConfigBuilder,
-}
-
-impl ConfigBuilder for ConfigBuilderImpl {
-    fn name(&self) -> &str {
-        self.inner.name()
-    }
-
-    fn version(&self) -> &str {
-        self.inner.version()
-    }
-
-    fn with_name(mut self, name: impl Into<String>) -> Self {
-        self.inner = self.inner.with_name(name);
-        self
-    }
-
-    fn with_version(mut self, version: impl Into<String>) -> Self {
-        self.inner = self.inner.with_version(version);
-        self
-    }
-
-    fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
-        self.inner = self.inner.with_config_dir(dir);
-        self
-    }
-
-    fn build_loader(self) -> Result<impl Loader + FeatureLoader, ConfigError> {
-        Ok(SectionLoaderImpl {
-            inner: self.inner.build_loader_internal()?,
-        })
-    }
-}
-
-// ============================================================================
-// Config builder with substitution facade
-// ============================================================================
-
-pub(crate) struct ConfigBuilderImplWithSubstitution {
-    pub(crate) inner: DefaultConfigBuilder,
-    pub(crate) policy: Box<dyn SubstitutionPolicy>,
-}
-
-impl ConfigBuilder for ConfigBuilderImplWithSubstitution {
-    fn name(&self) -> &str {
-        self.inner.name()
-    }
-
-    fn version(&self) -> &str {
-        self.inner.version()
-    }
-
-    fn with_name(mut self, name: impl Into<String>) -> Self {
-        self.inner = self.inner.with_name(name);
-        self
-    }
-
-    fn with_version(mut self, version: impl Into<String>) -> Self {
-        self.inner = self.inner.with_version(version);
-        self
-    }
-
-    fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
-        self.inner = self.inner.with_config_dir(dir);
-        self
-    }
-
-    fn build_loader(self) -> Result<impl Loader + FeatureLoader, ConfigError> {
-        let mut loader = self.inner.build_loader_internal()?;
-        loader.substitution_policy = Some(self.policy);
-        Ok(SectionLoaderImpl { inner: loader })
-    }
-}
-
-// ============================================================================
-// Factory functions
-// ============================================================================
+use crate::core::{DefaultConfigBuilder, DefaultSectionLoader};
+use crate::saf::config::ConfigBuilderImpl;
+use crate::saf::path::PathValidatorImpl;
+use crate::saf::section::SectionLoaderImpl;
+use crate::saf::substitution::ConfigBuilderImplWithSubstitution;
 
 /// Create a loader reading from `SWE_EDGE_CONFIG_DIR`, falling back to `config/`.
 ///
@@ -224,14 +102,7 @@ where
     loader.load_optional_section(key)
 }
 
-// ============================================================================
-// Factory functions with substitution policy support
-// ============================================================================
-
 /// Create a loader with environment variable substitution support.
-///
-/// Loads config from `SWE_EDGE_CONFIG_DIR` (if set) or `config/`, with substitution
-/// of `{{VAR_NAME}}` placeholders in TOML values using the provided policy.
 ///
 /// # Errors
 ///
@@ -286,10 +157,7 @@ pub fn create_loader_xdg_with_substitution(
 
 /// Create a config builder that supports substitution and custom paths.
 ///
-/// Returns a builder pre-seeded with the calling package's name and version,
-/// allowing for flexible configuration of paths and substitution policy.
-/// Use the builder methods to customize paths, then call `build_loader()`
-/// to create the loader.
+/// Returns a builder pre-seeded with the calling package's name and version.
 pub fn create_config_builder_with_substitution(
     policy: Box<dyn SubstitutionPolicy>,
 ) -> impl ConfigBuilder {
