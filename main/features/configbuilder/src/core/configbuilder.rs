@@ -4,7 +4,6 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::config_builder::ConfigBuilder;
 use crate::api::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
 
@@ -87,26 +86,26 @@ impl DefaultConfigBuilder {
     }
 }
 
-impl ConfigBuilder for DefaultConfigBuilder {
-    fn name(&self) -> &str {
+impl DefaultConfigBuilder {
+    pub(crate) fn name(&self) -> &str {
         &self.name
     }
 
-    fn version(&self) -> &str {
+    pub(crate) fn version(&self) -> &str {
         &self.version
     }
 
-    fn with_name(mut self, name: impl Into<String>) -> Self {
+    pub(crate) fn with_name(mut self, name: impl Into<String>) -> Self {
         self.name = name.into();
         self
     }
 
-    fn with_version(mut self, version: impl Into<String>) -> Self {
+    pub(crate) fn with_version(mut self, version: impl Into<String>) -> Self {
         self.version = version.into();
         self
     }
 
-    fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
+    pub(crate) fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
         self
     }

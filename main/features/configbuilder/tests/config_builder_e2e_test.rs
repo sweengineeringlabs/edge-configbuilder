@@ -2,7 +2,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{create_config_builder, ConfigError, Loader as _};
+use swe_edge_configbuilder::{create_config_builder, ConfigBuilder as _, ConfigError, Loader as _};
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]

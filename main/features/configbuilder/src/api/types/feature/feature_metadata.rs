@@ -7,9 +7,9 @@
 ///
 /// All fields are `&'static str` so the struct is `Copy` and zero-cost at runtime.
 ///
-/// [`OptionalSection::metadata`]: crate::spi::OptionalSection::metadata
+/// [`OptionalSection::metadata`]: crate::api::traits::optional_section::OptionalSection::metadata
 /// [`FeatureRecord`]: crate::api::types::feature::feature_record::FeatureRecord
-/// [`FeatureSummary`]: crate::saf::configbuilder_svc::FeatureSummary
+/// [`FeatureSummary`]: crate::api::types::feature_summary::FeatureSummary
 #[derive(Debug, Clone, Copy, Default)]
 pub struct FeatureMetadata {
     /// Short human-readable description shown in startup summaries and operator logs.

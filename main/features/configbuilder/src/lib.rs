@@ -22,11 +22,14 @@
 mod api;
 mod core;
 mod saf;
-mod spi;
 
+pub use crate::api::traits::config_builder::ConfigBuilder;
+pub use crate::api::traits::config_section::ConfigSection;
 pub use crate::api::traits::feature_loader::FeatureLoader;
 pub use crate::api::traits::loader::Loader;
+pub use crate::api::traits::optional_section::OptionalSection;
 pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
+pub use crate::api::traits::validator::Validator;
 pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature, OnError, OverrideSource,
 };
@@ -35,7 +38,6 @@ pub use crate::api::types::loader::{
 };
 pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
 pub use saf::*;
-pub use spi::{ConfigSection, OptionalSection};
 
 /// Internal helpers exposed for use by `load_in_order!` and `preflight!` macros.
 ///
@@ -103,7 +105,6 @@ macro_rules! load_in_order {
 /// Issues reported:
 /// - [`PreflightIssueKind::LoadError`] — I/O or parse failure
 /// - [`PreflightIssueKind::ValidationError`] — `validate_enabled` rejected the section
-///   (both hard `Fail` and graceful `Disable` degradations are captured)
 /// - [`PreflightIssueKind::DependencyMissing`] — a declared dependency is not enabled
 /// - [`PreflightIssueKind::DependencyCycle`] — a cycle exists in the dependency graph
 ///

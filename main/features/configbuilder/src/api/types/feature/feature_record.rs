@@ -8,7 +8,7 @@ use crate::api::types::feature::override_source::OverrideSource;
 /// Collected by [`FeatureRegistry`] as each feature is loaded, so the registry
 /// can produce a startup summary of every registered feature.
 ///
-/// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
+/// [`FeatureRegistry`]: crate::api::types::feature_registry::FeatureRegistry
 #[derive(Debug, Clone)]
 pub struct FeatureRecord {
     /// The TOML section key for this feature (e.g. `"message_broker"`).
@@ -27,12 +27,12 @@ pub struct FeatureRecord {
     /// Section keys this feature declared it depends on via
     /// [`OptionalSection::requires`].
     ///
-    /// [`OptionalSection::requires`]: crate::spi::OptionalSection::requires
+    /// [`OptionalSection::requires`]: crate::api::traits::optional_section::OptionalSection::requires
     pub requires: &'static [&'static str],
 
     /// Static annotations (description, owner, deprecation) declared by the
     /// feature via [`OptionalSection::metadata`].
     ///
-    /// [`OptionalSection::metadata`]: crate::spi::OptionalSection::metadata
+    /// [`OptionalSection::metadata`]: crate::api::traits::optional_section::OptionalSection::metadata
     pub metadata: FeatureMetadata,
 }

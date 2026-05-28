@@ -1,48 +1,7 @@
 use std::fmt;
 
-use crate::api::error::config_error::ConfigError;
-
-/// Category of a preflight issue.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum PreflightIssueKind {
-    /// The section could not be loaded (I/O or parse error).
-    LoadError,
-    /// The section loaded but failed cross-field validation.
-    ValidationError,
-    /// A declared dependency is absent or disabled.
-    DependencyMissing,
-    /// A cycle exists in the declared dependency graph.
-    DependencyCycle,
-}
-
-impl PreflightIssueKind {
-    /// Classify a [`ConfigError`] into the appropriate issue kind.
-    ///
-    /// Used by the [`preflight!`] macro to convert load errors into report entries.
-    ///
-    /// [`preflight!`]: crate::preflight
-    pub fn from_config_error(e: &ConfigError) -> Self {
-        match e {
-            ConfigError::Parse(_) | ConfigError::Io(_) | ConfigError::NotFound(_) => {
-                Self::LoadError
-            }
-            ConfigError::Validation { .. } => Self::ValidationError,
-        }
-    }
-}
-
-/// A single issue captured during a [`preflight!`] dry-run.
-///
-/// [`preflight!`]: crate::preflight
-#[derive(Debug, Clone)]
-pub struct PreflightIssue {
-    /// Config section that triggered the issue.
-    pub section: String,
-    /// Category of the issue.
-    pub kind: PreflightIssueKind,
-    /// Human-readable description of what went wrong.
-    pub message: String,
-}
+use crate::api::types::preflight::preflight_issue::PreflightIssue;
+use crate::api::types::preflight::preflight_issue_kind::PreflightIssueKind;
 
 /// Aggregated result of a [`preflight!`] dry-run.
 ///

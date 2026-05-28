@@ -8,9 +8,9 @@
 ///
 /// The env var takes precedence over the trait default.
 ///
-/// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
-/// [`OptionalSection::validate_enabled`]: crate::spi::OptionalSection::validate_enabled
-/// [`OptionalSection::on_error`]: crate::spi::OptionalSection::on_error
+/// [`FeatureRegistry`]: crate::api::types::feature_registry::FeatureRegistry
+/// [`OptionalSection::validate_enabled`]: crate::api::traits::optional_section::OptionalSection::validate_enabled
+/// [`OptionalSection::on_error`]: crate::api::traits::optional_section::OptionalSection::on_error
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum OnError {
     /// Propagate the error — startup halts immediately. **This is the default.**

@@ -10,7 +10,7 @@ use crate::api::types::feature::feature_state::FeatureState;
 /// [`FeatureRegistry`] uses the record to build the startup feature summary.
 ///
 /// [`FeatureLoader::load_feature`]: crate::api::feature::traits::feature_loader::FeatureLoader::load_feature
-/// [`FeatureRegistry`]: crate::saf::configbuilder_svc::FeatureRegistry
+/// [`FeatureRegistry`]: crate::api::types::feature_registry::FeatureRegistry
 #[derive(Debug)]
 pub struct LoadedFeature<T> {
     /// The feature state after applying all precedence rules:

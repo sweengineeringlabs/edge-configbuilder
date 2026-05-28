@@ -14,7 +14,7 @@ impl Topology {
     ///
     /// Returns an error string naming the cycle members when a cycle is detected.
     ///
-    /// [`FeatureRegistry::validate_dependencies`]: crate::saf::configbuilder_svc::FeatureRegistry::validate_dependencies
+    /// [`FeatureRegistry::validate_dependencies`]: crate::api::types::feature_registry::FeatureRegistry::validate_dependencies
     pub fn sort(names: &[&str], requires: &[&[&str]]) -> Result<Vec<usize>, String> {
         let n = names.len();
         let index: HashMap<&str, usize> = names

@@ -4,7 +4,7 @@
 use std::io::Write as _;
 use swe_edge_configbuilder::{
     create_config_builder, create_loader, create_loader_for_dir, create_loader_xdg,
-    create_validator, ConfigError, Loader as _,
+    create_validator, ConfigBuilder as _, ConfigError, Loader as _, Validator as _,
 };
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
