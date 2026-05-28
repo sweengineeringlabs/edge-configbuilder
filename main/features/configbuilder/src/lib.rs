@@ -22,7 +22,7 @@
 mod api;
 mod core;
 mod saf;
-pub mod spi;
+mod spi;
 
 pub use crate::api::traits::feature_loader::FeatureLoader;
 pub use crate::api::traits::loader::Loader;
