@@ -7,7 +7,7 @@ use crate::api::types::section_loader_impl::SectionLoaderImpl;
 ///
 /// Implement this on any `serde::Deserialize + Default` config struct. The
 /// runtime calls [`ConfigSection::load`] once at startup — callers never
-/// write `create_config_builder().build_loader().load_section(...)` manually.
+/// write `ConfigLoaderFactory::create_config_builder().build_loader().load_section(...)` manually.
 ///
 /// # Example
 ///

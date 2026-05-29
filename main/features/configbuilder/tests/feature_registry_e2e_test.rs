@@ -132,7 +132,7 @@ fn test_feature_registry_summary_empty_shows_zero_of_zero() {
 fn test_feature_registry_load_enabled_section_returns_enabled_and_records_it() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let state: FeatureState<CacheConfig> = registry.load(&loader).unwrap();
@@ -147,7 +147,7 @@ fn test_feature_registry_load_enabled_section_returns_enabled_and_records_it() {
 fn test_feature_registry_summary_one_enabled_shows_one_of_one() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -165,7 +165,7 @@ fn test_feature_registry_summary_one_enabled_shows_one_of_one() {
 fn test_feature_registry_load_absent_section_returns_disabled_and_records_it() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other]\nkey = \"x\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let state: FeatureState<CacheConfig> = registry.load(&loader).unwrap();
@@ -180,7 +180,7 @@ fn test_feature_registry_load_absent_section_returns_disabled_and_records_it() {
 fn test_feature_registry_summary_one_disabled_shows_zero_of_one() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other]\nkey = \"x\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -201,7 +201,7 @@ fn test_feature_registry_load_multiple_features_records_all_in_order() {
         dir.path(),
         "[cache]\nurl = \"redis://localhost\"\n\n[message_broker]\nhost = \"mq.local\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let cache_state: FeatureState<CacheConfig> = registry.load(&loader).unwrap();
@@ -218,7 +218,7 @@ fn test_feature_registry_load_multiple_features_records_all_in_order() {
 fn test_feature_registry_summary_mixed_shows_correct_counts() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -240,7 +240,7 @@ fn test_feature_registry_load_propagates_validation_error() {
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result = registry.load::<BrokerConfig>(&loader);
@@ -257,7 +257,7 @@ fn test_feature_registry_no_record_stored_on_validation_failure() {
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let _ = registry.load::<BrokerConfig>(&loader);
@@ -274,7 +274,7 @@ fn test_feature_registry_no_record_stored_on_validation_failure() {
 fn test_feature_summary_display_lists_section_names() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -292,7 +292,7 @@ fn test_feature_summary_display_lists_section_names() {
 fn test_feature_summary_display_shows_on_off_status() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -313,7 +313,7 @@ fn test_feature_summary_display_shows_total_counts() {
         dir.path(),
         "[cache]\nurl = \"redis://localhost\"\n[message_broker]\nhost = \"mq\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -341,7 +341,7 @@ fn test_validate_dependencies_returns_ok_when_required_feature_is_enabled() {
         dir.path(),
         "[cache]\nurl = \"redis://localhost\"\n[analytics]\nendpoint = \"https://ingest.local\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -361,7 +361,7 @@ fn test_validate_dependencies_returns_err_when_required_feature_is_disabled() {
         dir.path(),
         "[analytics]\nendpoint = \"https://ingest.local\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -385,7 +385,7 @@ fn test_validate_dependencies_returns_ok_when_dependent_feature_is_also_disabled
     let dir = TempDir::new().unwrap();
     // both absent: analytics is Disabled, so its `requires` constraint is ignored
     write_toml(dir.path(), "[other]\nkey = \"x\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -408,7 +408,7 @@ fn test_feature_registry_load_disable_on_error_returns_disabled_state() {
         dir.path(),
         "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result: Result<FeatureState<BrokerConfigDisable>, _> = registry.load(&loader);
@@ -431,7 +431,7 @@ fn test_feature_registry_load_disable_on_error_stores_record_with_validation_err
         dir.path(),
         "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<BrokerConfigDisable>(&loader).unwrap();
@@ -457,7 +457,7 @@ fn test_feature_registry_load_disable_on_error_summary_shows_off() {
         dir.path(),
         "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<BrokerConfigDisable>(&loader).unwrap();
@@ -482,7 +482,7 @@ fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
         dir.path(),
         "[broker_disable]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result = registry.load::<BrokerConfigDisable>(&loader);
@@ -502,7 +502,7 @@ fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
 fn test_on_load_observer_is_called_after_each_successful_load() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let names: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
@@ -524,7 +524,7 @@ fn test_on_load_observer_is_called_after_each_successful_load() {
 fn test_on_load_observer_receives_correct_enabled_flag() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let states: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
@@ -541,7 +541,7 @@ fn test_on_load_observer_receives_correct_enabled_flag() {
 fn test_on_load_multiple_observers_all_called_in_registration_order() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nurl = \"redis://localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let log: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(Vec::new()));
@@ -566,7 +566,7 @@ fn test_on_load_observer_not_called_when_load_returns_err() {
         dir.path(),
         "[message_broker]\nhost = \"mq\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let call_count: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
@@ -591,7 +591,7 @@ fn test_feature_summary_display_shows_metadata_description() {
         dir.path(),
         "[cache]\nurl = \"redis://localhost\"\n[analytics]\nendpoint = \"https://ingest.local\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
@@ -611,7 +611,7 @@ fn test_feature_summary_display_shows_metadata_owner() {
         dir.path(),
         "[analytics]\nendpoint = \"https://ingest.local\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     registry.load::<AnalyticsConfig>(&loader).unwrap();

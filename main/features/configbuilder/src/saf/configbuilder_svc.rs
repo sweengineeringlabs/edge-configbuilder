@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::types::config_builder_impl::ConfigBuilderImpl;
-use crate::api::types::config_loader_factory::ConfigLoaderFactory;
+use crate::api::types::config::ConfigBuilderImpl;
+use crate::api::types::config::ConfigLoaderFactory;
 use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::path_validator_impl::PathValidatorImpl;
 use crate::api::types::section_loader_impl::SectionLoaderImpl;

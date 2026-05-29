@@ -39,7 +39,7 @@ fn test_feature_summary_enabled_count_counts_only_enabled_features() {
     // to Enabled — not total, not disabled.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nttl = 60");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
     registry.load::<BrokerConfig>(&loader).unwrap();
@@ -56,7 +56,7 @@ fn test_feature_summary_disabled_count_counts_only_disabled_features() {
     // disabled_count() must count exactly the features that were absent/disabled.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nttl = 30");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
     registry.load::<BrokerConfig>(&loader).unwrap();
@@ -77,7 +77,7 @@ fn test_feature_summary_display_contains_feature_counts() {
         dir.path(),
         "[cache]\nttl = 10\n[broker]\nurl = \"amqp://localhost\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
     registry.load::<BrokerConfig>(&loader).unwrap();
@@ -96,7 +96,7 @@ fn test_feature_summary_all_enabled_returns_true_when_all_enabled() {
         dir.path(),
         "[cache]\nttl = 5\n[broker]\nurl = \"amqp://localhost\"",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
     registry.load::<BrokerConfig>(&loader).unwrap();
@@ -113,7 +113,7 @@ fn test_feature_summary_all_enabled_returns_false_when_some_disabled() {
     // can use it as a strict "production-ready" gate.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[cache]\nttl = 5");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut registry = FeatureRegistry::new();
     registry.load::<CacheConfig>(&loader).unwrap();
     registry.load::<BrokerConfig>(&loader).unwrap();

@@ -30,9 +30,10 @@ fn test_load_feature_section_present_key_returns_enabled_with_correct_values() {
         dir.path(),
         "[message_broker]\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(state.is_enabled());
     let cfg = state.into_option().unwrap();
     assert_eq!(cfg.host, "localhost");
@@ -46,9 +47,10 @@ fn test_load_feature_section_present_dotted_key_returns_enabled() {
         dir.path(),
         "[services.broker]\nhost = \"broker.svc\"\nport = 1883",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "services.broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "services.broker")
+            .unwrap();
     assert!(state.is_enabled());
     assert_eq!(state.into_option().unwrap().port, 1883);
 }
@@ -59,9 +61,10 @@ fn test_load_feature_section_present_dotted_key_returns_enabled() {
 fn test_load_feature_section_absent_key_in_existing_file_returns_disabled() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other_service]\nhost = \"x\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(
         state.is_disabled(),
         "expected Disabled — section key absent from TOML"
@@ -71,9 +74,10 @@ fn test_load_feature_section_absent_key_in_existing_file_returns_disabled() {
 #[test]
 fn test_load_feature_section_no_toml_files_returns_disabled() {
     let dir = TempDir::new().unwrap();
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(
         state.is_disabled(),
         "expected Disabled — no config files exist"
@@ -86,7 +90,7 @@ fn test_load_feature_section_no_toml_files_returns_disabled() {
 fn test_load_feature_section_malformed_toml_returns_parse_error() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "not = [broken toml");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = load_feature_section::<BrokerConfig>(&loader, "message_broker").unwrap_err();
     assert!(
         matches!(err, ConfigError::Parse(_)),
@@ -99,7 +103,7 @@ fn test_load_feature_section_missing_required_field_returns_parse_error() {
     let dir = TempDir::new().unwrap();
     // `message_broker` section present but missing required `port` field
     write_toml(dir.path(), "[message_broker]\nhost = \"localhost\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = load_feature_section::<BrokerConfig>(&loader, "message_broker").unwrap_err();
     assert!(
         matches!(err, ConfigError::Parse(_)),
@@ -112,7 +116,7 @@ fn test_load_feature_section_oversized_file_returns_io_error() {
     let dir = TempDir::new().unwrap();
     let oversized = vec![b'#'; 1_048_577];
     std::fs::write(dir.path().join("application.toml"), &oversized).unwrap();
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = load_feature_section::<BrokerConfig>(&loader, "message_broker").unwrap_err();
     assert!(
         matches!(err, ConfigError::Io(_)),
@@ -126,9 +130,10 @@ fn test_load_feature_section_oversized_file_returns_io_error() {
 fn test_load_feature_section_section_only_in_one_dir_returns_enabled() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[message_broker]\nhost = \"low\"\nport = 5672");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(state.is_enabled());
     assert_eq!(state.into_option().unwrap().host, "low");
 }
@@ -145,13 +150,15 @@ fn test_load_feature_section_high_priority_dir_wins_on_key_conflict() {
         high.path(),
         "[message_broker]\nhost = \"high-host\"\nport = 2222",
     );
-    let loader = swe_edge_configbuilder::create_config_builder()
-        .with_config_dir(low.path())
-        .with_config_dir(high.path())
-        .build_loader()
-        .unwrap();
+    let loader =
+        swe_edge_configbuilder::ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
+            .with_config_dir(low.path())
+            .with_config_dir(high.path())
+            .build_loader()
+            .unwrap();
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(state.is_enabled());
     let cfg = state.into_option().unwrap();
     assert_eq!(cfg.host, "high-host", "high-priority dir must win");
@@ -164,13 +171,15 @@ fn test_load_feature_section_section_absent_in_both_dirs_returns_disabled() {
     let high = TempDir::new().unwrap();
     write_toml(low.path(), "[other]\nvalue = \"x\"");
     write_toml(high.path(), "[also_other]\nvalue = \"y\"");
-    let loader = swe_edge_configbuilder::create_config_builder()
-        .with_config_dir(low.path())
-        .with_config_dir(high.path())
-        .build_loader()
-        .unwrap();
+    let loader =
+        swe_edge_configbuilder::ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
+            .with_config_dir(low.path())
+            .with_config_dir(high.path())
+            .build_loader()
+            .unwrap();
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(state.is_disabled());
 }
 
@@ -183,9 +192,10 @@ fn test_load_feature_section_explicit_enabled_false_returns_disabled() {
         dir.path(),
         "[message_broker]\nenabled = false\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state: FeatureState<BrokerConfig> =
-        load_feature_section(&loader, "message_broker").unwrap();
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "message_broker")
+            .unwrap();
     assert!(
         state.is_disabled(),
         "enabled=false in TOML must disable the feature"
@@ -199,7 +209,7 @@ fn test_load_feature_explicit_enabled_false_record_carries_toml_flag_source() {
         dir.path(),
         "[message_broker]\nenabled = false\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let loaded = loader
         .load_feature::<BrokerConfig>("message_broker")
         .unwrap();
@@ -226,8 +236,9 @@ fn test_load_feature_env_var_false_disables_present_section() {
         dir.path(),
         "[fl_e2e_off]\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
-    let result: Result<FeatureState<BrokerConfig>, _> = load_feature_section(&loader, "fl_e2e_off");
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let result: Result<FeatureState<BrokerConfig>, _> =
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "fl_e2e_off");
     // SAFETY: cleanup before any assert that could panic
     unsafe { std::env::remove_var(var) };
     let state = result.unwrap();
@@ -245,7 +256,7 @@ fn test_load_feature_env_var_true_enables_present_section_and_records_env_source
     unsafe { std::env::set_var(var, "true") };
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[fl_e2e_on]\nhost = \"localhost\"\nport = 5672");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = loader.load_feature::<BrokerConfig>("fl_e2e_on");
     // SAFETY: cleanup
     unsafe { std::env::remove_var(var) };
@@ -272,9 +283,9 @@ fn test_load_feature_env_var_true_overrides_enabled_false_in_toml() {
         dir.path(),
         "[fl_e2e_force]\nenabled = false\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result: Result<FeatureState<BrokerConfig>, _> =
-        load_feature_section(&loader, "fl_e2e_force");
+        ConfigLoaderFactory::ConfigLoaderFactory::load_feature_section(&loader, "fl_e2e_force");
     // SAFETY: cleanup
     unsafe { std::env::remove_var(var) };
     assert!(
@@ -291,7 +302,7 @@ fn test_load_feature_env_var_true_with_absent_section_returns_not_found() {
     unsafe { std::env::set_var(var, "yes") };
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other]\nhost = \"x\"");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = load_feature_section::<BrokerConfig>(&loader, "fl_e2e_absent");
     // SAFETY: cleanup
     unsafe { std::env::remove_var(var) };
@@ -312,7 +323,7 @@ fn test_load_feature_invalid_env_var_value_returns_io_error() {
         dir.path(),
         "[fl_e2e_invalid]\nhost = \"localhost\"\nport = 5672",
     );
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = load_feature_section::<BrokerConfig>(&loader, "fl_e2e_invalid");
     // SAFETY: cleanup
     unsafe { std::env::remove_var(var) };

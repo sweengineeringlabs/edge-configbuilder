@@ -7,13 +7,12 @@
 //! # Usage
 //!
 //! ```rust,ignore
-//! use swe_edge_configbuilder::create_loader;
-//!
+//! use swe_edge_configbuilder::ConfigLoaderFactory;`n//!
 //! #[derive(serde::Deserialize, Default)]
 //! struct CompletionConfig { model: String, max_tokens: u32 }
 //!
 //! let cfg: CompletionConfig =
-//!     create_loader()?.load_section("application.completion")?;
+//!     ConfigLoaderFactory::create_loader()?.load_section("application.completion")?;
 //! ```
 
 #![deny(unsafe_code)]
@@ -32,7 +31,7 @@ pub use crate::api::traits::optional_section::OptionalSection;
 pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
 pub use crate::api::traits::validator::Validator;
 pub use crate::api::types::application_config::ApplicationConfig;
-pub use crate::api::types::config_builder_impl::ConfigBuilderImpl;
+pub use crate::api::types::config::ConfigBuilderImpl;
 pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
     OverrideSource,
@@ -44,89 +43,7 @@ pub use crate::api::types::path_validator_impl::PathValidatorImpl;
 pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
 pub use crate::api::types::section_loader_impl::SectionLoaderImpl;
 pub use crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
-pub use saf::*;
-
-// ── Backward-compatible module-level aliases ──────────────────────────────────
-// These delegate to ConfigLoaderFactory so callers using the flat import style
-// (swe_edge_configbuilder::create_loader()) continue to work unchanged.
-
-/// Create a loader reading from `SWE_EDGE_CONFIG_DIR`, falling back to `config/`.
-#[inline]
-pub fn create_loader() -> Result<SectionLoaderImpl, crate::api::error::config_error::ConfigError> {
-    ConfigLoaderFactory::create_loader()
-}
-
-/// Create a loader reading from a single explicit directory.
-#[inline]
-pub fn create_loader_for_dir(dir: impl Into<std::path::PathBuf>) -> SectionLoaderImpl {
-    ConfigLoaderFactory::create_loader_for_dir(dir)
-}
-
-/// Create a loader following the XDG Base Directory chain for `app_name`.
-#[inline]
-pub fn create_loader_xdg(
-    app_name: &str,
-) -> Result<SectionLoaderImpl, crate::api::error::config_error::ConfigError> {
-    ConfigLoaderFactory::create_loader_xdg(app_name)
-}
-
-/// Create a path validator.
-#[inline]
-pub fn create_validator() -> PathValidatorImpl {
-    ConfigLoaderFactory::create_validator()
-}
-
-/// Create a config builder pre-seeded with this package's name and version.
-#[inline]
-pub fn create_config_builder() -> ConfigBuilderImpl {
-    ConfigLoaderFactory::create_config_builder()
-}
-
-/// Load the section at `key` as an optional feature, returning `Disabled` when absent.
-#[inline]
-pub fn load_feature_section<T>(
-    loader: &SectionLoaderImpl,
-    key: &str,
-) -> Result<FeatureState<T>, crate::api::error::config_error::ConfigError>
-where
-    T: serde::de::DeserializeOwned,
-{
-    ConfigLoaderFactory::load_feature_section(loader, key)
-}
-
-/// Create a loader with environment variable substitution support.
-#[inline]
-pub fn create_loader_with_substitution(
-    policy: Box<dyn SubstitutionPolicy>,
-) -> Result<SectionLoaderImpl, crate::api::error::config_error::ConfigError> {
-    ConfigLoaderFactory::create_loader_with_substitution(policy)
-}
-
-/// Create a loader from a single directory with substitution support.
-#[inline]
-pub fn create_loader_for_dir_with_substitution(
-    dir: impl Into<std::path::PathBuf>,
-    policy: Box<dyn SubstitutionPolicy>,
-) -> SectionLoaderImpl {
-    ConfigLoaderFactory::create_loader_for_dir_with_substitution(dir, policy)
-}
-
-/// Create an XDG-aware loader with substitution support.
-#[inline]
-pub fn create_loader_xdg_with_substitution(
-    app_name: &str,
-    policy: Box<dyn SubstitutionPolicy>,
-) -> Result<SectionLoaderImpl, crate::api::error::config_error::ConfigError> {
-    ConfigLoaderFactory::create_loader_xdg_with_substitution(app_name, policy)
-}
-
-/// Create a config builder that supports substitution and custom paths.
-#[inline]
-pub fn create_config_builder_with_substitution(
-    policy: Box<dyn SubstitutionPolicy>,
-) -> SubstitutionConfigBuilderImpl {
-    ConfigLoaderFactory::create_config_builder_with_substitution(policy)
-}
+pub use gateway::*;
 
 #[doc(hidden)]
 pub use crate::api::configbuilder::DefaultConfigBuilderBound;

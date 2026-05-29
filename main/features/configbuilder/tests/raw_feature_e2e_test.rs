@@ -21,10 +21,11 @@ fn test_raw_feature_present_section_results_in_enabled_state() {
     }
 
     let dir = dir_with("[feat]\nx = 7");
-    let state: FeatureState<Feat> = create_loader_for_dir(dir.path())
-        .load_feature("feat")
-        .unwrap()
-        .state;
+    let state: FeatureState<Feat> =
+        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
+            .load_feature("feat")
+            .unwrap()
+            .state;
     assert!(state.is_enabled());
     assert_eq!(state.into_option().unwrap().x, 7);
 }
@@ -38,9 +39,10 @@ fn test_raw_feature_absent_section_results_in_disabled_state() {
     }
 
     let dir = dir_with("[other]\nx = 1");
-    let state: FeatureState<Feat> = create_loader_for_dir(dir.path())
-        .load_feature("feat")
-        .unwrap()
-        .state;
+    let state: FeatureState<Feat> =
+        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
+            .load_feature("feat")
+            .unwrap()
+            .state;
     assert!(state.is_disabled());
 }

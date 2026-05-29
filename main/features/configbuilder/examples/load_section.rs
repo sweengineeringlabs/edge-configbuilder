@@ -1,7 +1,6 @@
 //! Load a typed configuration section from application.toml via ConfigBuilder.
 
-use swe_edge_configbuilder::create_config_builder;
-
+use swe_edge_configbuilder::ConfigLoaderFactory;
 #[derive(Debug, Default, serde::Deserialize)]
 #[serde(default)]
 struct BrokerConfig {
@@ -10,7 +9,10 @@ struct BrokerConfig {
 }
 
 fn main() {
-    let loader = match create_config_builder().with_name("my-app").build_loader() {
+    let loader = match ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
+        .with_name("my-app")
+        .build_loader()
+    {
         Ok(l) => l,
         Err(e) => {
             eprintln!("failed to build config loader: {e}");

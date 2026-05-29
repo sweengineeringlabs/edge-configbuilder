@@ -1,0 +1,15 @@
+{
+  "members": [
+    {
+      "failed": 0,
+      "member": "main/features/configbuilder",
+      "passed": 160,
+      "skipped": 0
+    }
+  ],
+  "mode": "package",
+  "timestamp": "2026-05-29T17:27:46.035753500+02:00",
+  "total_failed": 0,
+  "total_members": 1,
+  "total_passed": 160
+}

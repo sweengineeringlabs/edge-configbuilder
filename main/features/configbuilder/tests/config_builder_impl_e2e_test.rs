@@ -2,19 +2,18 @@
 #![allow(clippy::unwrap_used)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::create_config_builder;
-
+use swe_edge_configbuilder::ConfigLoaderFactory;
 /// @covers: config_builder_impl::ConfigBuilderImpl::with_name
 #[test]
 fn test_config_builder_impl_with_name_is_reflected() {
-    let b = create_config_builder().with_name("my-app");
+    let b = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder().with_name("my-app");
     assert_eq!(b.name(), "my-app");
 }
 
 /// @covers: config_builder_impl::ConfigBuilderImpl::with_version
 #[test]
 fn test_config_builder_impl_with_version_is_reflected() {
-    let b = create_config_builder().with_version("2.0.0");
+    let b = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder().with_version("2.0.0");
     assert_eq!(b.version(), "2.0.0");
 }
 
@@ -31,7 +30,7 @@ fn test_config_builder_impl_build_loader_reads_explicit_dir() {
         key: String,
     }
 
-    let loader = create_config_builder()
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
         .with_config_dir(dir.path())
         .build_loader()
         .unwrap();

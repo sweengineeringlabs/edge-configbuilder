@@ -105,7 +105,7 @@ impl OptionalSection for CycleQ {
 fn test_preflight_all_absent_sections_returns_ok_report() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection, IndexSection);
     assert!(
@@ -119,7 +119,7 @@ fn test_preflight_all_absent_sections_returns_ok_report() {
 fn test_preflight_all_present_valid_returns_ok_report() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[store]\n[index]\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection, IndexSection);
     assert!(
@@ -135,7 +135,7 @@ fn test_preflight_all_present_valid_returns_ok_report() {
 fn test_preflight_enabled_feature_with_satisfied_dep_returns_ok_report() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[store]\n[index]\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, IndexSection, StoreSection);
     assert!(
@@ -153,7 +153,7 @@ fn test_preflight_enabled_feature_missing_dep_reports_dependency_missing() {
     let dir = TempDir::new().unwrap();
     // index is present but store is absent → dependency violation
     write_toml(dir.path(), "[index]\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection, IndexSection);
     assert!(!report.is_ok(), "missing dependency must be reported");
@@ -171,7 +171,7 @@ fn test_preflight_enabled_feature_missing_dep_reports_dependency_missing() {
 fn test_preflight_missing_dep_issue_names_the_dependent_section() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[index]\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection, IndexSection);
     let issue = report
@@ -196,7 +196,7 @@ fn test_preflight_missing_dep_issue_names_the_dependent_section() {
 fn test_preflight_fail_on_error_validation_reports_validation_error() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[broken]\nthreshold = -1\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, BrokenSection);
     assert!(!report.is_ok());
@@ -215,7 +215,7 @@ fn test_preflight_disable_on_error_validation_also_reports_validation_error() {
     let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[degraded]\nthreshold = -5\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, DegradedSection);
     assert!(!report.is_ok());
@@ -235,7 +235,7 @@ fn test_preflight_disable_on_error_validation_also_reports_validation_error() {
 fn test_preflight_dependency_cycle_reports_dependency_cycle_issue() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, CycleP, CycleQ);
     assert!(!report.is_ok());
@@ -253,7 +253,7 @@ fn test_preflight_dependency_cycle_reports_dependency_cycle_issue() {
 fn test_preflight_cycle_issue_message_mentions_cycle() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, CycleP, CycleQ);
     let issue = report
@@ -276,7 +276,7 @@ fn test_preflight_collects_all_issues_across_all_sections() {
     let dir = TempDir::new().unwrap();
     // broken has invalid threshold; index is present but store is absent
     write_toml(dir.path(), "[broken]\nthreshold = -1\n[index]\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection, BrokenSection, IndexSection);
     assert!(
@@ -292,7 +292,7 @@ fn test_preflight_collects_all_issues_across_all_sections() {
 fn test_preflight_report_display_ok_is_readable() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, StoreSection);
     assert_eq!(report.to_string(), "preflight: OK");
@@ -302,7 +302,7 @@ fn test_preflight_report_display_ok_is_readable() {
 fn test_preflight_report_display_with_issues_is_readable() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[broken]\nthreshold = -99\n");
-    let loader = create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let report = preflight!(&loader, BrokenSection);
     let output = report.to_string();

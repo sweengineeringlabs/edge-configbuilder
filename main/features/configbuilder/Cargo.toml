@@ -103,3 +103,11 @@ path = "tests/validator_ops_e2e_test.rs"
 [[test]]
 name = "raw_feature_e2e_test"
 path = "tests/raw_feature_e2e_test.rs"
+
+[[test]]
+name = "feature_record_builder_int_test"
+path = "tests/feature_record_builder_int_test.rs"
+
+[[test]]
+name = "config_loader_factory_int_test"
+path = "tests/config_loader_factory_int_test.rs"
