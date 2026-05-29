@@ -1,5 +1,6 @@
 pub mod application_config;
 pub mod config_builder_impl;
+pub mod config_loader_factory;
 pub mod feature;
 pub mod feature_registry;
 pub mod feature_summary;

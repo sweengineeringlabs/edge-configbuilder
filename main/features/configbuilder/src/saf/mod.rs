@@ -1,15 +1,6 @@
 mod configbuilder_svc;
 
 pub use crate::api::error::config_error::ConfigError;
+pub use crate::api::types::config_loader_factory::ConfigLoaderFactory;
 pub use crate::api::types::feature_registry::FeatureRegistry;
 pub use crate::api::types::feature_summary::FeatureSummary;
-pub use configbuilder_svc::create_config_builder;
-pub use configbuilder_svc::create_config_builder_with_substitution;
-pub use configbuilder_svc::create_loader;
-pub use configbuilder_svc::create_loader_for_dir;
-pub use configbuilder_svc::create_loader_for_dir_with_substitution;
-pub use configbuilder_svc::create_loader_with_substitution;
-pub use configbuilder_svc::create_loader_xdg;
-pub use configbuilder_svc::create_loader_xdg_with_substitution;
-pub use configbuilder_svc::create_validator;
-pub use configbuilder_svc::load_feature_section;
