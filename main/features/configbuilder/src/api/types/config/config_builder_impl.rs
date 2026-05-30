@@ -2,6 +2,8 @@
 
 use std::path::PathBuf;
 
+use crate::api::traits::config::config_builder::ConfigBuilder;
+
 /// A ready-to-use config builder produced by `create_config_builder`.
 ///
 /// Use the fluent builder methods to configure directories, then call
@@ -46,5 +48,23 @@ impl ConfigBuilderImpl {
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
         self
+    }
+}
+
+impl ConfigBuilder for ConfigBuilderImpl {
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn version(&self) -> &str {
+        &self.version
+    }
+    fn with_name(self, name: impl Into<String>) -> Self {
+        ConfigBuilderImpl::with_name(self, name)
+    }
+    fn with_version(self, version: impl Into<String>) -> Self {
+        ConfigBuilderImpl::with_version(self, version)
+    }
+    fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self {
+        ConfigBuilderImpl::with_config_dir(self, dir)
     }
 }
