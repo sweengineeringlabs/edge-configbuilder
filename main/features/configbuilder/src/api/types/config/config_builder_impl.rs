@@ -4,14 +4,34 @@ use std::path::PathBuf;
 
 use crate::api::traits::config::config_builder::ConfigBuilder;
 
-/// A ready-to-use config builder produced by `create_config_builder`.
+/// Concrete config builder returned by [`ConfigLoaderFactory::create_config_builder`].
 ///
-/// Use the fluent builder methods to configure directories, then call
-/// `build_loader` to obtain a [`SectionLoaderImpl`].
+/// This is the **only type from which you can call `build_loader()`** to finalise
+/// configuration into a [`SectionLoaderImpl`].  The `build_loader` method is an
+/// inherent method added by an extension impl in `saf/` (not on the [`ConfigBuilder`]
+/// trait) so that this declaration in `api/` carries no dependency on `core/`.
 ///
-/// The `build_loader` method is provided by an extension impl in `saf/` so
-/// that this type carries no dependency on `core/` (SEA rules 46 and 116).
+/// # Usage
 ///
+/// ```rust,ignore
+/// use swe_edge_configbuilder::ConfigLoaderFactory;
+///
+/// let loader = ConfigLoaderFactory::create_config_builder()
+///     .with_name(env!("CARGO_PKG_NAME"))
+///     .with_version(env!("CARGO_PKG_VERSION"))
+///     .build_loader()?;
+///
+/// let cfg: MyConfig = loader.load_section("my_section")?;
+/// ```
+///
+/// # Why not `impl ConfigBuilder`?
+///
+/// SAF `create_config_builder()` functions return this concrete type, not
+/// `impl ConfigBuilder`.  Returning the opaque trait type would prevent callers
+/// from ever calling `build_loader()`, because `build_loader` is not part of the
+/// [`ConfigBuilder`] trait contract.
+///
+/// [`ConfigLoaderFactory::create_config_builder`]: crate::api::types::config::ConfigLoaderFactory::create_config_builder
 /// [`SectionLoaderImpl`]: crate::api::types::section_loader_impl::SectionLoaderImpl
 pub struct ConfigBuilderImpl {
     pub(crate) name: String,

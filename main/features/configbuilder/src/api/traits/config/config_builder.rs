@@ -2,9 +2,37 @@ use std::path::PathBuf;
 
 /// Assemble application configuration from named sources.
 ///
-/// Obtain a concrete instance via the `saf/` factory functions (`create_config_builder`,
-/// `create_config_builder_with_substitution`). Call `build_loader()` on the returned
-/// builder to finalise configuration.
+/// `ConfigBuilder` is a **builder-chain trait** — it covers only the configuration
+/// fields (`name`, `version`, `with_config_dir`).  It deliberately does **not**
+/// include `build_loader()`.  That finaliser is an inherent method on the concrete
+/// types ([`ConfigBuilderImpl`], [`SubstitutionConfigBuilderImpl`]) because the
+/// construction logic depends on `core/` internals that the `api/` trait layer must
+/// not reference (SEA rules 46 and 116).
+///
+/// # Two usage patterns
+///
+/// | Return type | Can call `build_loader()`? | When to use |
+/// |---|---|---|
+/// | `ConfigBuilderImpl` (concrete) | **yes** | SAF entry points — callers need to finalise into a loader |
+/// | `impl ConfigBuilder` (opaque) | **no** | Intermediate helpers that receive a partially-built builder and add fields, then hand it back to the caller who holds the concrete type |
+///
+/// **SAF `create_config_builder()` functions must return `ConfigBuilderImpl`**, not
+/// `impl ConfigBuilder`.  Returning the opaque trait type would prevent callers from
+/// ever calling `build_loader()` to actually load config.
+///
+/// # Obtaining a concrete instance
+///
+/// ```rust,ignore
+/// use swe_edge_configbuilder::ConfigLoaderFactory;
+///
+/// let loader = ConfigLoaderFactory::create_config_builder()
+///     .with_name("my-service")
+///     .with_version("1.0.0")
+///     .build_loader()?;
+/// ```
+///
+/// [`ConfigBuilderImpl`]: crate::api::types::config::ConfigBuilderImpl
+/// [`SubstitutionConfigBuilderImpl`]: crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl
 pub trait ConfigBuilder: Sized {
     /// Return the configured application name.
     fn name(&self) -> &str;
