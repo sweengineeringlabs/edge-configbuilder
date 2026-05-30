@@ -1,4 +1,4 @@
 //! Public API surface for the validator component.
 
-pub mod default_validator;
-pub use default_validator::DefaultValidator as DefaultValidatorBound;
+pub mod validator_bound;
+pub use validator_bound::ValidatorBound;

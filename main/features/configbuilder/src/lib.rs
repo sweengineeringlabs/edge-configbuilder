@@ -46,13 +46,13 @@ pub use crate::api::types::substitution_config_builder_impl::SubstitutionConfigB
 pub use gateway::*;
 
 #[doc(hidden)]
-pub use crate::api::configbuilder::DefaultConfigBuilderBound;
+pub use crate::api::configbuilder::ConfigBuilderBound;
 #[doc(hidden)]
-pub use crate::api::loader::DefaultSectionLoaderBound;
+pub use crate::api::loader::SectionLoaderBound;
 #[doc(hidden)]
 pub use crate::api::substitution::SubstituterBound;
 #[doc(hidden)]
-pub use crate::api::validator::DefaultValidatorBound;
+pub use crate::api::validator::ValidatorBound;
 
 /// Internal helpers exposed for use by `load_in_order!` and `preflight!` macros.
 ///

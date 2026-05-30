@@ -4,4 +4,4 @@
 ///
 /// The concrete implementor is
 /// `crate::core::loader::default_section_loader::DefaultSectionLoader`.
-pub trait DefaultSectionLoader {}
+pub trait SectionLoaderBound {}

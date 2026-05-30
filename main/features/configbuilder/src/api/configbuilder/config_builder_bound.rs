@@ -4,4 +4,4 @@
 ///
 /// The concrete implementor is
 /// `crate::core::configbuilder::default_config_builder::DefaultConfigBuilder`.
-pub trait DefaultConfigBuilder {}
+pub trait ConfigBuilderBound {}

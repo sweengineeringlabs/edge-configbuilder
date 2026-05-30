@@ -8,7 +8,7 @@ struct Sec {
     value: String,
 }
 
-/// @covers: api/default_section_loader::MAX_CONFIG_FILE_BYTES
+/// @covers: api/section_loader_bound::MAX_CONFIG_FILE_BYTES
 #[test]
 fn test_load_section_from_rejects_file_at_one_mib_plus_one_byte() {
     let dir = tempfile::tempdir().unwrap();
@@ -23,7 +23,7 @@ fn test_load_section_from_rejects_file_at_one_mib_plus_one_byte() {
     );
 }
 
-/// @covers: api/default_section_loader::MAX_CONFIG_FILE_BYTES
+/// @covers: api/section_loader_bound::MAX_CONFIG_FILE_BYTES
 #[test]
 fn test_load_section_from_accepts_file_at_exactly_one_mib() {
     let dir = tempfile::tempdir().unwrap();
@@ -40,7 +40,7 @@ fn test_load_section_from_accepts_file_at_exactly_one_mib() {
     assert_eq!(result.unwrap(), Sec::default());
 }
 
-/// @covers: api/default_section_loader::FALLBACK_CONFIG_DIR
+/// @covers: api/section_loader_bound::FALLBACK_CONFIG_DIR
 #[test]
 fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
     // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no

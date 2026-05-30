@@ -4,4 +4,4 @@
 ///
 /// The concrete implementor is
 /// `crate::core::validator::default_validator::DefaultValidator`.
-pub trait DefaultValidator {}
+pub trait ValidatorBound {}
