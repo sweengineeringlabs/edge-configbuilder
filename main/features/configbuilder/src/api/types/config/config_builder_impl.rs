@@ -40,6 +40,18 @@ pub struct ConfigBuilderImpl {
 }
 
 impl ConfigBuilderImpl {
+    /// Create a builder pre-seeded with the given application name and version.
+    ///
+    /// Use this instead of [`crate::saf::ConfigLoaderFactory::create_config_builder`]
+    /// when you want to specify the crate identity directly.
+    pub fn for_crate(name: impl Into<String>, version: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            version: version.into(),
+            config_dirs: Vec::new(),
+        }
+    }
+
     /// Return the configured application name.
     pub fn name(&self) -> &str {
         &self.name
