@@ -40,14 +40,19 @@ pub struct ConfigBuilderImpl {
 }
 
 impl ConfigBuilderImpl {
-    /// Create a builder pre-seeded with the given application name and version.
+    /// Create an empty builder with no name, version, or config dirs set.
     ///
-    /// Use this instead of [`crate::saf::ConfigLoaderFactory::create_config_builder`]
-    /// when you want to specify the crate identity directly.
-    pub fn for_crate(name: impl Into<String>, version: impl Into<String>) -> Self {
+    /// Call [`with_name`] and [`with_version`] to seed the builder before finalising
+    /// with [`build_loader`].  Prefer this over [`ConfigLoaderFactory::create_config_builder`]
+    /// when constructing from within a crate that knows its own name at compile time.
+    ///
+    /// [`with_name`]: Self::with_name
+    /// [`with_version`]: Self::with_version
+    /// [`build_loader`]: Self::build_loader
+    pub fn new() -> Self {
         Self {
-            name: name.into(),
-            version: version.into(),
+            name: String::new(),
+            version: String::new(),
             config_dirs: Vec::new(),
         }
     }
@@ -80,6 +85,12 @@ impl ConfigBuilderImpl {
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
         self
+    }
+}
+
+impl Default for ConfigBuilderImpl {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

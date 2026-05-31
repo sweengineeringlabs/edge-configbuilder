@@ -127,11 +127,10 @@ impl ConfigLoaderFactory {
     /// Uses XDG Base Directory resolution for the package name so callers do not
     /// need to call the builder methods manually.
     pub fn create_config_builder() -> ConfigBuilderImpl {
-        ConfigBuilderImpl {
-            name: env!("CARGO_PKG_NAME").to_string(),
-            version: env!("CARGO_PKG_VERSION").to_string(),
-            config_dirs: Vec::new(),
-        }
+        let mut b = ConfigBuilderImpl::new();
+        b = b.with_name(env!("CARGO_PKG_NAME"));
+        b = b.with_version(env!("CARGO_PKG_VERSION"));
+        b
     }
 
     /// Load the section at `key` as an optional feature, returning `Disabled` when absent.
