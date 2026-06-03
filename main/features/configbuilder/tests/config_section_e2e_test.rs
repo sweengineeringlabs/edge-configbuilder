@@ -1,5 +1,8 @@
+//! Tests for ConfigSection trait behaviour.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+use swe_edge_configbuilder::ConfigLoaderFactory;
 // @covers: api/traits/config/section.rs — ConfigSection trait behaviour
-use swe_edge_configbuilder::{create_loader_for_dir, ConfigSection};
+use swe_edge_configbuilder::ConfigSection;
 
 use std::io::Write as _;
 use tempfile::TempDir;
@@ -28,7 +31,7 @@ fn test_config_section_load_absent_section_returns_default() {
     // existing file — it must NOT return an error or expose internal paths.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other]\nhost = \"unrelated\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = AppSection::load(&loader);
     assert!(
         result.is_ok(),
@@ -46,7 +49,7 @@ fn test_config_section_load_present_section_returns_values() {
     // ConfigSection::load must deserialise the section when the key is present.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[app]\nhost = \"localhost\"\nport = 8080");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = AppSection::load(&loader);
     assert!(
         result.is_ok(),
@@ -70,7 +73,7 @@ fn test_config_section_load_parse_error_propagates() {
     // but the TOML is malformed — never silently swallow it.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[app]\nport = \"not_a_number\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = AppSection::load(&loader);
     assert!(
         result.is_err(),

@@ -2,9 +2,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{
-    create_loader, create_loader_for_dir, create_loader_xdg, ConfigError,
-};
+use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory};
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]
@@ -19,7 +17,7 @@ fn test_load_section_returns_not_found_for_absent_key() {
     // application.toml — the loader must return NotFound.
     let dir = tempfile::tempdir().unwrap();
     std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
-    let result: Result<Cfg, _> = ConfigLoaderFactory::ConfigLoaderFactory::create_loader()
+    let result: Result<Cfg, _> = ConfigLoaderFactory::create_loader()
         .unwrap()
         .load_section("nonexistent_section_xyz");
     std::env::remove_var("SWE_EDGE_CONFIG_DIR");
@@ -34,8 +32,7 @@ fn test_load_section_returns_not_found_for_absent_key() {
 fn test_load_section_from_returns_not_found_when_no_toml() {
     let dir = tempfile::tempdir().unwrap();
     let result: Result<Cfg, _> =
-        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
-            .load_section("nonexistent");
+        ConfigLoaderFactory::create_loader_for_dir(dir.path()).load_section("nonexistent");
     assert!(
         matches!(result, Err(ConfigError::NotFound(_))),
         "expected NotFound for empty dir, got {result:?}"
@@ -48,7 +45,7 @@ fn test_load_section_from_reads_written_section() {
     let dir = tempfile::tempdir().unwrap();
     let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
     writeln!(f, "[my_section]\nvalue = \"found\"").unwrap();
-    let cfg: Cfg = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
+    let cfg: Cfg = ConfigLoaderFactory::create_loader_for_dir(dir.path())
         .load_section("my_section")
         .unwrap();
     assert_eq!(cfg.value, "found");
@@ -57,11 +54,10 @@ fn test_load_section_from_reads_written_section() {
 /// @covers: create_loader_xdg
 #[test]
 fn test_load_section_xdg_returns_not_found_for_unknown_app() {
-    let result: Result<Cfg, _> = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_xdg(
-        "swe-edge-test-nonexistent-xyz",
-    )
-    .unwrap()
-    .load_section("any_section");
+    let result: Result<Cfg, _> =
+        ConfigLoaderFactory::create_loader_xdg("swe-edge-test-nonexistent-xyz")
+            .unwrap()
+            .load_section("any_section");
     assert!(
         matches!(result, Err(ConfigError::NotFound(_))),
         "expected NotFound for unknown XDG app, got {result:?}"

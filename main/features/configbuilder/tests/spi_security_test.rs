@@ -1,6 +1,9 @@
-// @covers: spi::OptionalSection, spi::ConfigSection
+//! Tests for SPI OptionalSection/ConfigSection surface.
+//! @covers: spi::OptionalSection, spi::ConfigSection
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use swe_edge_configbuilder::{
-    create_loader_for_dir, ConfigSection, FeatureState, OnError, OptionalSection,
+    ConfigLoaderFactory, ConfigSection, FeatureState, OnError, OptionalSection,
 };
 
 use std::io::Write as _;
@@ -29,7 +32,7 @@ fn test_config_section_struct_load_section_absent_returns_default_not_error() {
     // Absence of a required section must yield Default, never expose internals.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other]\nkey = \"value\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let result = SecretSection::load(&loader).unwrap();
     assert_eq!(result, SecretSection::default());
 }
@@ -39,7 +42,7 @@ fn test_config_section_struct_load_section_malformed_toml_returns_parse_error_no
     // Malformed TOML must surface a typed error, not panic or expose a stack trace.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "not = [broken toml");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = SecretSection::load(&loader).unwrap_err();
     let msg = err.to_string();
     assert!(
@@ -71,7 +74,7 @@ fn test_optional_section_struct_load_optional_absent_section_returns_disabled_no
     // Absent optional section must never propagate an error — only Disabled.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[unrelated]\nkey = \"x\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = FeatureSection::load_optional(&loader).unwrap();
     assert!(
         state.is_disabled(),
@@ -83,7 +86,7 @@ fn test_optional_section_struct_load_optional_absent_section_returns_disabled_no
 fn test_optional_section_struct_load_optional_no_files_returns_disabled_not_error() {
     // No config files at all must yield Disabled, not a NotFound error.
     let dir = TempDir::new().unwrap();
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = FeatureSection::load_optional(&loader).unwrap();
     assert!(state.is_disabled());
 }
@@ -95,7 +98,7 @@ fn test_optional_section_struct_load_optional_present_deserializes_correctly() {
         dir.path(),
         "[feature_svc]\nhost = \"localhost\"\nport = 8080",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = FeatureSection::load_optional(&loader).unwrap();
     assert!(state.is_enabled());
     let cfg = state.into_option().unwrap();
@@ -137,7 +140,7 @@ fn test_strict_feature_struct_validate_enabled_rejects_missing_cert_when_tls_req
     // security boundary the SPI exposes to downstream consumers.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[strict_feature]\nrequire_tls = true");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = StrictFeature::load_optional(&loader).unwrap_err();
     assert!(
         err.to_string().contains("cert_path"),
@@ -152,7 +155,7 @@ fn test_strict_feature_struct_validate_enabled_accepts_valid_tls_config() {
         dir.path(),
         "[strict_feature]\nrequire_tls = true\ncert_path = \"/etc/certs/server.pem\"",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = StrictFeature::load_optional(&loader).unwrap();
     assert!(
         matches!(state, FeatureState::Enabled(_)),
@@ -164,7 +167,7 @@ fn test_strict_feature_struct_validate_enabled_accepts_valid_tls_config() {
 fn test_strict_feature_struct_validate_enabled_accepts_no_tls_without_cert() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[strict_feature]\nrequire_tls = false");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = StrictFeature::load_optional(&loader).unwrap();
     assert!(
         matches!(state, FeatureState::Enabled(_)),

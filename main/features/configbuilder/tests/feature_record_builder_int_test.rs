@@ -24,7 +24,7 @@ fn test_enabled_sets_flag() {
 fn test_override_source_sets_field() {
     let r = FeatureRecordBuilder::new("cache")
         .override_source(OverrideSource::EnvVar {
-            var: "CACHE_ENABLED".into(),
+            var_name: "CACHE_ENABLED".into(),
             value: "false".into(),
         })
         .build();

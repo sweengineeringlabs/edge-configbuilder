@@ -1,3 +1,5 @@
+//! Tests for substitution policy implementations.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
     AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
     SubstitutionPolicy,

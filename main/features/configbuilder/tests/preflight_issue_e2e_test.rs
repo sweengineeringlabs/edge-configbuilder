@@ -1,3 +1,4 @@
+//! Tests for PreflightIssue struct fields.
 // @covers: api/types/preflight/preflight_issue.rs — PreflightIssue struct fields
 use swe_edge_configbuilder::{PreflightIssue, PreflightIssueKind};
 

@@ -1,3 +1,4 @@
+//! Integration tests for substitution-related error display.
 use swe_edge_configbuilder::ConfigError;
 
 #[test]

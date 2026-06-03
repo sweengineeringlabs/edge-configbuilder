@@ -8,7 +8,7 @@ fn test_validate_path_file_error_contains_not_a_directory_phrase() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     std::fs::write(&file, b"").unwrap();
-    let err = ConfigLoaderFactory::ConfigLoaderFactory::create_validator()
+    let err = ConfigLoaderFactory::create_validator()
         .validate_path(&file)
         .unwrap_err();
     assert!(
@@ -23,7 +23,7 @@ fn test_validate_path_file_error_includes_the_offending_path() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     std::fs::write(&file, b"").unwrap();
-    let err = ConfigLoaderFactory::ConfigLoaderFactory::create_validator()
+    let err = ConfigLoaderFactory::create_validator()
         .validate_path(&file)
         .unwrap_err();
     assert!(

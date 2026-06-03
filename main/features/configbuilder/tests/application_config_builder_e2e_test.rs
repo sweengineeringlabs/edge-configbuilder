@@ -5,21 +5,20 @@ use swe_edge_configbuilder::ConfigLoaderFactory;
 /// @covers: api/application_config_builder::APP_NAME
 #[test]
 fn test_create_config_builder_name_matches_cargo_package_name() {
-    let b = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder();
+    let b = ConfigLoaderFactory::create_config_builder();
     assert_eq!(b.name(), env!("CARGO_PKG_NAME"));
 }
 
 /// @covers: api/application_config_builder::APP_VERSION
 #[test]
 fn test_create_config_builder_version_matches_cargo_package_version() {
-    let b = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder();
+    let b = ConfigLoaderFactory::create_config_builder();
     assert_eq!(b.version(), env!("CARGO_PKG_VERSION"));
 }
 
 /// @covers: api/application_config_builder::APP_NAME
 #[test]
 fn test_create_config_builder_with_name_overrides_preset_name() {
-    let b = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
-        .with_name("override-name");
+    let b = ConfigLoaderFactory::create_config_builder().with_name("override-name");
     assert_eq!(b.name(), "override-name");
 }

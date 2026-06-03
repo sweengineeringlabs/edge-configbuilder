@@ -12,6 +12,13 @@ const FALLBACK_CONFIG_DIR: &str = "config";
 
 pub(crate) struct DefaultConfigBuilder {
     pub(crate) name: String,
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "set by constructors; read only by test-gated accessors (ConfigBuilderImpl owns the production builder API)"
+        )
+    )]
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
 }
@@ -86,6 +93,9 @@ impl DefaultConfigBuilder {
     }
 }
 
+/// Builder-style accessors used only by this module's unit tests.
+/// The production builder API lives on [`ConfigBuilderImpl`](crate::api::types::config::ConfigBuilderImpl).
+#[cfg(test)]
 impl DefaultConfigBuilder {
     pub(crate) fn name(&self) -> &str {
         &self.name

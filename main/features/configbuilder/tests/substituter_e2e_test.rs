@@ -5,7 +5,7 @@
 use std::io::Write as _;
 use tempfile::TempDir;
 
-use swe_edge_configbuilder::{create_loader_for_dir_with_substitution, AllowAllPolicy};
+use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
 
 fn write_toml(dir: &std::path::Path, content: &str) {
     let mut f = std::fs::File::create(dir.join("application.toml")).unwrap();
@@ -26,7 +26,10 @@ fn test_substituter_replaces_env_var_placeholder_with_value() {
 
     // SAFETY: single-threaded test binary; no other thread reads or writes this var
     unsafe { std::env::set_var("DB_HOST", "localhost:5432") };
-    let loader = create_loader_for_dir_with_substitution(dir.path(), Box::new(AllowAllPolicy));
+    let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+        dir.path(),
+        Box::new(AllowAllPolicy),
+    );
     let cfg: DbConfig = loader.load_section("db").unwrap();
     // SAFETY: cleanup — same invariant as above
     unsafe { std::env::remove_var("DB_HOST") };
@@ -45,7 +48,10 @@ fn test_substituter_returns_error_when_env_var_missing() {
 
     // SAFETY: cleanup only — no other thread touches this var
     unsafe { std::env::remove_var("UNDEFINED_VAR_XYZ") };
-    let loader = create_loader_for_dir_with_substitution(dir.path(), Box::new(AllowAllPolicy));
+    let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+        dir.path(),
+        Box::new(AllowAllPolicy),
+    );
     let result: Result<DbConfig, _> = loader.load_section("db");
 
     assert!(result.is_err(), "missing env var must return an error");

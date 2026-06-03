@@ -129,7 +129,7 @@ impl Loader for DefaultSectionLoader {
     {
         let val = self.load_section_value(key)?;
         // Empty table == section absent but files found — return type default.
-        if val.as_table().map_or(false, |t| t.is_empty()) {
+        if val.as_table().is_some_and(|t| t.is_empty()) {
             return Ok(T::default());
         }
         val.try_into()
@@ -567,6 +567,10 @@ mod tests {
     fn test_load_optional_section_missing_required_field_returns_parse_error() {
         #[derive(Debug, serde::Deserialize)]
         struct DefaultSectionLoaderStrict {
+            #[expect(
+                dead_code,
+                reason = "deserialization target — its absence is the test subject"
+            )]
             required: String, // no Default, no Option — must be present
         }
         let dir = TempDir::new().unwrap();

@@ -1,8 +1,9 @@
 //! Tests for `RawFeature` — the type-erased feature load result.
 #![allow(clippy::unwrap_used)]
+use swe_edge_configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{create_loader_for_dir, FeatureState};
+use swe_edge_configbuilder::FeatureState;
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {
@@ -21,11 +22,10 @@ fn test_raw_feature_present_section_results_in_enabled_state() {
     }
 
     let dir = dir_with("[feat]\nx = 7");
-    let state: FeatureState<Feat> =
-        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
-            .load_feature("feat")
-            .unwrap()
-            .state;
+    let state: FeatureState<Feat> = ConfigLoaderFactory::create_loader_for_dir(dir.path())
+        .load_feature("feat")
+        .unwrap()
+        .state;
     assert!(state.is_enabled());
     assert_eq!(state.into_option().unwrap().x, 7);
 }
@@ -39,10 +39,9 @@ fn test_raw_feature_absent_section_results_in_disabled_state() {
     }
 
     let dir = dir_with("[other]\nx = 1");
-    let state: FeatureState<Feat> =
-        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
-            .load_feature("feat")
-            .unwrap()
-            .state;
+    let state: FeatureState<Feat> = ConfigLoaderFactory::create_loader_for_dir(dir.path())
+        .load_feature("feat")
+        .unwrap()
+        .state;
     assert!(state.is_disabled());
 }

@@ -6,11 +6,9 @@ use swe_edge_configbuilder::ConfigLoaderFactory;
 #[test]
 fn test_validate_section_dir_nonexistent_path_succeeds() {
     assert!(
-        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(
-            "/nonexistent/swe-edge-test-path-xyz"
-        )
-        .validate()
-        .is_ok()
+        ConfigLoaderFactory::create_loader_for_dir("/nonexistent/swe-edge-test-path-xyz")
+            .validate()
+            .is_ok()
     );
 }
 
@@ -18,11 +16,9 @@ fn test_validate_section_dir_nonexistent_path_succeeds() {
 #[test]
 fn test_validate_section_dir_valid_dir_succeeds() {
     let dir = tempfile::tempdir().unwrap();
-    assert!(
-        ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path())
-            .validate()
-            .is_ok()
-    );
+    assert!(ConfigLoaderFactory::create_loader_for_dir(dir.path())
+        .validate()
+        .is_ok());
 }
 
 /// @covers: create_loader_for_dir
@@ -31,7 +27,7 @@ fn test_validate_section_dir_file_path_returns_error() {
     let dir = tempfile::tempdir().unwrap();
     let file_path = dir.path().join("not_a_dir.toml");
     std::fs::write(&file_path, b"").unwrap();
-    let err = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(&file_path)
+    let err = ConfigLoaderFactory::create_loader_for_dir(&file_path)
         .validate()
         .unwrap_err();
     assert!(matches!(err, swe_edge_configbuilder::ConfigError::Io(_)));

@@ -1,5 +1,6 @@
 //! End-to-end tests for the internal topological sort utility.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::__internal::Topology;
 
 #[test]

@@ -1,3 +1,4 @@
+//! Tests for PrefixWhitelistPolicy substitution.
 // @covers: api/types/loader/prefix_whitelist_policy.rs — PrefixWhitelistPolicy
 use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
 

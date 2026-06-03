@@ -1,15 +1,16 @@
 //! End-to-end tests for `SectionLoaderImpl`.
 #![allow(clippy::unwrap_used)]
+use swe_edge_configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{create_loader_for_dir, SectionLoaderImpl};
+use swe_edge_configbuilder::SectionLoaderImpl;
 use tempfile::TempDir;
 
 fn make_loader(content: &str) -> (TempDir, SectionLoaderImpl) {
     let dir = TempDir::new().unwrap();
     let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
     f.write_all(content.as_bytes()).unwrap();
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     (dir, loader)
 }
 
@@ -39,6 +40,6 @@ fn test_section_loader_impl_load_section_absent_key_returns_default() {
 #[test]
 fn test_section_loader_impl_validate_existing_dir_returns_ok() {
     let dir = TempDir::new().unwrap();
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     assert!(loader.validate().is_ok());
 }

@@ -9,7 +9,7 @@ struct BrokerConfig {
 }
 
 fn main() {
-    let loader = match ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
+    let loader = match ConfigLoaderFactory::create_config_builder()
         .with_name("my-app")
         .build_loader()
     {

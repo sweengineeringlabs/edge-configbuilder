@@ -1,4 +1,6 @@
+//! Tests for CompositePolicy substitution.
 // @covers: api/types/loader/composite_policy.rs — CompositePolicy AND logic
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
     AllowAllPolicy, CompositePolicy, PrefixWhitelistPolicy, SubstitutionPolicy,
 };

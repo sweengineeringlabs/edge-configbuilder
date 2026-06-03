@@ -1,4 +1,5 @@
-// @covers: api/types/loader/pattern_whitelist_policy.rs — PatternWhitelistPolicy
+//! @covers: api/types/loader/pattern_whitelist_policy.rs — PatternWhitelistPolicy
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{PatternWhitelistPolicy, SubstitutionPolicy};
 
 #[test]

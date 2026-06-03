@@ -31,7 +31,7 @@ impl SectionLoaderImpl {
         let val = self.ops.load_section_value(key)?;
         // Empty table == section absent from all files but files were found;
         // return the type default (same contract as DefaultSectionLoader).
-        if val.as_table().map_or(false, |t| t.is_empty()) {
+        if val.as_table().is_some_and(|t| t.is_empty()) {
             return Ok(T::default());
         }
         val.try_into()

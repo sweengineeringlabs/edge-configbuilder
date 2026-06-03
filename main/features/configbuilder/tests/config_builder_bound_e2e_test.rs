@@ -5,7 +5,7 @@ use swe_edge_configbuilder::ConfigLoaderFactory;
 /// @covers: api/config_builder_bound::DEFAULT_VERSION
 #[test]
 fn test_create_config_builder_default_version_is_semver() {
-    let version = ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder()
+    let version = ConfigLoaderFactory::create_config_builder()
         .version()
         .to_owned();
     let parts: Vec<&str> = version.split('.').collect();
@@ -24,7 +24,7 @@ fn test_create_config_builder_default_version_is_semver() {
 #[test]
 fn test_create_config_builder_default_name_is_package_name() {
     assert_eq!(
-        ConfigLoaderFactory::ConfigLoaderFactory::create_config_builder().name(),
+        ConfigLoaderFactory::create_config_builder().name(),
         env!("CARGO_PKG_NAME")
     );
 }

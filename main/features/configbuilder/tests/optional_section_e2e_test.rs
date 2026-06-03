@@ -1,4 +1,6 @@
-use swe_edge_configbuilder::{create_loader_for_dir, ConfigError, FeatureState, OptionalSection};
+//! Tests for OptionalSection trait — load_optional and validate_enabled.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, OptionalSection};
 use tempfile::TempDir;
 
 fn write_toml(dir: &std::path::Path, content: &str) {
@@ -50,7 +52,7 @@ impl OptionalSection for SimpleFeature {
 fn test_optional_section_load_optional_absent_key_returns_disabled() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[other_section]\nvalue = \"x\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = BrokerConfig::load_optional(&loader).unwrap();
     assert!(
         state.is_disabled(),
@@ -61,7 +63,7 @@ fn test_optional_section_load_optional_absent_key_returns_disabled() {
 #[test]
 fn test_optional_section_load_optional_no_files_returns_disabled() {
     let dir = TempDir::new().unwrap();
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = BrokerConfig::load_optional(&loader).unwrap();
     assert!(state.is_disabled());
 }
@@ -75,7 +77,7 @@ fn test_optional_section_load_optional_present_valid_returns_enabled() {
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = BrokerConfig::load_optional(&loader).unwrap();
     assert!(state.is_enabled());
     let cfg = state.into_option().unwrap();
@@ -90,7 +92,7 @@ fn test_optional_section_load_optional_tls_disabled_no_cert_passes_validation() 
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672\ntls_enabled = false",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = BrokerConfig::load_optional(&loader).unwrap();
     assert!(state.is_enabled());
 }
@@ -102,7 +104,7 @@ fn test_optional_section_load_optional_tls_enabled_with_cert_passes_validation()
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672\ntls_enabled = true\ncert_path = \"/etc/certs/broker.pem\"",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = BrokerConfig::load_optional(&loader).unwrap();
     assert!(state.is_enabled());
     let cfg = state.into_option().unwrap();
@@ -118,7 +120,7 @@ fn test_optional_section_load_optional_tls_enabled_missing_cert_returns_validati
         dir.path(),
         "[message_broker]\nhost = \"mq.local\"\nport = 5672\ntls_enabled = true",
     );
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let err = BrokerConfig::load_optional(&loader).unwrap_err();
     assert!(
         matches!(err, ConfigError::Validation { .. }),
@@ -142,7 +144,7 @@ fn test_optional_section_load_optional_validate_not_called_when_section_absent()
     // — proves the path is skipped when Disabled.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[unrelated]\nkey = \"value\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     // No panic or error even though BrokerConfig's validate_enabled would reject
     // a tls_enabled=true section — it's never called here.
     let state = BrokerConfig::load_optional(&loader).unwrap();
@@ -155,7 +157,7 @@ fn test_optional_section_load_optional_validate_not_called_when_section_absent()
 fn test_optional_section_load_optional_default_validation_always_passes() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "[simple_feature]\nname = \"demo\"");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let state = SimpleFeature::load_optional(&loader).unwrap();
     assert!(state.is_enabled());
     assert_eq!(state.into_option().unwrap().name, "demo");

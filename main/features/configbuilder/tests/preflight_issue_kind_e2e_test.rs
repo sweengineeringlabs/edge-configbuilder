@@ -1,4 +1,4 @@
-// @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
+//! @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
 use swe_edge_configbuilder::{ConfigError, PreflightIssueKind};
 
 #[test]

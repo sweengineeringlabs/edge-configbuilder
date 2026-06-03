@@ -1,8 +1,9 @@
 //! End-to-end tests for the `load_in_order!` macro.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use serde::Deserialize;
 use swe_edge_configbuilder::{
-    create_loader_for_dir, load_in_order, ConfigError, FeatureRegistry, OptionalSection,
+    load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, OptionalSection,
 };
 use tempfile::TempDir;
 
@@ -74,7 +75,7 @@ impl OptionalSection for CycleY {
 fn test_load_in_order_single_section_no_deps_succeeds() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result = load_in_order!(&mut registry, &loader, AlphaSection);
@@ -87,7 +88,7 @@ fn test_load_in_order_single_section_no_deps_succeeds() {
 fn test_load_in_order_multiple_independent_sections_all_recorded() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result = load_in_order!(
@@ -109,7 +110,7 @@ fn test_load_in_order_dependency_loads_before_dependent_regardless_of_macro_orde
     // The toposort must put AlphaSection first in the registry records.
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     load_in_order!(&mut registry, &loader, BetaSection, AlphaSection).unwrap();
@@ -134,7 +135,7 @@ fn test_load_in_order_chain_loads_in_dependency_order() {
     // gamma → beta → alpha: all three listed in reverse dependency order
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     load_in_order!(
@@ -158,7 +159,7 @@ fn test_load_in_order_chain_loads_in_dependency_order() {
 fn test_load_in_order_cycle_returns_validation_error() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let result = load_in_order!(&mut registry, &loader, CycleX, CycleY);
@@ -173,7 +174,7 @@ fn test_load_in_order_cycle_returns_validation_error() {
 fn test_load_in_order_cycle_error_section_is_load_in_order() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let err = load_in_order!(&mut registry, &loader, CycleX, CycleY).unwrap_err();
@@ -193,7 +194,7 @@ fn test_load_in_order_cycle_error_section_is_load_in_order() {
 fn test_load_in_order_cycle_leaves_registry_empty() {
     let dir = TempDir::new().unwrap();
     write_toml(dir.path(), "");
-    let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
 
     let mut registry = FeatureRegistry::new();
     let _ = load_in_order!(&mut registry, &loader, CycleX, CycleY);
@@ -211,7 +212,7 @@ fn test_load_in_order_result_is_compatible_with_question_mark() {
     fn try_load() -> Result<(), ConfigError> {
         let dir = TempDir::new().unwrap();
         write_toml(dir.path(), "");
-        let loader = ConfigLoaderFactory::ConfigLoaderFactory::create_loader_for_dir(dir.path());
+        let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
         let mut registry = FeatureRegistry::new();
         load_in_order!(&mut registry, &loader, AlphaSection)?;
         Ok(())
