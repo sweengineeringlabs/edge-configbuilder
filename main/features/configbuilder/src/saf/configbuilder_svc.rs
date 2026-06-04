@@ -8,7 +8,9 @@ use crate::api::types::feature::feature_state::FeatureState;
 use crate::api::types::path_validator_impl::PathValidatorImpl;
 use crate::api::types::section_loader_impl::SectionLoaderImpl;
 use crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
-use crate::core::{DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator};
+use crate::core::{
+    DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator, DEFAULT_READ_TIMEOUT,
+};
 
 // ── Extension impls for the builder types ────────────────────────────────────
 //
@@ -46,6 +48,7 @@ impl ConfigBuilderImpl {
             name: self.name,
             version: self.version,
             config_dirs: self.config_dirs,
+            read_timeout: self.read_timeout.unwrap_or(DEFAULT_READ_TIMEOUT),
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -67,13 +70,13 @@ impl SubstitutionConfigBuilderImpl {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct DbConfig { url: String }
     ///
     /// let loader = ConfigLoaderFactory::create_config_builder_with_substitution(
-    ///         Box::new(AllowAllPolicy),
+    ///         Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
     ///     )
     ///     .with_config_dir("config/")
     ///     .build_loader()
@@ -86,6 +89,7 @@ impl SubstitutionConfigBuilderImpl {
             name: self.name,
             version: self.version,
             config_dirs: self.config_dirs,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         core.substitution_policy = Some(self.policy);
@@ -126,6 +130,7 @@ impl ConfigLoaderFactory {
             name: String::new(),
             version: String::new(),
             config_dirs: Vec::new(),
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -154,6 +159,7 @@ impl ConfigLoaderFactory {
             ops: Box::new(DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: None,
+                read_timeout: DEFAULT_READ_TIMEOUT,
             }),
         }
     }
@@ -193,6 +199,7 @@ impl ConfigLoaderFactory {
             name: app_name.to_owned(),
             version: String::new(),
             config_dirs: Vec::new(),
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -301,14 +308,14 @@ impl ConfigLoaderFactory {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct DbConfig { url: String }
     ///
     /// // TOML: url = "postgres://{{DB_USER}}@host/db"
     /// let loader = ConfigLoaderFactory::create_loader_with_substitution(
-    ///         Box::new(AllowAllPolicy),
+    ///         Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
     ///     )
     ///     .expect("config dir accessible");
     ///
@@ -321,6 +328,7 @@ impl ConfigLoaderFactory {
             name: String::new(),
             version: String::new(),
             config_dirs: Vec::new(),
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -334,14 +342,14 @@ impl ConfigLoaderFactory {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct AppConfig { host: String }
     ///
     /// let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
     ///     "config/",
-    ///     Box::new(AllowAllPolicy),
+    ///     Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
     /// );
     /// let cfg: AppConfig = loader.load_section("app").unwrap_or_default();
     /// ```
@@ -353,6 +361,7 @@ impl ConfigLoaderFactory {
             ops: Box::new(DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: Some(policy),
+                read_timeout: DEFAULT_READ_TIMEOUT,
             }),
         }
     }
@@ -373,7 +382,7 @@ impl ConfigLoaderFactory {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct AppConfig { api_key: String }
@@ -381,7 +390,7 @@ impl ConfigLoaderFactory {
     /// // TOML: api_key = "{{MY_APP_API_KEY}}"
     /// let loader = ConfigLoaderFactory::create_loader_xdg_with_substitution(
     ///         "my-app",
-    ///         Box::new(AllowAllPolicy),
+    ///         Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
     ///     )
     ///     .expect("XDG dirs accessible");
     ///
@@ -395,6 +404,7 @@ impl ConfigLoaderFactory {
             name: app_name.to_owned(),
             version: String::new(),
             config_dirs: Vec::new(),
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -412,13 +422,13 @@ impl ConfigLoaderFactory {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct DbConfig { url: String }
     ///
     /// let loader = ConfigLoaderFactory::create_config_builder_with_substitution(
-    ///         Box::new(AllowAllPolicy),
+    ///         Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
     ///     )
     ///     .with_config_dir("config/")
     ///     .build_loader()

@@ -2,6 +2,7 @@
 
 use std::env;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::loader::Loader as _;
@@ -21,6 +22,7 @@ pub(crate) struct DefaultConfigBuilder {
     )]
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
+    pub(crate) read_timeout: Duration,
 }
 
 impl DefaultConfigBuilder {
@@ -44,6 +46,7 @@ impl DefaultConfigBuilder {
             let loader = DefaultSectionLoader {
                 config_dirs: self.config_dirs,
                 substitution_policy: None,
+                read_timeout: self.read_timeout,
             };
             loader.validate()?;
             return Ok(loader);
@@ -71,6 +74,7 @@ impl DefaultConfigBuilder {
             let loader = DefaultSectionLoader {
                 config_dirs: dirs,
                 substitution_policy: None,
+                read_timeout: self.read_timeout,
             };
             loader.validate()?;
             return Ok(loader);
@@ -87,6 +91,7 @@ impl DefaultConfigBuilder {
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir],
             substitution_policy: None,
+            read_timeout: self.read_timeout,
         };
         loader.validate()?;
         Ok(loader)
@@ -133,6 +138,7 @@ mod tests {
             name: String::new(),
             version: "0.1.0".to_string(),
             config_dirs: Vec::new(),
+            read_timeout: Duration::from_secs(30),
         }
     }
 
@@ -243,6 +249,7 @@ mod tests {
             name: String::new(),
             version: String::new(),
             config_dirs: vec![dir.path().to_path_buf()],
+            read_timeout: Duration::from_secs(30),
         };
         let result = builder.build_loader_internal();
         assert!(

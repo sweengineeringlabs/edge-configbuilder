@@ -1,6 +1,7 @@
 //! Public concrete config builder returned by `create_config_builder`.
 
 use std::path::PathBuf;
+use std::time::Duration;
 
 use crate::api::traits::config::config_builder::ConfigBuilder;
 
@@ -45,6 +46,7 @@ pub struct ConfigBuilderImpl {
     pub(crate) name: String,
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
+    pub(crate) read_timeout: Option<Duration>,
 }
 
 impl ConfigBuilderImpl {
@@ -71,6 +73,7 @@ impl ConfigBuilderImpl {
             name: String::new(),
             version: String::new(),
             config_dirs: Vec::new(),
+            read_timeout: None,
         }
     }
 
@@ -144,6 +147,27 @@ impl ConfigBuilderImpl {
     /// ```
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
+        self
+    }
+
+    /// Override the default 30-second read deadline for each `application.toml`.
+    ///
+    /// Use a tight deadline (e.g. `Duration::from_millis(500)`) in test harnesses
+    /// to make stalled-filesystem scenarios fail fast.  In production the default
+    /// 30 s is recommended — it covers slow spinning disks without hanging startup
+    /// indefinitely on a stalled NFS/FUSE mount.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::time::Duration;
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    ///
+    /// let builder = ConfigBuilderImpl::new()
+    ///     .with_read_timeout(Duration::from_secs(5));
+    /// ```
+    pub fn with_read_timeout(mut self, timeout: Duration) -> Self {
+        self.read_timeout = Some(timeout);
         self
     }
 }

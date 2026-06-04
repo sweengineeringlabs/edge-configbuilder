@@ -1,9 +1,17 @@
 //! `DefaultSectionLoader` — layered TOML section extractor with optional substitution.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::mpsc;
+use std::time::Duration;
 
 const MAX_CONFIG_FILE_BYTES: u64 = 1_048_576;
 const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
+
+/// Default wall-clock deadline for a single `application.toml` read.
+///
+/// 30 seconds is generous enough for a slow spinning disk while still bounding
+/// the worst-case startup hang from a stalled NFS/FUSE mount.
+pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
 use crate::api::error::config_error::ConfigError;
 use crate::api::traits::feature_loader::FeatureLoader;
 use crate::api::traits::loader::Loader;
@@ -29,9 +37,36 @@ use crate::core::Substituter;
 pub(crate) struct DefaultSectionLoader {
     pub(crate) config_dirs: Vec<PathBuf>,
     pub(crate) substitution_policy: Option<Box<dyn SubstitutionPolicy>>,
+    /// Wall-clock deadline for each `application.toml` read.
+    pub(crate) read_timeout: Duration,
 }
 
 impl DefaultSectionLoader {
+    /// Read a file on a background thread, returning `ConfigError::Io` if the read
+    /// does not complete within `timeout`.  The background thread is not cancelled
+    /// (there is no portable cancel mechanism for in-flight OS I/O), but it is
+    /// detached and will exit naturally once the underlying I/O completes or fails.
+    fn read_with_timeout(path: &Path, timeout: Duration) -> Result<String, ConfigError> {
+        let path_buf = path.to_path_buf();
+        let (tx, rx) = mpsc::channel();
+        std::thread::spawn(move || {
+            let _ = tx.send(std::fs::read_to_string(&path_buf));
+        });
+        match rx.recv_timeout(timeout) {
+            Ok(Ok(text)) => Ok(text),
+            Ok(Err(e)) => Err(ConfigError::Io(format!("{}: {e}", path.display()))),
+            Err(mpsc::RecvTimeoutError::Timeout) => Err(ConfigError::Io(format!(
+                "{}: read timed out after {}s — filesystem may be stalled",
+                path.display(),
+                timeout.as_secs()
+            ))),
+            Err(mpsc::RecvTimeoutError::Disconnected) => Err(ConfigError::Io(format!(
+                "{}: reader thread disconnected unexpectedly",
+                path.display()
+            ))),
+        }
+    }
+
     fn merge_toml(base: toml::Value, overlay: toml::Value) -> toml::Value {
         match (base, overlay) {
             (toml::Value::Table(mut b), toml::Value::Table(o)) => {
@@ -97,8 +132,7 @@ impl DefaultSectionLoader {
                     meta.len(),
                 )));
             }
-            let text = std::fs::read_to_string(&path)
-                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
+            let text = Self::read_with_timeout(&path, self.read_timeout)?;
 
             let text = if let Some(ref policy) = self.substitution_policy {
                 let substituter =
@@ -175,8 +209,7 @@ impl LoaderOps for DefaultSectionLoader {
                     meta.len(),
                 )));
             }
-            let text = std::fs::read_to_string(&path)
-                .map_err(|e| ConfigError::Io(format!("{}: {e}", path.display())))?;
+            let text = Self::read_with_timeout(&path, self.read_timeout)?;
 
             let text = if let Some(ref policy) = self.substitution_policy {
                 let substituter =
@@ -336,6 +369,7 @@ mod tests {
         DefaultSectionLoader {
             config_dirs: vec![dir.to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         }
     }
 
@@ -411,6 +445,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let sec: DefaultSectionLoaderSection = loader.load_section("s").unwrap();
         assert_eq!(sec.value, "high");
@@ -425,6 +460,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let sec: DefaultSectionLoaderSection = loader.load_section("s").unwrap();
         assert_eq!(sec.value, "hi");
@@ -464,6 +500,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let srv: DefaultSectionLoaderServer = loader.load_section("s").unwrap();
         assert_eq!(
@@ -594,6 +631,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
             loader.load_optional_section("feat").unwrap();
@@ -616,6 +654,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
             loader.load_optional_section("feat").unwrap();
@@ -802,6 +841,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![PathBuf::from("/nonexistent/swe-edge-test-xyz")],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         assert!(loader.validate().is_ok());
     }
@@ -812,6 +852,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir.path().to_path_buf()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         assert!(loader.validate().is_ok());
     }
@@ -824,6 +865,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![file.clone()],
             substitution_policy: None,
+            read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let err = loader.validate().unwrap_err();
         assert!(matches!(err, ConfigError::Io(_)));

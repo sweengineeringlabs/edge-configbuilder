@@ -22,14 +22,14 @@ use crate::api::traits::substitution_policy::SubstitutionPolicy;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+/// use swe_edge_configbuilder::{PrefixWhitelistPolicy, ConfigLoaderFactory};
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// struct DbConfig { url: String }
 ///
 /// // TOML: url = "postgres://{{DB_USER}}:{{DB_PASS}}@host/db"
 /// let loader = ConfigLoaderFactory::create_config_builder_with_substitution(
-///         Box::new(AllowAllPolicy),
+///         Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
 ///     )
 ///     .with_config_dir("config/")
 ///     .build_loader()
