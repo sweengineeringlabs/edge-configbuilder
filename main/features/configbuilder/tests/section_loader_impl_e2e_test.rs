@@ -1,5 +1,5 @@
 //! End-to-end tests for `SectionLoaderImpl`.
-#![allow(clippy::unwrap_used)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
