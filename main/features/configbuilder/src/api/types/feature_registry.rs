@@ -20,17 +20,25 @@ type FeatureObserver = Box<dyn Fn(&FeatureRecord)>;
 /// Register observability callbacks via [`FeatureRegistry::on_load`] to emit
 /// metrics or traces after each feature is resolved.
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,ignore
-/// use swe_edge_configbuilder::{FeatureRegistry, OptionalSection};
+/// ```rust,no_run
+/// use swe_edge_configbuilder::{ConfigLoaderFactory, FeatureRegistry, OptionalSection};
+///
+/// # #[derive(serde::Deserialize)] struct BrokerConfig { host: String }
+/// # impl OptionalSection for BrokerConfig { fn section_name() -> &'static str { "broker" } }
+/// # #[derive(serde::Deserialize)] struct CacheConfig { ttl: u64 }
+/// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
+/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
 ///
 /// let mut registry = FeatureRegistry::new();
-/// registry.on_load(|r| tracing::info!(section = r.section_name, enabled = r.enabled));
-/// let broker = registry.load::<MessageBrokerConfig>(&loader)?;
-/// let cache  = registry.load::<CacheConfig>(&loader)?;
+/// registry.on_load(|r| eprintln!("[{}] enabled={}", r.section_name, r.enabled));
 ///
-/// tracing::info!("{}", registry.summary());
+/// let _broker = registry.load::<BrokerConfig>(&loader).expect("load failed");
+/// let _cache  = registry.load::<CacheConfig>(&loader).expect("load failed");
+///
+/// registry.validate_dependencies().expect("dependency check failed");
+/// eprintln!("{}", registry.summary());
 /// ```
 pub struct FeatureRegistry {
     records: Vec<FeatureRecord>,
@@ -44,7 +52,16 @@ impl Default for FeatureRegistry {
 }
 
 impl FeatureRegistry {
-    /// Create an empty registry.
+    /// Create an empty registry with no features and no observers.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::FeatureRegistry;
+    /// let registry = FeatureRegistry::new();
+    /// assert_eq!(registry.records().len(), 0);
+    /// assert!(registry.summary().all_enabled()); // vacuously true
+    /// ```
     pub fn new() -> Self {
         Self {
             records: Vec::new(),
@@ -163,11 +180,34 @@ impl FeatureRegistry {
     }
 
     /// All feature records collected so far, in load order.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::FeatureRegistry;
+    /// let registry = FeatureRegistry::new();
+    /// assert!(registry.records().is_empty());
+    /// ```
     pub fn records(&self) -> &[FeatureRecord] {
         &self.records
     }
 
     /// Produce a startup summary of every registered feature.
+    ///
+    /// The returned [`FeatureSummary`] implements [`Display`] — log it directly
+    /// with `tracing::info!("{}", registry.summary())`.
+    ///
+    /// [`FeatureSummary`]: crate::FeatureSummary
+    /// [`Display`]: std::fmt::Display
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::FeatureRegistry;
+    /// let registry = FeatureRegistry::new();
+    /// let summary = registry.summary();
+    /// assert_eq!(summary.total_count(), 0);
+    /// ```
     pub fn summary(&self) -> FeatureSummary {
         FeatureSummary {
             records: self.records.clone(),

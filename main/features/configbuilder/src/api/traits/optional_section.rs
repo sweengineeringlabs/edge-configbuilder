@@ -25,9 +25,11 @@ use crate::api::types::section_loader_impl::SectionLoaderImpl;
 /// Override `metadata` to annotate the feature with description, owner, and
 /// deprecation information for richer startup summaries.
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,ignore
+/// ```rust,no_run
+/// use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, FeatureState, OptionalSection};
+///
 /// #[derive(serde::Deserialize)]
 /// pub struct MessageBrokerConfig {
 ///     pub host:        String,
@@ -36,7 +38,7 @@ use crate::api::types::section_loader_impl::SectionLoaderImpl;
 ///     pub cert_path:   Option<String>,
 /// }
 ///
-/// impl swe_edge_configbuilder::OptionalSection for MessageBrokerConfig {
+/// impl OptionalSection for MessageBrokerConfig {
 ///     fn section_name() -> &'static str { "message_broker" }
 ///
 ///     fn validate_enabled(&self) -> Result<(), ConfigError> {
@@ -50,14 +52,14 @@ use crate::api::types::section_loader_impl::SectionLoaderImpl;
 ///     }
 /// }
 ///
-/// // runtime startup
-/// match MessageBrokerConfig::load_optional(&loader)? {
-///     FeatureState::Enabled(cfg) => init_broker(cfg),
-///     FeatureState::Disabled     => {}
+/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+/// match MessageBrokerConfig::load_optional(&loader).expect("load failed") {
+///     FeatureState::Enabled(cfg) => println!("broker at {}:{}", cfg.host, cfg.port),
+///     FeatureState::Disabled     => println!("broker not configured"),
 /// }
 /// ```
 ///
-/// [`ConfigSection`]: crate::api::traits::config::config_section::ConfigSection
+/// [`ConfigSection`]: crate::ConfigSection
 pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// The top-level TOML key for this section (e.g. `"message_broker"`).
     fn section_name() -> &'static str; // @allow: no_stub_fn_bodies — required trait method, no default

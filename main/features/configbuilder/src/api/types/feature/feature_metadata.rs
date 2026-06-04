@@ -6,10 +6,31 @@
 /// so the startup [`FeatureSummary`] can produce self-documenting operator output.
 ///
 /// All fields are `&'static str` so the struct is `Copy` and zero-cost at runtime.
+/// Use struct-literal syntax with `..FeatureMetadata::default()` to set only the
+/// fields you care about.
 ///
-/// [`OptionalSection::metadata`]: crate::api::traits::optional_section::OptionalSection::metadata
-/// [`FeatureRecord`]: crate::api::types::feature::feature_record::FeatureRecord
-/// [`FeatureSummary`]: crate::api::types::feature_summary::FeatureSummary
+/// [`OptionalSection::metadata`]: crate::OptionalSection::metadata
+/// [`FeatureRecord`]: crate::FeatureRecord
+/// [`FeatureSummary`]: crate::FeatureSummary
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::FeatureMetadata;
+///
+/// let meta = FeatureMetadata {
+///     description: "Async message bus backed by NATS",
+///     owner: "platform-team",
+///     deprecated_since: None,
+/// };
+///
+/// assert_eq!(meta.owner, "platform-team");
+/// assert!(meta.deprecated_since.is_none());
+///
+/// // Partial construction via Default
+/// let minimal = FeatureMetadata { description: "TLS termination", ..Default::default() };
+/// assert!(minimal.owner.is_empty());
+/// ```
 #[derive(Debug, Clone, Copy, Default)]
 pub struct FeatureMetadata {
     /// Short human-readable description shown in startup summaries and operator logs.

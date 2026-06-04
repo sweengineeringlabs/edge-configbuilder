@@ -11,18 +11,8 @@ use crate::api::traits::config::config_builder::ConfigBuilder;
 /// inherent method added by an extension impl in `saf/` (not on the [`ConfigBuilder`]
 /// trait) so that this declaration in `api/` carries no dependency on `core/`.
 ///
-/// # Usage
-///
-/// ```rust,ignore
-/// use swe_edge_configbuilder::ConfigLoaderFactory;
-///
-/// let loader = ConfigLoaderFactory::create_config_builder()
-///     .with_name(env!("CARGO_PKG_NAME"))
-///     .with_version(env!("CARGO_PKG_VERSION"))
-///     .build_loader()?;
-///
-/// let cfg: MyConfig = loader.load_section("my_section")?;
-/// ```
+/// Chain the fluent setters to configure XDG resolution, then call `build_loader()`
+/// to get a [`SectionLoaderImpl`] ready to call `load_section` on.
 ///
 /// # Why not `impl ConfigBuilder`?
 ///
@@ -31,8 +21,26 @@ use crate::api::traits::config::config_builder::ConfigBuilder;
 /// from ever calling `build_loader()`, because `build_loader` is not part of the
 /// [`ConfigBuilder`] trait contract.
 ///
-/// [`ConfigLoaderFactory::create_config_builder`]: crate::api::types::config::ConfigLoaderFactory::create_config_builder
-/// [`SectionLoaderImpl`]: crate::api::types::section_loader_impl::SectionLoaderImpl
+/// [`ConfigLoaderFactory::create_config_builder`]: crate::ConfigLoaderFactory::create_config_builder
+/// [`SectionLoaderImpl`]: crate::SectionLoaderImpl
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use swe_edge_configbuilder::ConfigBuilderImpl;
+///
+/// #[derive(serde::Deserialize, Default)]
+/// struct AuthConfig { token_ttl_secs: u64 }
+///
+/// let loader = ConfigBuilderImpl::new()
+///     .with_name(env!("CARGO_PKG_NAME"))
+///     .with_version(env!("CARGO_PKG_VERSION"))
+///     .with_config_dir("config/")
+///     .build_loader()
+///     .expect("config dir must be readable");
+///
+/// let cfg: AuthConfig = loader.load_section("auth").expect("auth section required");
+/// ```
 pub struct ConfigBuilderImpl {
     pub(crate) name: String,
     pub(crate) version: String,
@@ -49,6 +57,15 @@ impl ConfigBuilderImpl {
     /// [`with_name`]: Self::with_name
     /// [`with_version`]: Self::with_version
     /// [`build_loader`]: Self::build_loader
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// let b = ConfigBuilderImpl::new();
+    /// assert!(b.name().is_empty());
+    /// assert!(b.version().is_empty());
+    /// ```
     pub fn new() -> Self {
         Self {
             name: String::new(),
@@ -58,22 +75,54 @@ impl ConfigBuilderImpl {
     }
 
     /// Return the configured application name.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// let b = ConfigBuilderImpl::new().with_name("my-app");
+    /// assert_eq!(b.name(), "my-app");
+    /// ```
     pub fn name(&self) -> &str {
         &self.name
     }
 
     /// Return the configured application version.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// let b = ConfigBuilderImpl::new().with_version("1.2.3");
+    /// assert_eq!(b.version(), "1.2.3");
+    /// ```
     pub fn version(&self) -> &str {
         &self.version
     }
 
-    /// Set the application name; used by `build_loader` to resolve XDG paths.
+    /// Set the application name; used by `build_loader` to resolve XDG config paths.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// let b = ConfigBuilderImpl::new().with_name("swe-edge");
+    /// assert_eq!(b.name(), "swe-edge");
+    /// ```
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
         self.name = name.into();
         self
     }
 
     /// Set the application version string.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// let b = ConfigBuilderImpl::new().with_version("0.1.0");
+    /// assert_eq!(b.version(), "0.1.0");
+    /// ```
     pub fn with_version(mut self, version: impl Into<String>) -> Self {
         self.version = version.into();
         self
@@ -81,7 +130,18 @@ impl ConfigBuilderImpl {
 
     /// Append an explicit config directory; takes precedence over XDG resolution.
     ///
-    /// Multiple calls accumulate directories — later entries win on key conflicts.
+    /// Multiple calls accumulate directories in the order they are added — a key
+    /// present in a later directory wins over one in an earlier directory.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigBuilderImpl;
+    /// // Adding two directories; the second wins on conflicts.
+    /// let _b = ConfigBuilderImpl::new()
+    ///     .with_config_dir("/etc/my-app")
+    ///     .with_config_dir("/run/secrets/my-app");
+    /// ```
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
         self

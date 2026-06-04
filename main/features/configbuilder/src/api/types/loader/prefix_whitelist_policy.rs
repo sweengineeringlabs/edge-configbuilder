@@ -1,18 +1,59 @@
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 
-/// Allows only environment variables matching specified prefixes.
+/// Allows only environment variables whose names start with one of the given prefixes.
+///
+/// Any variable that does not match at least one prefix is rejected with an
+/// explanatory error message listing all allowed prefixes. Prefix comparison is
+/// case-sensitive and byte-exact.
+///
+/// Use this as the default production policy when your config variables share a
+/// common namespace prefix (e.g. `APP_`, `SWE_EDGE_`).
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
+///
+/// let policy = PrefixWhitelistPolicy::new(vec!["APP_".to_string(), "SWE_".to_string()]);
+///
+/// assert!(policy.validate("APP_PORT").is_ok());
+/// assert!(policy.validate("SWE_LOG_LEVEL").is_ok());
+/// assert!(policy.validate("SECRET_KEY").is_err());
+/// assert_eq!(policy.prefixes(), &["APP_", "SWE_"]);
+/// ```
 #[derive(Debug)]
 pub struct PrefixWhitelistPolicy {
     prefixes: Vec<String>,
 }
 
 impl PrefixWhitelistPolicy {
-    /// Create a new prefix whitelist policy.
+    /// Create a prefix whitelist from the given list of allowed prefixes.
+    ///
+    /// An empty `prefixes` list rejects every variable — prefer [`AllowAllPolicy`]
+    /// if you genuinely want unrestricted access.
+    ///
+    /// [`AllowAllPolicy`]: crate::AllowAllPolicy
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
+    /// let policy = PrefixWhitelistPolicy::new(vec!["APP_".to_string()]);
+    /// assert!(policy.validate("APP_HOST").is_ok());
+    /// ```
     pub fn new(prefixes: Vec<String>) -> Self {
         Self { prefixes }
     }
 
-    /// Get the allowed prefixes.
+    /// Returns the allowed prefixes in declaration order.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::PrefixWhitelistPolicy;
+    /// let policy = PrefixWhitelistPolicy::new(vec!["FOO_".to_string()]);
+    /// assert_eq!(policy.prefixes(), &["FOO_"]);
+    /// ```
     pub fn prefixes(&self) -> &[String] {
         &self.prefixes
     }

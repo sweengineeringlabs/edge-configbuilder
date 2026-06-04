@@ -5,7 +5,29 @@
 /// When [`FeatureRecord::override_source`] is `Some`, the feature's enabled/disabled
 /// state was forced by one of these mechanisms rather than simple section presence.
 ///
-/// [`FeatureRecord::override_source`]: crate::api::types::feature::feature_record::FeatureRecord::override_source
+/// `None` (no override) means the decision came from ordinary TOML logic: section
+/// present → `Enabled`, section absent → `Disabled`.
+///
+/// [`FeatureRecord::override_source`]: crate::FeatureRecord::override_source
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::OverrideSource;
+///
+/// // Env-var override: operator set SWE_EDGE_FEATURE_CACHE=false.
+/// let src = OverrideSource::EnvVar {
+///     var_name: "SWE_EDGE_FEATURE_CACHE".to_string(),
+///     value: "false".to_string(),
+/// };
+/// if let OverrideSource::EnvVar { var_name, .. } = &src {
+///     assert!(var_name.starts_with("SWE_EDGE_FEATURE_"));
+/// }
+///
+/// // Explicit TOML flag: [cache] enabled = false.
+/// let toml_flag = OverrideSource::ExplicitTomlFlag;
+/// assert!(matches!(toml_flag, OverrideSource::ExplicitTomlFlag));
+/// ```
 #[derive(Debug, Clone)]
 pub enum OverrideSource {
     /// An environment variable forced this feature on or off.

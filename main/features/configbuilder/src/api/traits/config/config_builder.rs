@@ -22,13 +22,14 @@ use std::path::PathBuf;
 ///
 /// # Obtaining a concrete instance
 ///
-/// ```rust,ignore
+/// ```rust,no_run
 /// use swe_edge_configbuilder::ConfigLoaderFactory;
 ///
 /// let loader = ConfigLoaderFactory::create_config_builder()
 ///     .with_name("my-service")
 ///     .with_version("1.0.0")
-///     .build_loader()?;
+///     .build_loader()
+///     .expect("config dir accessible");
 /// ```
 ///
 /// [`ConfigBuilderImpl`]: crate::api::types::config::ConfigBuilderImpl

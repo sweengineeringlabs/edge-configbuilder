@@ -6,13 +6,16 @@
 //!
 //! # Usage
 //!
-//! ```rust,ignore
-//! use swe_edge_configbuilder::ConfigLoaderFactory;`n//!
+//! ```rust,no_run
+//! use swe_edge_configbuilder::ConfigLoaderFactory;
+//!
 //! #[derive(serde::Deserialize, Default)]
 //! struct CompletionConfig { model: String, max_tokens: u32 }
 //!
-//! let cfg: CompletionConfig =
-//!     ConfigLoaderFactory::create_loader()?.load_section("application.completion")?;
+//! let cfg: CompletionConfig = ConfigLoaderFactory::create_loader()
+//!     .expect("config dir accessible")
+//!     .load_section("application.completion")
+//!     .expect("completion section required");
 //! ```
 
 #![deny(unsafe_code)]
@@ -72,14 +75,22 @@ pub mod __internal {
 /// Returns `Err(ConfigError::Validation)` if a dependency cycle is detected.
 /// The first load failure propagates and stops further loading.
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,ignore
-/// use swe_edge_configbuilder::{load_in_order, FeatureRegistry};
+/// ```rust,no_run
+/// use swe_edge_configbuilder::{load_in_order, ConfigLoaderFactory, FeatureRegistry, OptionalSection};
 ///
+/// # #[derive(serde::Deserialize)] struct CacheConfig;
+/// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
+/// # #[derive(serde::Deserialize)] struct BrokerConfig;
+/// # impl OptionalSection for BrokerConfig { fn section_name() -> &'static str { "broker" } }
+/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
 /// let mut registry = FeatureRegistry::new();
-/// load_in_order!(&mut registry, &loader, CacheConfig, BrokerConfig, AnalyticsConfig)?;
-/// registry.validate_dependencies()?;
+///
+/// load_in_order!(&mut registry, &loader, CacheConfig, BrokerConfig)
+///     .expect("dependency order must be acyclic");
+///
+/// registry.validate_dependencies().expect("all dependencies satisfied");
 /// println!("{}", registry.summary());
 /// ```
 #[macro_export]
@@ -123,14 +134,20 @@ macro_rules! load_in_order {
 /// - [`PreflightIssueKind::DependencyMissing`] — a declared dependency is not enabled
 /// - [`PreflightIssueKind::DependencyCycle`] — a cycle exists in the dependency graph
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,ignore
-/// use swe_edge_configbuilder::preflight;
+/// ```rust,no_run
+/// use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection};
 ///
-/// let report = preflight!(&loader, CacheConfig, BrokerConfig, AnalyticsConfig);
+/// # #[derive(serde::Deserialize)] struct CacheConfig;
+/// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
+/// # #[derive(serde::Deserialize)] struct BrokerConfig;
+/// # impl OptionalSection for BrokerConfig { fn section_name() -> &'static str { "broker" } }
+/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+/// let report = preflight!(&loader, CacheConfig, BrokerConfig);
+///
 /// if !report.is_ok() {
-///     eprintln!("{}", report);
+///     eprintln!("{report}");
 ///     std::process::exit(1);
 /// }
 /// ```

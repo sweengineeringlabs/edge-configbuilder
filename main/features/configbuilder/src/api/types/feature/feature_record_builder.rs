@@ -5,6 +5,33 @@ use crate::api::types::feature::feature_record::FeatureRecord;
 use crate::api::types::feature::override_source::OverrideSource;
 
 /// Fluent builder for [`FeatureRecord`].
+///
+/// Start with [`FeatureRecordBuilder::new`], chain the setter methods, then call
+/// [`build`] to obtain a [`FeatureRecord`].  Fields not explicitly set default
+/// to: `enabled = false`, no override source, no dependencies, empty metadata.
+///
+/// [`build`]: FeatureRecordBuilder::build
+/// [`FeatureRecord`]: crate::FeatureRecord
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::{FeatureMetadata, FeatureRecordBuilder, OverrideSource};
+///
+/// let record = FeatureRecordBuilder::new("message_broker")
+///     .enabled(true)
+///     .requires(&["tls"])
+///     .metadata(FeatureMetadata {
+///         description: "Async message bus",
+///         owner: "platform-team",
+///         deprecated_since: None,
+///     })
+///     .build();
+///
+/// assert_eq!(record.section_name, "message_broker");
+/// assert!(record.enabled);
+/// assert_eq!(record.metadata.description, "Async message bus");
+/// ```
 pub struct FeatureRecordBuilder {
     section_name: String,
     enabled: bool,
@@ -15,6 +42,14 @@ pub struct FeatureRecordBuilder {
 
 impl FeatureRecordBuilder {
     /// Start a builder for the named TOML section.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::FeatureRecordBuilder;
+    /// let b = FeatureRecordBuilder::new("auth");
+    /// assert_eq!(b.build().section_name, "auth");
+    /// ```
     pub fn new(section_name: impl Into<String>) -> Self {
         Self {
             section_name: section_name.into(),
@@ -50,6 +85,15 @@ impl FeatureRecordBuilder {
     }
 
     /// Consume the builder and return a [`FeatureRecord`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::FeatureRecordBuilder;
+    /// let record = FeatureRecordBuilder::new("tls").enabled(true).build();
+    /// assert!(record.enabled);
+    /// assert!(record.override_source.is_none());
+    /// ```
     pub fn build(self) -> FeatureRecord {
         FeatureRecord {
             section_name: self.section_name,

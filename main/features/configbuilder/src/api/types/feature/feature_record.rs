@@ -8,7 +8,27 @@ use crate::api::types::feature::override_source::OverrideSource;
 /// Collected by [`FeatureRegistry`] as each feature is loaded, so the registry
 /// can produce a startup summary of every registered feature.
 ///
+/// Construct via [`FeatureRecordBuilder`] rather than struct literal syntax, as
+/// new fields may be added without a semver bump.
+///
 /// [`FeatureRegistry`]: crate::api::types::feature_registry::FeatureRegistry
+/// [`FeatureRecordBuilder`]: crate::FeatureRecordBuilder
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::FeatureRecordBuilder;
+///
+/// let record = FeatureRecordBuilder::new("cache")
+///     .enabled(true)
+///     .requires(&["tls"])
+///     .build();
+///
+/// assert_eq!(record.section_name, "cache");
+/// assert!(record.enabled);
+/// assert_eq!(record.requires, &["tls"]);
+/// assert!(record.override_source.is_none());
+/// ```
 #[derive(Debug, Clone)]
 pub struct FeatureRecord {
     /// The TOML section key for this feature (e.g. `"message_broker"`).

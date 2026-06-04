@@ -9,18 +9,20 @@ use crate::api::types::section_loader_impl::SectionLoaderImpl;
 /// runtime calls [`ConfigSection::load`] once at startup — callers never
 /// write `ConfigLoaderFactory::create_config_builder().build_loader().load_section(...)` manually.
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,ignore
+/// ```rust,no_run
+/// use swe_edge_configbuilder::{ConfigLoaderFactory, ConfigSection};
+///
 /// #[derive(serde::Deserialize, Default)]
 /// pub struct MtlsAuthConfig { pub allowed_cns: Vec<String> }
 ///
-/// impl swe_edge_configbuilder::ConfigSection for MtlsAuthConfig {
+/// impl ConfigSection for MtlsAuthConfig {
 ///     fn section_name() -> &'static str { "mtls" }
 /// }
 ///
-/// // runtime
-/// let cfg = MtlsAuthConfig::load(&loader)?;
+/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+/// let cfg = MtlsAuthConfig::load(&loader).expect("mtls section required");
 /// ```
 pub trait ConfigSection: serde::de::DeserializeOwned + Default + Send + Sync + 'static {
     /// The top-level TOML key for this section (e.g. `"mtls"`, `"authz"`).

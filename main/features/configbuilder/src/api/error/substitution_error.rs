@@ -1,6 +1,24 @@
 use std::fmt;
 
 /// Error type for environment variable substitution failures.
+///
+/// Produced internally when the TOML loader encounters a `{{VAR_NAME}}` placeholder
+/// that is either missing from the environment or rejected by the active
+/// [`SubstitutionPolicy`]. Converted to [`ConfigError::Io`] before being returned
+/// to callers — you will not receive this type directly.
+///
+/// [`SubstitutionPolicy`]: crate::SubstitutionPolicy
+/// [`ConfigError::Io`]: crate::ConfigError::Io
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// // SubstitutionError is an internal detail; callers see ConfigError::Io.
+/// // To trigger this error path in tests, configure a policy and provide a
+/// // TOML value with an unresolvable placeholder:
+/// //   host = "{{MISSING_VAR}}"
+/// // The loader will return Err(ConfigError::Io("variable 'MISSING_VAR' not found ...")).
+/// ```
 #[derive(Debug, Clone)]
 pub enum SubstitutionError {
     /// A referenced environment variable was not found.

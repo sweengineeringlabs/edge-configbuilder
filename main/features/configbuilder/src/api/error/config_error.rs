@@ -1,6 +1,35 @@
 use thiserror::Error;
 
 /// Errors returned by config loading and validation operations.
+///
+/// Returned by [`Loader::load_section`], [`FeatureLoader::load_feature`], and
+/// every factory function that builds a loader. Match on the variant to decide
+/// whether to abort startup or log and continue.
+///
+/// [`Loader::load_section`]: crate::Loader::load_section
+/// [`FeatureLoader::load_feature`]: crate::FeatureLoader::load_feature
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::ConfigError;
+///
+/// // Construct a validation error with an actionable message.
+/// let err = ConfigError::validation(
+///     "auth",
+///     "cert_path is required when tls_enabled = true",
+/// );
+/// assert!(err.to_string().contains("cert_path"));
+///
+/// // Match on the variant.
+/// match err {
+///     ConfigError::Validation { section, reason } => {
+///         assert_eq!(section, "auth");
+///         assert!(reason.contains("cert_path"));
+///     }
+///     _ => panic!("unexpected variant"),
+/// }
+/// ```
 #[derive(Debug, Error)]
 pub enum ConfigError {
     /// A TOML file could not be parsed.
@@ -41,6 +70,15 @@ pub enum ConfigError {
 
 impl ConfigError {
     /// Construct a [`ConfigError::Validation`] with the section name and reason.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use swe_edge_configbuilder::ConfigError;
+    ///
+    /// let err = ConfigError::validation("tls", "key_path is required");
+    /// assert!(matches!(err, ConfigError::Validation { .. }));
+    /// ```
     pub fn validation(section: impl Into<String>, reason: impl Into<String>) -> Self {
         Self::Validation {
             section: section.into(),

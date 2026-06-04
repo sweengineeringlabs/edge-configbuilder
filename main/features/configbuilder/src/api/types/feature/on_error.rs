@@ -8,9 +8,22 @@
 ///
 /// The env var takes precedence over the trait default.
 ///
-/// [`FeatureRegistry`]: crate::api::types::feature_registry::FeatureRegistry
-/// [`OptionalSection::validate_enabled`]: crate::api::traits::optional_section::OptionalSection::validate_enabled
-/// [`OptionalSection::on_error`]: crate::api::traits::optional_section::OptionalSection::on_error
+/// [`FeatureRegistry`]: crate::FeatureRegistry
+/// [`OptionalSection::validate_enabled`]: crate::OptionalSection::validate_enabled
+/// [`OptionalSection::on_error`]: crate::OptionalSection::on_error
+///
+/// # Examples
+///
+/// ```rust
+/// use swe_edge_configbuilder::OnError;
+///
+/// // Default policy halts startup on misconfiguration.
+/// assert_eq!(OnError::default(), OnError::Fail);
+///
+/// // Override to keep the service running even when this feature is broken.
+/// let policy = OnError::Disable;
+/// assert_ne!(policy, OnError::Fail);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum OnError {
     /// Propagate the error — startup halts immediately. **This is the default.**
