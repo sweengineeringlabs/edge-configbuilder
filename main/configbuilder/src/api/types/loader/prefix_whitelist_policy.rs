@@ -29,10 +29,9 @@ pub struct PrefixWhitelistPolicy {
 impl PrefixWhitelistPolicy {
     /// Create a prefix whitelist from the given list of allowed prefixes.
     ///
-    /// An empty `prefixes` list rejects every variable — prefer [`AllowAllPolicy`]
-    /// if you genuinely want unrestricted access.
-    ///
-    /// [`AllowAllPolicy`]: crate::AllowAllPolicy
+    /// An empty `prefixes` list rejects every variable. Pass `[""]` as the
+    /// sole prefix to accept all variables when unrestricted access is needed
+    /// (tests only — do not use in production).
     ///
     /// # Examples
     ///

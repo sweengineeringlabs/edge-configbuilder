@@ -18,6 +18,16 @@ service_type     = "config"
 name = "swe_edge_configbuilder"
 path = "src/lib.rs"
 
+[features]
+## Exposes `AllowAllPolicy` for use in tests.
+##
+## Add to `[dev-dependencies]` only:
+##   swe-edge-configbuilder = { ..., features = ["test-utils"] }
+##
+## Never enable in `[dependencies]` — `AllowAllPolicy` bypasses all variable
+## restrictions and must not reach production binaries.
+test-utils = []
+
 [dependencies]
 serde     = { version = "1.0", features = ["derive"] }
 toml      = "0.8"
@@ -51,10 +61,12 @@ path = "tests/feature_summary_e2e_test.rs"
 [[test]]
 name = "allow_all_policy_e2e_test"
 path = "tests/allow_all_policy_e2e_test.rs"
+required-features = ["test-utils"]
 
 [[test]]
 name = "composite_policy_e2e_test"
 path = "tests/composite_policy_e2e_test.rs"
+required-features = ["test-utils"]
 
 [[test]]
 name = "pattern_whitelist_policy_e2e_test"
@@ -75,6 +87,7 @@ path = "tests/preflight_issue_kind_e2e_test.rs"
 [[test]]
 name = "substituter_e2e_test"
 path = "tests/substituter_e2e_test.rs"
+required-features = ["test-utils"]
 
 [[test]]
 name = "section_loader_impl_e2e_test"
@@ -91,6 +104,7 @@ path = "tests/config_builder_impl_e2e_test.rs"
 [[test]]
 name = "substitution_config_builder_impl_e2e_test"
 path = "tests/substitution_config_builder_impl_e2e_test.rs"
+required-features = ["test-utils"]
 
 [[test]]
 name = "loader_ops_e2e_test"
@@ -111,3 +125,8 @@ path = "tests/feature_record_builder_int_test.rs"
 [[test]]
 name = "config_loader_factory_int_test"
 path = "tests/config_loader_factory_int_test.rs"
+
+[[test]]
+name = "substitution_policy_e2e_test"
+path = "tests/substitution_policy_e2e_test.rs"
+required-features = ["test-utils"]

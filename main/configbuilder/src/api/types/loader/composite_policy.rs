@@ -14,9 +14,7 @@ use crate::api::traits::substitution_policy::SubstitutionPolicy;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{
-///     AllowAllPolicy, CompositePolicy, PrefixWhitelistPolicy, SubstitutionPolicy,
-/// };
+/// use swe_edge_configbuilder::{CompositePolicy, PrefixWhitelistPolicy, SubstitutionPolicy};
 ///
 /// let policy = CompositePolicy::new(vec![
 ///     Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
@@ -46,10 +44,12 @@ impl CompositePolicy {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{AllowAllPolicy, CompositePolicy, SubstitutionPolicy};
+    /// use swe_edge_configbuilder::{CompositePolicy, PrefixWhitelistPolicy, SubstitutionPolicy};
     ///
-    /// let policy = CompositePolicy::new(vec![Box::new(AllowAllPolicy)]);
-    /// assert!(policy.validate("ANYTHING").is_ok());
+    /// let policy = CompositePolicy::new(vec![
+    ///     Box::new(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])),
+    /// ]);
+    /// assert!(policy.validate("APP_HOST").is_ok());
     /// ```
     pub fn new(policies: Vec<Box<dyn SubstitutionPolicy>>) -> Self {
         Self { policies }

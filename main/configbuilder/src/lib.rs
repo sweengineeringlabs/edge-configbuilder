@@ -39,8 +39,10 @@ pub use crate::api::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
     OverrideSource,
 };
+#[cfg(any(test, feature = "test-utils"))]
+pub use crate::api::types::loader::AllowAllPolicy;
 pub use crate::api::types::loader::{
-    AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
+    CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
 pub use crate::api::types::path_validator_impl::PathValidatorImpl;
 pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};

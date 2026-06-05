@@ -4,11 +4,11 @@
 /// `validate` on every `{{VAR_NAME}}` placeholder before substituting it;
 /// rejection returns `ConfigError::Io` to the caller.
 ///
-/// Built-in implementations: [`AllowAllPolicy`], [`PrefixWhitelistPolicy`],
-/// [`PatternWhitelistPolicy`], [`CompositePolicy`].  Implement this trait when
-/// the built-ins do not match your security requirements.
+/// Built-in implementations: [`PrefixWhitelistPolicy`], [`PatternWhitelistPolicy`],
+/// [`CompositePolicy`].  For tests only: `AllowAllPolicy` (requires the
+/// `test-utils` feature).  Implement this trait when the built-ins do not match
+/// your security requirements.
 ///
-/// [`AllowAllPolicy`]: crate::AllowAllPolicy
 /// [`PrefixWhitelistPolicy`]: crate::PrefixWhitelistPolicy
 /// [`PatternWhitelistPolicy`]: crate::PatternWhitelistPolicy
 /// [`CompositePolicy`]: crate::CompositePolicy
@@ -48,8 +48,8 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{AllowAllPolicy, SubstitutionPolicy};
-    /// assert!(AllowAllPolicy.validate("ANY_VAR").is_ok());
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
+    /// assert!(PrefixWhitelistPolicy::new(vec!["APP_".to_string()]).validate("APP_HOST").is_ok());
     /// ```
     fn validate(&self, var_name: &str) -> Result<(), String>;
 
@@ -61,8 +61,11 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{AllowAllPolicy, SubstitutionPolicy};
-    /// assert_eq!(AllowAllPolicy.description(), "AllowAll (no restrictions)");
+    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
+    /// assert_eq!(
+    ///     PrefixWhitelistPolicy::new(vec!["APP_".to_string()]).description(),
+    ///     "PrefixWhitelist(APP_)"
+    /// );
     /// ```
     fn description(&self) -> String {
         "custom policy".to_string()

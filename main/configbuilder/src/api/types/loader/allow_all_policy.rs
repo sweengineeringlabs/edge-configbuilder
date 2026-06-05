@@ -1,3 +1,4 @@
+#[cfg(any(test, feature = "test-utils"))]
 use crate::api::traits::substitution_policy::SubstitutionPolicy;
 
 /// Allows all environment variables to be substituted (no restrictions).
@@ -22,9 +23,11 @@ use crate::api::traits::substitution_policy::SubstitutionPolicy;
 /// assert!(policy.validate("SECRET_KEY").is_ok());
 /// assert!(policy.validate("DATABASE_URL").is_ok());
 /// ```
+#[cfg(any(test, feature = "test-utils"))]
 #[derive(Debug)]
 pub struct AllowAllPolicy;
 
+#[cfg(any(test, feature = "test-utils"))]
 impl SubstitutionPolicy for AllowAllPolicy {
     fn validate(&self, _var_name: &str) -> Result<(), String> {
         Ok(())
