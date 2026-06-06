@@ -26,28 +26,28 @@ mod core;
 mod gateway;
 mod saf;
 
-pub use crate::api::traits::config::config_builder::ConfigBuilder;
-pub use crate::api::traits::config::config_section::ConfigSection;
-pub use crate::api::traits::feature_loader::FeatureLoader;
-pub use crate::api::traits::loader::Loader;
-pub use crate::api::traits::optional_section::OptionalSection;
-pub use crate::api::traits::substitution_policy::SubstitutionPolicy;
-pub use crate::api::traits::validator::Validator;
-pub use crate::api::types::application_config::ApplicationConfig;
-pub use crate::api::types::config::ConfigBuilderImpl;
-pub use crate::api::types::feature::{
+pub use crate::api::configbuilder::traits::config_builder::ConfigBuilder;
+pub use crate::api::configbuilder::types::application_config::ApplicationConfig;
+pub use crate::api::configbuilder::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
+pub use crate::api::configbuilder::types::ConfigBuilderImpl;
+pub use crate::api::loader::traits::config_section::ConfigSection;
+pub use crate::api::loader::traits::feature_loader::FeatureLoader;
+pub use crate::api::loader::traits::loader::Loader;
+pub use crate::api::loader::traits::optional_section::OptionalSection;
+pub use crate::api::loader::types::feature::{
     FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
     OverrideSource,
 };
+pub use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+pub use crate::api::preflight::types::{PreflightIssue, PreflightIssueKind, PreflightReport};
+pub use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
 #[cfg(any(test, feature = "test-utils"))]
-pub use crate::api::types::loader::AllowAllPolicy;
-pub use crate::api::types::loader::{
+pub use crate::api::substitution::types::AllowAllPolicy;
+pub use crate::api::substitution::types::{
     CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
 };
-pub use crate::api::types::path_validator_impl::PathValidatorImpl;
-pub use crate::api::types::preflight::{PreflightIssue, PreflightIssueKind, PreflightReport};
-pub use crate::api::types::section_loader_impl::SectionLoaderImpl;
-pub use crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
+pub use crate::api::validator::traits::validator::Validator;
+pub use crate::api::validator::types::path_validator_impl::PathValidatorImpl;
 pub use gateway::*;
 
 #[doc(hidden)]
@@ -65,7 +65,7 @@ pub use crate::api::validator::ValidatorBound;
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod __internal {
-    pub use crate::api::types::topology::Topology;
+    pub use crate::api::loader::types::topology::Topology;
 }
 
 /// Load a set of optional feature sections in dependency order.

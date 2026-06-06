@@ -42,7 +42,7 @@ pub enum ConfigError {
 
     /// No `application.toml` was found in any configured directory.
     ///
-    /// Returned by [`crate::api::traits::loader::Loader::load_section`] when
+    /// Returned by [`crate::api::loader::traits::loader::Loader::load_section`] when
     /// every candidate directory either does not exist or contains no
     /// `application.toml` file. This usually indicates a misconfigured config
     /// path rather than an intentionally absent section.
@@ -58,7 +58,7 @@ pub enum ConfigError {
     /// The message must be actionable: state what constraint was violated and
     /// what the operator must do to resolve it.
     ///
-    /// [`OptionalSection::validate_enabled`]: crate::api::traits::optional_section::OptionalSection::validate_enabled
+    /// [`OptionalSection::validate_enabled`]: crate::api::loader::traits::optional_section::OptionalSection::validate_enabled
     #[error("config validation error in section '{section}': {reason}")]
     Validation {
         /// The TOML section key where the violation was detected (e.g. `"message_broker"`).

@@ -13,16 +13,16 @@ const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 /// the worst-case startup hang from a stalled NFS/FUSE mount.
 pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::feature_loader::FeatureLoader;
-use crate::api::traits::loader::Loader;
-use crate::api::traits::loader_ops::LoaderOps;
-use crate::api::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::types::feature::feature_record::FeatureRecord;
-use crate::api::types::feature::feature_state::FeatureState;
-use crate::api::types::feature::loaded_feature::LoadedFeature;
-use crate::api::types::feature::override_source::OverrideSource;
-use crate::api::types::raw_feature::RawFeature;
+use crate::api::loader::traits::feature_loader::FeatureLoader;
+use crate::api::loader::traits::loader::Loader;
+use crate::api::loader::traits::loader_ops::LoaderOps;
+use crate::api::loader::types::feature::feature_metadata::FeatureMetadata;
+use crate::api::loader::types::feature::feature_record::FeatureRecord;
+use crate::api::loader::types::feature::feature_state::FeatureState;
+use crate::api::loader::types::feature::loaded_feature::LoadedFeature;
+use crate::api::loader::types::feature::override_source::OverrideSource;
+use crate::api::loader::types::raw_feature::RawFeature;
+use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
 use crate::core::Substituter;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
@@ -353,7 +353,7 @@ impl FeatureLoader for DefaultSectionLoader {
 mod tests {
     use super::*;
     use crate::api::error::config_error::ConfigError;
-    use crate::api::types::feature::feature_state::FeatureState;
+    use crate::api::loader::types::feature::feature_state::FeatureState;
     use std::io::Write as _;
     use std::path::Path;
     use tempfile::TempDir;
@@ -711,7 +711,7 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::feature::override_source::OverrideSource::ExplicitTomlFlag)
+                Some(crate::api::loader::types::feature::override_source::OverrideSource::ExplicitTomlFlag)
             ),
             "expected ExplicitTomlFlag override source"
         );
@@ -739,7 +739,9 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::feature::override_source::OverrideSource::EnvVar { .. })
+                Some(
+                    crate::api::loader::types::feature::override_source::OverrideSource::EnvVar { .. }
+                )
             ),
             "expected EnvVar override source"
         );
@@ -767,7 +769,9 @@ mod tests {
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::types::feature::override_source::OverrideSource::EnvVar { .. })
+                Some(
+                    crate::api::loader::types::feature::override_source::OverrideSource::EnvVar { .. }
+                )
             ),
             "expected EnvVar override source"
         );

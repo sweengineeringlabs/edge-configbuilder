@@ -1,13 +1,13 @@
 use std::path::PathBuf;
 
+use crate::api::configbuilder::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
+use crate::api::configbuilder::types::ConfigBuilderImpl;
+use crate::api::configbuilder::types::ConfigLoaderFactory;
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::types::config::ConfigBuilderImpl;
-use crate::api::types::config::ConfigLoaderFactory;
-use crate::api::types::feature::feature_state::FeatureState;
-use crate::api::types::path_validator_impl::PathValidatorImpl;
-use crate::api::types::section_loader_impl::SectionLoaderImpl;
-use crate::api::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
+use crate::api::loader::types::feature::feature_state::FeatureState;
+use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::validator::types::path_validator_impl::PathValidatorImpl;
 use crate::core::{
     DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator, DEFAULT_READ_TIMEOUT,
 };

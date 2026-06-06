@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use crate::api::error::config_error::ConfigError;
-use crate::api::traits::loader::Loader as _;
+use crate::api::loader::traits::loader::Loader as _;
 use crate::core::DefaultSectionLoader;
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
@@ -99,7 +99,7 @@ impl DefaultConfigBuilder {
 }
 
 /// Builder-style accessors used only by this module's unit tests.
-/// The production builder API lives on [`ConfigBuilderImpl`](crate::api::types::config::ConfigBuilderImpl).
+/// The production builder API lives on [`ConfigBuilderImpl`](crate::api::configbuilder::types::ConfigBuilderImpl).
 #[cfg(test)]
 impl DefaultConfigBuilder {
     pub(crate) fn name(&self) -> &str {
