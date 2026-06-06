@@ -1,14 +1,14 @@
 [package]
 name             = "swe-edge-configbuilder"
-version.workspace     = true
-edition.workspace     = true
-license.workspace     = true
-rust-version.workspace = true
-authors.workspace     = true
-repository.workspace  = true
-description  = "Standalone, runtime-independent TOML section loader for swe-edge services."
-keywords     = ["config", "toml", "xdg", "loader", "swe"]
-categories   = ["config"]
+version          = "0.1.0"
+edition          = "2021"
+license          = "MIT OR Apache-2.0"
+rust-version     = "1.95"
+authors          = ["SWE Engineering Labs"]
+repository       = "https://github.com/sweengineeringlabs/edge"
+description      = "Standalone, runtime-independent TOML section loader for swe-edge services."
+keywords         = ["config", "toml", "xdg", "loader", "swe"]
+categories       = ["config"]
 
 [package.metadata.struct-engine]
 application_type = "lib"
@@ -16,7 +16,7 @@ service_type     = "config"
 
 [lib]
 name = "swe_edge_configbuilder"
-path = "src/lib.rs"
+path = "main/src/lib.rs"
 
 [features]
 ## Exposes `AllowAllPolicy` for use in tests.
