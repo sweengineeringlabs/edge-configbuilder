@@ -1,4 +1,5 @@
 //! End-to-end tests for the substituter (env-var substitution in TOML values).
+#![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used)]
 #![allow(unsafe_code)]
 

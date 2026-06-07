@@ -1,4 +1,5 @@
 //! End-to-end tests for `SubstitutionConfigBuilderImpl`.
+#![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used)]
 #![allow(unsafe_code)]
 
