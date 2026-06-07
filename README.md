@@ -1,4 +1,6 @@
-# swe-edge-config
+# swe-edge-configbuilder
+
+> **TLDR:** Standalone TOML section loader for swe-edge — XDG-aware layered resolution, env var substitution with security policies, and preflight validation. No runtime dependency. See [Overview](scm/docs/README.md) for details.
 
 Standalone, runtime-independent TOML section loader for swe-edge services.
 
@@ -170,3 +172,9 @@ let loader = create_config_builder_with_substitution(Box::new(policy))
     .with_config_dir("/etc/myapp")
     .build_loader()?;
 ```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Overview](scm/docs/README.md) | WHAT + WHY — capabilities and design rationale |
