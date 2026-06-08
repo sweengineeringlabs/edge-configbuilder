@@ -366,6 +366,35 @@ impl ConfigLoaderFactory {
         }
     }
 
+    /// Load section `key` from the XDG config chain for `app_name` in one call.
+    ///
+    /// Equivalent to `ConfigLoaderFactory::create_loader_xdg(app_name)?.load_section(key)`,
+    /// provided so callers never need to hold an intermediate loader reference.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError::Io`] if any XDG path contains `..` traversal components
+    /// or is not a directory, and [`ConfigError::Parse`] if the section cannot be
+    /// deserialised into `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use swe_edge_configbuilder::ConfigLoaderFactory;
+    ///
+    /// #[derive(serde::Deserialize, Default)]
+    /// struct GoalConfig { target: String }
+    ///
+    /// let cfg: GoalConfig = ConfigLoaderFactory::load_section_xdg("my-app", "goal")
+    ///     .unwrap_or_default();
+    /// ```
+    pub fn load_section_xdg<T>(app_name: &str, key: &str) -> Result<T, ConfigError>
+    where
+        T: serde::de::DeserializeOwned + Default,
+    {
+        ConfigLoaderFactory::create_loader_xdg(app_name)?.load_section(key)
+    }
+
     /// Create an XDG-aware loader with substitution support.
     ///
     /// Combines XDG multi-directory resolution (same as [`create_loader_xdg`])

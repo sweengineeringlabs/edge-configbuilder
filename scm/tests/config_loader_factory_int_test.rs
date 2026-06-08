@@ -20,3 +20,43 @@ fn test_create_loader_for_dir_accepts_temp_dir() {
 fn test_create_validator_returns_path_validator() {
     let _v = ConfigLoaderFactory::create_validator();
 }
+
+/// @covers: load_section_xdg
+///
+/// Tests both present-section (returns value) and absent-section (returns Default)
+/// in a single test to avoid env-var races when tests run in parallel.
+#[test]
+fn test_load_section_xdg_reads_section_and_returns_default_when_absent(
+) -> Result<(), Box<dyn std::error::Error>> {
+    use std::io::Write as _;
+
+    #[derive(serde::Deserialize, Default, Debug, PartialEq)]
+    struct GoalSection {
+        target: String,
+    }
+    #[derive(serde::Deserialize, Default, PartialEq, Debug)]
+    struct OtherSection {
+        value: u32,
+    }
+
+    let dir = tempfile::tempdir()?;
+    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path());
+
+    let mut f = std::fs::File::create(dir.path().join("application.toml"))?;
+    f.write_all(b"[goal]\ntarget = \"prod\"\n")?;
+
+    // Present section → reads value.
+    let goal = ConfigLoaderFactory::load_section_xdg::<GoalSection>("dummy", "goal")?;
+    assert_eq!(goal.target, "prod");
+
+    // Absent section → file exists but key missing → Default.
+    let absent = ConfigLoaderFactory::load_section_xdg::<OtherSection>("dummy", "missing")?;
+    assert_eq!(
+        absent,
+        OtherSection { value: 0 },
+        "absent section must return default"
+    );
+
+    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+    Ok(())
+}
