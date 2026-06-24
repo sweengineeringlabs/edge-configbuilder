@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::api::configbuilder::traits::config_builder::ConfigBuilder;
 
-/// Concrete config builder returned by [`ConfigLoaderFactory::create_config_builder`].
+/// Concrete config builder returned by [`ConfigLoaderFactory::create_config_builder`](crate::ConfigLoaderFactory::create_config_builder).
 ///
 /// This is the **only type from which you can call `build_loader()`** to finalise
 /// configuration into a [`SectionLoaderImpl`].  The `build_loader` method is an
@@ -53,7 +53,7 @@ impl ConfigBuilderImpl {
     /// Create an empty builder with no name, version, or config dirs set.
     ///
     /// Call [`with_name`] and [`with_version`] to seed the builder before finalising
-    /// with [`build_loader`].  Prefer this over [`ConfigLoaderFactory::create_config_builder`]
+    /// with [`build_loader`].  Prefer this over [`ConfigLoaderFactory::create_config_builder`](crate::ConfigLoaderFactory::create_config_builder)
     /// when constructing from within a crate that knows its own name at compile time.
     ///
     /// [`with_name`]: Self::with_name
