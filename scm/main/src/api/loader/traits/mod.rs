@@ -1,3 +1,5 @@
+//! Loader contracts for required and optional section loading.
+
 pub mod config_section;
 pub mod feature_loader;
 pub mod loader;

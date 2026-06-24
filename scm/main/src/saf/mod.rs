@@ -1,3 +1,5 @@
+//! SAF facade for consumer-facing access to configbuilder services.
+
 mod config;
 mod configbuilder_svc;
 mod feature_loader_svc;

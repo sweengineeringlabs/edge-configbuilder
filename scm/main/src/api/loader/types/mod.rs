@@ -1,3 +1,5 @@
+//! Loader state and record types used to track feature loading outcomes.
+
 pub mod feature_metadata;
 pub mod feature_record;
 pub mod feature_record_builder;

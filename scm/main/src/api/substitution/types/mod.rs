@@ -1,3 +1,5 @@
+//! Built-in substitution policy implementations.
+
 #[cfg(any(test, feature = "test-utils"))]
 pub mod allow_all_policy;
 pub mod composite_policy;

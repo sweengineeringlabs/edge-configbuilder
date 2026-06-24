@@ -1,3 +1,5 @@
+//! Preflight report types and issue classification values.
+
 pub mod preflight_issue;
 pub mod preflight_issue_kind;
 pub mod preflight_report;
