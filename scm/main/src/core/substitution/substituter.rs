@@ -1,5 +1,6 @@
-use crate::api::substitution::error::substitution_error::SubstitutionError;
-use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::{
+    PolicyCatalog, SubstituterBound as SubstituterContract, SubstitutionError, SubstitutionPolicy,
+};
 use regex::Regex;
 use std::env;
 
@@ -95,11 +96,26 @@ impl<'a> Substituter<'a> {
     }
 }
 
+impl<'a> SubstituterContract for Substituter<'a> {}
+
+impl<'a> PolicyCatalog for Substituter<'a> {
+    type SubstitutionError = crate::api::SubstitutionError;
+    type CompositePolicy = crate::api::CompositePolicy;
+    type PatternWhitelistPolicy = crate::api::PatternWhitelistPolicy;
+    type PrefixWhitelistPolicy = crate::api::PrefixWhitelistPolicy;
+
+    #[cfg(any(test, feature = "test-utils"))]
+    type AllowAllPolicy = crate::api::AllowAllPolicy;
+}
+
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    use crate::api::substitution::types::AllowAllPolicy;
+    use crate::api::AllowAllPolicy;
+
+    fn must<T, E>(result: Result<T, E>) -> T {
+        result.unwrap_or_else(|_| std::process::abort())
+    }
 
     fn substituter(policy: &dyn SubstitutionPolicy) -> Substituter<'_> {
         Substituter::new(policy, "test_location".to_string())
@@ -116,7 +132,7 @@ mod tests {
     fn test_substitute() {
         let policy = AllowAllPolicy;
         let sub = substituter(&policy);
-        let result = sub.substitute("value").unwrap();
+        let result = must(sub.substitute("value"));
         assert_eq!(result, "value");
     }
 
@@ -124,7 +140,7 @@ mod tests {
     fn test_no_substitution_needed() {
         let policy = AllowAllPolicy;
         let sub = substituter(&policy);
-        let result = sub.substitute("hello world").unwrap();
+        let result = must(sub.substitute("hello world"));
         assert_eq!(result, "hello world");
     }
 
@@ -133,7 +149,7 @@ mod tests {
         std::env::set_var("TEST_VAR", "value123");
         let policy = AllowAllPolicy;
         let sub = substituter(&policy);
-        let result = sub.substitute("prefix-{{TEST_VAR}}-suffix").unwrap();
+        let result = must(sub.substitute("prefix-{{TEST_VAR}}-suffix"));
         assert_eq!(result, "prefix-value123-suffix");
     }
 
@@ -143,7 +159,7 @@ mod tests {
         std::env::set_var("VAR2", "world");
         let policy = AllowAllPolicy;
         let sub = substituter(&policy);
-        let result = sub.substitute("{{VAR1}} {{VAR2}}").unwrap();
+        let result = must(sub.substitute("{{VAR1}} {{VAR2}}"));
         assert_eq!(result, "hello world");
     }
 
@@ -151,7 +167,7 @@ mod tests {
     fn test_escaped_braces() {
         let policy = AllowAllPolicy;
         let sub = substituter(&policy);
-        let result = sub.substitute(r"use \{\{VAR\}\} for substitution").unwrap();
+        let result = must(sub.substitute(r"use \{\{VAR\}\} for substitution"));
         assert_eq!(result, "use {{VAR}} for substitution");
     }
 
@@ -179,7 +195,7 @@ mod tests {
 
     #[test]
     fn test_policy_rejection() {
-        use crate::api::substitution::types::PrefixWhitelistPolicy;
+        use crate::api::PrefixWhitelistPolicy;
         let policy = PrefixWhitelistPolicy::new(vec!["ALLOWED_".to_string()]);
         let sub = substituter(&policy);
         let result = sub.substitute("{{FORBIDDEN_VAR}}");

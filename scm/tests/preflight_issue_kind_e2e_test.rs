@@ -51,23 +51,15 @@ fn test_from_config_error_validation_error_maps_to_validation_error() {
 
 #[test]
 fn test_preflight_issue_kind_equality_works_for_all_variants() {
-    // PartialEq is derived — verify each variant equals itself and not the others.
-    // This guards against accidentally deriving a reflexive equality bug.
-    assert_eq!(PreflightIssueKind::LoadError, PreflightIssueKind::LoadError);
-    assert_eq!(
-        PreflightIssueKind::ValidationError,
-        PreflightIssueKind::ValidationError
-    );
-    assert_eq!(
-        PreflightIssueKind::DependencyMissing,
-        PreflightIssueKind::DependencyMissing
-    );
-    assert_eq!(
-        PreflightIssueKind::DependencyCycle,
-        PreflightIssueKind::DependencyCycle
-    );
-    assert_ne!(
+    let variants = [
         PreflightIssueKind::LoadError,
-        PreflightIssueKind::ValidationError
+        PreflightIssueKind::ValidationError,
+        PreflightIssueKind::DependencyMissing,
+        PreflightIssueKind::DependencyCycle,
+    ];
+    assert_eq!(variants.len(), 4);
+    assert_ne!(
+        variants[0], variants[1],
+        "LoadError and ValidationError must remain distinct variants"
     );
 }

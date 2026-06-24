@@ -6,7 +6,6 @@
 //! [`SubstitutionPolicy`]: traits::substitution_policy::SubstitutionPolicy
 
 pub mod error;
+pub mod substituter;
 pub mod traits;
 pub mod types;
-
-pub use traits::substituter_bound::SubstituterBound;

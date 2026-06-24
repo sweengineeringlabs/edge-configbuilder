@@ -2,7 +2,7 @@
 ///
 /// Implementations decide whether a variable name is allowed. The loader calls
 /// `validate` on every `{{VAR_NAME}}` placeholder before substituting it;
-/// rejection returns `ConfigError::Io` to the caller.
+/// rejection returns a config I/O error to the caller.
 ///
 /// Built-in implementations: [`PrefixWhitelistPolicy`], [`PatternWhitelistPolicy`],
 /// [`CompositePolicy`].  For tests only: `AllowAllPolicy` (requires the
@@ -42,7 +42,7 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// Decide whether `var_name` may be substituted into a config value.
     ///
     /// Return `Ok(())` to permit substitution or `Err(reason)` to reject it.
-    /// The `reason` string is included verbatim in the `ConfigError::Io` message
+    /// The `reason` string is included verbatim in the config I/O error message
     /// returned to the caller.
     ///
     /// # Examples

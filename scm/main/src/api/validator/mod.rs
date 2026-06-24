@@ -7,7 +7,6 @@
 //! [`ValidatorOps`]: traits::validator_ops::ValidatorOps
 //! [`PathValidatorImpl`]: types::path_validator_impl::PathValidatorImpl
 
+pub mod errors;
 pub mod traits;
 pub mod types;
-
-pub use traits::validator_bound::ValidatorBound;

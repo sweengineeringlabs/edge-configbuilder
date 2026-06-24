@@ -4,8 +4,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use crate::api::error::config_error::ConfigError;
-use crate::api::loader::traits::loader::Loader as _;
+use crate::api::{ConfigBuilder, ConfigBuilderBound, ConfigError, Loader as _};
 use crate::core::DefaultSectionLoader;
 
 const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
@@ -13,13 +12,6 @@ const FALLBACK_CONFIG_DIR: &str = "config";
 
 pub(crate) struct DefaultConfigBuilder {
     pub(crate) name: String,
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "set by constructors; read only by test-gated accessors (ConfigBuilderImpl owns the production builder API)"
-        )
-    )]
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
     pub(crate) read_timeout: Duration,
@@ -98,6 +90,38 @@ impl DefaultConfigBuilder {
     }
 }
 
+impl ConfigBuilder for DefaultConfigBuilder {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn version(&self) -> &str {
+        &self.version
+    }
+
+    fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
+        self
+    }
+
+    fn with_version(mut self, version: impl Into<String>) -> Self {
+        self.version = version.into();
+        self
+    }
+
+    fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.config_dirs.push(dir.into());
+        self
+    }
+}
+
+impl ConfigBuilderBound for DefaultConfigBuilder {
+    type ApplicationConfig = crate::api::ApplicationConfig;
+    type Builder = crate::api::ConfigBuilderImpl;
+    type Factory = crate::api::ConfigLoaderFactory;
+    type SubstitutionBuilder = crate::api::SubstitutionConfigBuilderImpl;
+}
+
 /// Builder-style accessors used only by this module's unit tests.
 /// The production builder API lives on [`ConfigBuilderImpl`](crate::api::configbuilder::types::ConfigBuilderImpl).
 #[cfg(test)]
@@ -127,11 +151,21 @@ impl DefaultConfigBuilder {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    use crate::api::error::config_error::ConfigError;
+    use crate::api::ConfigError;
     use std::io::Write as _;
+
+    fn must<T, E>(result: Result<T, E>) -> T {
+        result.unwrap_or_else(|_| std::process::abort())
+    }
+
+    fn path_str(path: &Path) -> &str {
+        match path.to_str() {
+            Some(value) => value,
+            None => std::process::abort(),
+        }
+    }
 
     fn blank() -> DefaultConfigBuilder {
         DefaultConfigBuilder {
@@ -184,25 +218,22 @@ mod tests {
 
     #[test]
     fn test_build_loader_with_explicit_dir_reads_application_toml() {
-        let dir = tempfile::tempdir().unwrap();
-        let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
-        writeln!(f, "[svc]\nvalue = \"ok\"").unwrap();
-        let sec: DefaultConfigBuilderFixture = blank()
-            .with_config_dir(dir.path())
-            .build_loader_internal()
-            .unwrap()
-            .load_section("svc")
-            .unwrap();
+        let dir = must(tempfile::tempdir());
+        let mut f = must(std::fs::File::create(dir.path().join("application.toml")));
+        must(writeln!(f, "[svc]\nvalue = \"ok\""));
+        let loader = must(blank().with_config_dir(dir.path()).build_loader_internal());
+        let sec: DefaultConfigBuilderFixture = must(loader.load_section("svc"));
         assert_eq!(sec.value, "ok");
     }
 
     #[test]
     fn test_build_loader_with_unknown_name_returns_not_found() {
-        let result: Result<DefaultConfigBuilderFixture, _> = blank()
-            .with_name("swe-edge-nonexistent-test-xyz")
-            .build_loader_internal()
-            .unwrap()
-            .load_section("any");
+        let loader = must(
+            blank()
+                .with_name("swe-edge-nonexistent-test-xyz")
+                .build_loader_internal(),
+        );
+        let result: Result<DefaultConfigBuilderFixture, _> = loader.load_section("any");
         assert!(
             matches!(result, Err(ConfigError::NotFound(_))),
             "expected NotFound for unknown app, got {result:?}"
@@ -213,12 +244,11 @@ mod tests {
     fn test_build_loader_no_name_no_dirs_no_application_toml_returns_not_found() {
         // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no
         // application.toml — load_section must return NotFound.
-        let dir = tempfile::tempdir().unwrap();
-        std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
-        let result: Result<DefaultConfigBuilderFixture, _> = blank()
-            .build_loader_internal()
-            .unwrap()
-            .load_section("nonexistent_section_xyz");
+        let dir = must(tempfile::tempdir());
+        std::env::set_var("SWE_EDGE_CONFIG_DIR", path_str(dir.path()));
+        let loader = must(blank().build_loader_internal());
+        let result: Result<DefaultConfigBuilderFixture, _> =
+            loader.load_section("nonexistent_section_xyz");
         std::env::remove_var("SWE_EDGE_CONFIG_DIR");
         assert!(
             matches!(result, Err(ConfigError::NotFound(_))),
@@ -236,25 +266,27 @@ mod tests {
 
     #[test]
     fn test_reject_traversal_accepts_absolute_path() {
-        assert!(
-            DefaultConfigBuilder::reject_traversal(std::path::Path::new("/etc/xdg/myapp")).is_ok(),
-            "expected ok for absolute path without '..'"
-        );
+        let path = std::path::Path::new("/etc/xdg/myapp");
+        assert!(!path
+            .components()
+            .any(|c| { matches!(c, std::path::Component::ParentDir) }));
+        assert!(matches!(
+            DefaultConfigBuilder::reject_traversal(path),
+            Ok(())
+        ));
     }
 
     #[test]
     fn test_build_loader_internal() {
-        let dir = tempfile::tempdir().unwrap();
+        let dir = must(tempfile::tempdir());
         let builder = DefaultConfigBuilder {
             name: String::new(),
             version: String::new(),
             config_dirs: vec![dir.path().to_path_buf()],
             read_timeout: Duration::from_secs(30),
         };
-        let result = builder.build_loader_internal();
-        assert!(
-            result.is_ok(),
-            "expected ok loader from explicit config_dir"
-        );
+        let loader = must(builder.build_loader_internal());
+        assert_eq!(loader.config_dirs, vec![dir.path().to_path_buf()]);
+        assert_eq!(loader.read_timeout, Duration::from_secs(30));
     }
 }

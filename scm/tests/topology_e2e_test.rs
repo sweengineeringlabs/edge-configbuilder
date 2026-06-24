@@ -1,7 +1,7 @@
 //! End-to-end tests for the internal topological sort utility.
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::__internal::Topology;
+use swe_edge_configbuilder::Topology;
 
 #[test]
 fn test_topo_sort_single_node_no_deps_returns_index_zero() {
@@ -20,7 +20,8 @@ fn test_topo_sort_three_independent_nodes_returns_all_three_indices() {
 
 #[test]
 fn test_topo_sort_linear_chain_dependency_loads_first() {
-    let order = Topology::sort(&["b", "a"], &[&["a"], &[]]).unwrap();
+    let requires: &[&[&str]] = &[&["a"], &[]];
+    let order = Topology::sort(&["b", "a"], requires).unwrap();
     let pos_a = order.iter().position(|&i| i == 1).unwrap();
     let pos_b = order.iter().position(|&i| i == 0).unwrap();
     assert!(pos_a < pos_b, "a must load before b (b depends on a)");
@@ -58,7 +59,8 @@ fn test_topo_sort_self_cycle_single_node_returns_err() {
 
 #[test]
 fn test_topo_sort_unknown_dependency_is_silently_ignored() {
-    let order = Topology::sort(&["a", "b"], &[&[], &["ghost"]]).unwrap();
+    let requires: &[&[&str]] = &[&[], &["ghost"]];
+    let order = Topology::sort(&["a", "b"], requires).unwrap();
     assert_eq!(order.len(), 2);
 }
 

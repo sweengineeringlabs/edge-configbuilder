@@ -5,11 +5,12 @@ use swe_edge_configbuilder::ConfigLoaderFactory;
 /// @covers: create_loader_for_dir
 #[test]
 fn test_validate_section_dir_nonexistent_path_succeeds() {
-    assert!(
-        ConfigLoaderFactory::create_loader_for_dir("/nonexistent/swe-edge-test-path-xyz")
-            .validate()
-            .is_ok()
-    );
+    let path = std::path::Path::new("/nonexistent/swe-edge-test-path-xyz");
+    assert!(!path.exists(), "test path must remain absent");
+    assert!(matches!(
+        ConfigLoaderFactory::create_loader_for_dir(path).validate(),
+        Ok(())
+    ));
 }
 
 /// @covers: create_loader_for_dir

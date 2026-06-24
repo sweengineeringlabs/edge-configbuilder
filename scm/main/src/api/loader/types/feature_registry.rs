@@ -1,13 +1,13 @@
 //! [`FeatureRegistry`] — startup feature collector and dependency validator.
 
-use crate::api::error::config_error::ConfigError;
 use crate::api::loader::traits::optional_section::OptionalSection;
-use crate::api::loader::types::feature::feature_record::FeatureRecord;
-use crate::api::loader::types::feature::feature_state::FeatureState;
-use crate::api::loader::types::feature::on_error::OnError;
-use crate::api::loader::types::feature::override_source::OverrideSource;
+use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::types::feature_state::FeatureState;
 use crate::api::loader::types::feature_summary::FeatureSummary;
+use crate::api::loader::types::on_error::OnError;
+use crate::api::loader::types::override_source::OverrideSource;
 use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+use crate::api::ConfigError;
 
 type FeatureObserver = Box<dyn Fn(&FeatureRecord)>;
 
@@ -95,18 +95,20 @@ impl FeatureRegistry {
     where
         T: OptionalSection,
     {
-        use crate::api::loader::types::feature::loaded_feature::LoadedFeature;
+        use crate::api::loader::types::loaded_feature::LoadedFeature;
 
         let loaded: LoadedFeature<T> = loader.load_feature(T::section_name())?;
+        let LoadedFeature { state, record } = loaded;
+        let record = *record;
 
-        let validation_result = if let FeatureState::Enabled(ref value) = loaded.state {
+        let validation_result = if let FeatureState::Enabled(ref value) = state {
             Some(value.validate_enabled())
         } else {
             None
         };
 
         let (final_state, final_override) = match validation_result {
-            Some(Ok(())) | None => (loaded.state, loaded.record.override_source),
+            Some(Ok(())) | None => (state, record.override_source),
             Some(Err(e)) => match Self::resolve_on_error::<T>(T::section_name()) {
                 OnError::Fail => return Err(e),
                 OnError::Disable => (
@@ -119,11 +121,11 @@ impl FeatureRegistry {
         };
 
         self.records.push(FeatureRecord {
-            section_name: loaded.record.section_name,
+            section_name: record.section_name,
             enabled: final_state.is_enabled(),
             override_source: final_override,
             requires: T::requires(),
-            metadata: T::metadata(),
+            metadata: Box::new(T::metadata()),
         });
 
         if let Some(record) = self.records.last() {

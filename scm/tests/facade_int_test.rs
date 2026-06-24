@@ -11,8 +11,10 @@ fn test_section_loader_svc_trait_impl() {
 #[test]
 fn test_path_validator_svc_trait_impl() {
     let validator = ConfigLoaderFactory::create_validator();
-    let result = validator.validate_path(std::path::Path::new("/tmp"));
-    assert!(result.is_ok());
+    let dir = tempfile::tempdir().expect("temp dir");
+    let result = validator.validate_path(dir.path());
+    assert!(dir.path().is_dir());
+    assert!(matches!(result, Ok(())));
 }
 
 #[test]

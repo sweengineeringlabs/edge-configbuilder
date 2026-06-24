@@ -6,20 +6,14 @@ use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
 fn test_prefix_whitelist_policy_accepts_variable_with_matching_prefix() {
     // The policy must accept a variable whose name starts with any allowed prefix.
     let policy = PrefixWhitelistPolicy::new(vec!["APP_".to_string(), "SWE_".to_string()]);
-    assert!(
-        policy.validate("APP_HOST").is_ok(),
-        "APP_HOST starts with APP_ and must be accepted"
-    );
+    assert_eq!(policy.validate("APP_HOST"), Ok(()));
 }
 
 #[test]
 fn test_prefix_whitelist_policy_accepts_second_matching_prefix() {
     // OR semantics: any matching prefix is sufficient — not all must match.
     let policy = PrefixWhitelistPolicy::new(vec!["APP_".to_string(), "SWE_".to_string()]);
-    assert!(
-        policy.validate("SWE_TOKEN").is_ok(),
-        "SWE_TOKEN starts with SWE_ and must be accepted"
-    );
+    assert_eq!(policy.validate("SWE_TOKEN"), Ok(()));
 }
 
 #[test]

@@ -14,7 +14,6 @@
 //! [`SectionLoaderImpl`]: types::section_loader_impl::SectionLoaderImpl
 //! [`Topology`]: types::topology::Topology
 
+pub mod errors;
 pub mod traits;
 pub mod types;
-
-pub use traits::section_loader_bound::SectionLoaderBound;

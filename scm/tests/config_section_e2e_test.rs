@@ -68,6 +68,30 @@ fn test_config_section_section_name_returns_correct_key() {
 }
 
 #[test]
+fn test_section_key_config_section_happy() {
+    let section = AppSection::default();
+    assert_eq!(section.section_key(), "app");
+}
+
+#[test]
+fn test_section_key_config_section_error() {
+    let section = AppSection {
+        host: "localhost".to_owned(),
+        port: 8080,
+    };
+    assert_ne!(section.section_key(), "other");
+}
+
+#[test]
+fn test_section_key_config_section_edge() {
+    let section = AppSection {
+        host: String::new(),
+        port: 0,
+    };
+    assert_eq!(section.section_key(), AppSection::section_name());
+}
+
+#[test]
 fn test_config_section_load_parse_error_propagates() {
     // ConfigSection::load must propagate a parse error when the section exists
     // but the TOML is malformed — never silently swallow it.

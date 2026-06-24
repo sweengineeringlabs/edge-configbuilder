@@ -1,9 +1,9 @@
 //! Public concrete section loader returned by the `saf/` factory functions.
 
-use crate::api::error::config_error::ConfigError;
 use crate::api::loader::traits::loader_ops::LoaderOps;
-use crate::api::loader::types::feature::feature_state::FeatureState;
-use crate::api::loader::types::feature::loaded_feature::LoadedFeature;
+use crate::api::loader::types::feature_state::FeatureState;
+use crate::api::loader::types::loaded_feature::LoadedFeature;
+use crate::api::ConfigError;
 
 /// A ready-to-use section loader produced by the `create_loader*` and
 /// `ConfigBuilderImpl::build_loader` factory functions.

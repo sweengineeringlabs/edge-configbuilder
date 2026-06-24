@@ -2,23 +2,44 @@
 
 use swe_edge_configbuilder::ConfigLoaderFactory;
 
+fn must<T, E>(result: Result<T, E>) -> T {
+    match result {
+        Ok(value) => value,
+        Err(_) => panic!("expected Ok result"),
+    }
+}
+
 /// @covers: create_config_builder
 #[test]
 fn test_create_config_builder_returns_builder_that_can_build_loader() {
-    let _loader = ConfigLoaderFactory::create_config_builder().build_loader();
+    let builder = ConfigLoaderFactory::create_config_builder();
+    assert_eq!(builder.name(), env!("CARGO_PKG_NAME"));
+    let loader = must(builder.build_loader());
+    if let Err(err) = loader.validate() {
+        panic!("expected generated loader to validate, got {err}");
+    }
 }
 
 /// @covers: create_loader_for_dir
 #[test]
 fn test_create_loader_for_dir_accepts_temp_dir() {
     let dir = std::env::temp_dir();
-    let _loader = ConfigLoaderFactory::create_loader_for_dir(dir);
+    let loader = ConfigLoaderFactory::create_loader_for_dir(&dir);
+    assert!(dir.exists());
+    if let Err(err) = loader.validate() {
+        panic!("expected temp dir loader to validate, got {err}");
+    }
 }
 
 /// @covers: create_validator
 #[test]
 fn test_create_validator_returns_path_validator() {
-    let _v = ConfigLoaderFactory::create_validator();
+    let validator = ConfigLoaderFactory::create_validator();
+    let dir = must(tempfile::tempdir());
+    assert!(dir.path().is_dir(), "tempdir must create a directory");
+    if let Err(err) = validator.validate_path(dir.path()) {
+        panic!("expected validator to accept tempdir, got {err}");
+    }
 }
 
 /// @covers: load_section_xdg

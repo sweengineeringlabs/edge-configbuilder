@@ -2,8 +2,8 @@
 
 use std::fmt;
 
-use crate::api::loader::types::feature::feature_record::FeatureRecord;
-use crate::api::loader::types::feature::override_source::OverrideSource;
+use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::types::override_source::OverrideSource;
 
 /// A point-in-time snapshot of every feature loaded through [`FeatureRegistry`].
 ///

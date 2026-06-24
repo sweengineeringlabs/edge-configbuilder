@@ -51,8 +51,8 @@ pub enum OverrideSource {
     /// The feature is treated as disabled so startup can continue.  The `reason`
     /// field carries the original validation error message for operator inspection.
     ///
-    /// [`OnError`]: crate::api::loader::types::feature::on_error::OnError
-    /// [`OnError::Disable`]: crate::api::loader::types::feature::on_error::OnError::Disable
+    /// [`OnError`]: crate::api::loader::types::on_error::OnError
+    /// [`OnError::Disable`]: crate::api::loader::types::on_error::OnError::Disable
     ValidationError {
         /// The string representation of the `validate_enabled` error.
         reason: String,

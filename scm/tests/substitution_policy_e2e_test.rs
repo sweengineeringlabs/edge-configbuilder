@@ -9,18 +9,18 @@ use swe_edge_configbuilder::{
 #[test]
 fn test_allow_all_policy_accepts_any_variable() {
     let policy = AllowAllPolicy;
-    assert!(policy.validate("ANY_VAR").is_ok());
-    assert!(policy.validate("_LEADING_UNDERSCORE").is_ok());
-    assert!(policy.validate("123NUMBERS").is_ok());
+    assert_eq!(policy.validate("ANY_VAR"), Ok(()));
+    assert_eq!(policy.validate("_LEADING_UNDERSCORE"), Ok(()));
+    assert_eq!(policy.validate("123NUMBERS"), Ok(()));
 }
 
 #[test]
 fn test_prefix_whitelist_policy_accepts_matching_prefix() {
     let policy = PrefixWhitelistPolicy::new(vec!["APP_".into(), "SERVICE_".into()]);
 
-    assert!(policy.validate("APP_DEBUG").is_ok());
-    assert!(policy.validate("SERVICE_URL").is_ok());
-    assert!(policy.validate("SERVICE_PORT").is_ok());
+    assert_eq!(policy.validate("APP_DEBUG"), Ok(()));
+    assert_eq!(policy.validate("SERVICE_URL"), Ok(()));
+    assert_eq!(policy.validate("SERVICE_PORT"), Ok(()));
 }
 
 #[test]

@@ -1,2 +1,2 @@
-pub mod substituter_bound;
+pub mod policy_catalog;
 pub mod substitution_policy;

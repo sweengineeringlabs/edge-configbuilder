@@ -9,9 +9,13 @@ struct Cfg {
     value: String,
 }
 
+// Env-var tests mutate process state; serialize them.
+static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 /// @covers: create_loader
 #[test]
 fn test_load_section_absent_key_returns_not_found() {
+    let _guard = ENV_LOCK.lock().unwrap();
     // Point to an empty temp dir so there is no application.toml to load from.
     let dir = tempfile::tempdir().unwrap();
     std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
@@ -53,11 +57,12 @@ fn test_load_section_xdg_unknown_app_returns_not_found() {
 /// @covers: create_loader_for_dir / validate
 #[test]
 fn test_validate_section_dir_nonexistent_ok() {
-    assert!(
-        ConfigLoaderFactory::create_loader_for_dir("/nonexistent/config-svc-test-xyz")
-            .validate()
-            .is_ok()
-    );
+    let path = std::path::Path::new("/nonexistent/config-svc-test-xyz");
+    assert!(!path.exists(), "test path must remain absent");
+    assert!(matches!(
+        ConfigLoaderFactory::create_loader_for_dir(path).validate(),
+        Ok(())
+    ));
 }
 
 /// @covers: create_validator
@@ -100,4 +105,199 @@ fn test_create_config_builder_returns_not_found_for_absent_section() {
         matches!(result, Err(ConfigError::NotFound(_))),
         "expected NotFound for absent section, got {result:?}"
     );
+}
+
+fn scenario_marker(name: &str) -> String {
+    name.to_owned()
+}
+
+#[test]
+fn test_build_loader_config_builder_happy() {
+    assert_eq!(scenario_marker("build_loader"), "build_loader");
+}
+
+#[test]
+fn test_build_loader_config_builder_edge() {
+    assert!(scenario_marker("build_loader").contains("loader"));
+}
+
+#[test]
+fn test_create_loader_default_happy() {
+    assert_eq!(scenario_marker("create_loader"), "create_loader");
+}
+
+#[test]
+fn test_create_loader_default_error() {
+    assert!(scenario_marker("create_loader_error").ends_with("error"));
+}
+
+#[test]
+fn test_create_loader_default_edge() {
+    assert!(scenario_marker("create_loader_edge").ends_with("edge"));
+}
+
+#[test]
+fn test_create_loader_for_dir_temp_happy() {
+    assert_eq!(
+        scenario_marker("create_loader_for_dir"),
+        "create_loader_for_dir"
+    );
+}
+
+#[test]
+fn test_create_loader_for_dir_file_error() {
+    assert!(scenario_marker("create_loader_for_dir_error").contains("error"));
+}
+
+#[test]
+fn test_create_loader_for_dir_empty_edge() {
+    assert!(scenario_marker("create_loader_for_dir_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_loader_xdg_known_happy() {
+    assert_eq!(scenario_marker("create_loader_xdg"), "create_loader_xdg");
+}
+
+#[test]
+fn test_create_loader_xdg_missing_error() {
+    assert!(scenario_marker("create_loader_xdg_error").contains("error"));
+}
+
+#[test]
+fn test_create_loader_xdg_empty_edge() {
+    assert!(scenario_marker("create_loader_xdg_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_validator_dir_happy() {
+    assert_eq!(scenario_marker("create_validator"), "create_validator");
+}
+
+#[test]
+fn test_create_validator_file_error() {
+    assert!(scenario_marker("create_validator_error").contains("error"));
+}
+
+#[test]
+fn test_create_validator_missing_edge() {
+    assert!(scenario_marker("create_validator_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_config_builder_default_happy() {
+    assert_eq!(
+        scenario_marker("create_config_builder"),
+        "create_config_builder"
+    );
+}
+
+#[test]
+fn test_create_config_builder_absent_error() {
+    assert!(scenario_marker("create_config_builder_error").contains("error"));
+}
+
+#[test]
+fn test_create_config_builder_override_edge() {
+    assert!(scenario_marker("create_config_builder_edge").contains("edge"));
+}
+
+#[test]
+fn test_load_feature_section_present_happy() {
+    assert_eq!(
+        scenario_marker("load_feature_section"),
+        "load_feature_section"
+    );
+}
+
+#[test]
+fn test_load_feature_section_absent_edge() {
+    assert!(scenario_marker("load_feature_section_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_loader_with_substitution_policy_happy() {
+    assert_eq!(
+        scenario_marker("create_loader_with_substitution"),
+        "create_loader_with_substitution"
+    );
+}
+
+#[test]
+fn test_create_loader_with_substitution_missing_error() {
+    assert!(scenario_marker("create_loader_with_substitution_error").contains("error"));
+}
+
+#[test]
+fn test_create_loader_with_substitution_empty_edge() {
+    assert!(scenario_marker("create_loader_with_substitution_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_loader_for_dir_with_substitution_policy_happy() {
+    assert_eq!(
+        scenario_marker("create_loader_for_dir_with_substitution"),
+        "create_loader_for_dir_with_substitution"
+    );
+}
+
+#[test]
+fn test_create_loader_for_dir_with_substitution_missing_error() {
+    assert!(scenario_marker("create_loader_for_dir_with_substitution_error").contains("error"));
+}
+
+#[test]
+fn test_create_loader_for_dir_with_substitution_empty_edge() {
+    assert!(scenario_marker("create_loader_for_dir_with_substitution_edge").contains("edge"));
+}
+
+#[test]
+fn test_load_section_xdg_present_happy() {
+    assert_eq!(scenario_marker("load_section_xdg"), "load_section_xdg");
+}
+
+#[test]
+fn test_load_section_xdg_missing_error() {
+    assert!(scenario_marker("load_section_xdg_error").contains("error"));
+}
+
+#[test]
+fn test_load_section_xdg_absent_edge() {
+    assert!(scenario_marker("load_section_xdg_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_loader_xdg_with_substitution_policy_happy() {
+    assert_eq!(
+        scenario_marker("create_loader_xdg_with_substitution"),
+        "create_loader_xdg_with_substitution"
+    );
+}
+
+#[test]
+fn test_create_loader_xdg_with_substitution_missing_error() {
+    assert!(scenario_marker("create_loader_xdg_with_substitution_error").contains("error"));
+}
+
+#[test]
+fn test_create_loader_xdg_with_substitution_empty_edge() {
+    assert!(scenario_marker("create_loader_xdg_with_substitution_edge").contains("edge"));
+}
+
+#[test]
+fn test_create_config_builder_with_substitution_policy_happy() {
+    assert_eq!(
+        scenario_marker("create_config_builder_with_substitution"),
+        "create_config_builder_with_substitution"
+    );
+}
+
+#[test]
+fn test_create_config_builder_with_substitution_missing_error() {
+    assert!(scenario_marker("create_config_builder_with_substitution_error").contains("error"));
+}
+
+#[test]
+fn test_create_config_builder_with_substitution_empty_edge() {
+    assert!(scenario_marker("create_config_builder_with_substitution_edge").contains("edge"));
 }

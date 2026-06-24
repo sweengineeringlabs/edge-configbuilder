@@ -9,7 +9,7 @@ fn test_feature_record_enabled_section_without_override() {
         enabled: true,
         override_source: None,
         requires: &[],
-        metadata: FeatureMetadata::default(),
+        metadata: Box::new(FeatureMetadata::default()),
     };
     assert_eq!(record.section_name, "cache");
     assert!(record.enabled);
@@ -23,7 +23,7 @@ fn test_feature_record_disabled_section_without_override() {
         enabled: false,
         override_source: None,
         requires: &[],
-        metadata: FeatureMetadata::default(),
+        metadata: Box::new(FeatureMetadata::default()),
     };
     assert!(!record.enabled);
     assert!(record.override_source.is_none());
@@ -36,7 +36,7 @@ fn test_feature_record_disabled_by_explicit_toml_flag() {
         enabled: false,
         override_source: Some(OverrideSource::ExplicitTomlFlag),
         requires: &[],
-        metadata: FeatureMetadata::default(),
+        metadata: Box::new(FeatureMetadata::default()),
     };
     assert!(!record.enabled);
     assert!(matches!(
@@ -55,7 +55,7 @@ fn test_feature_record_overridden_by_env_var() {
             value: "false".to_owned(),
         }),
         requires: &[],
-        metadata: FeatureMetadata::default(),
+        metadata: Box::new(FeatureMetadata::default()),
     };
     assert!(matches!(
         record.override_source,
@@ -70,7 +70,7 @@ fn test_feature_record_clone_produces_equal_record() {
         enabled: true,
         override_source: None,
         requires: &[],
-        metadata: FeatureMetadata::default(),
+        metadata: Box::new(FeatureMetadata::default()),
     };
     let cloned = original.clone();
     assert_eq!(original.section_name, cloned.section_name);

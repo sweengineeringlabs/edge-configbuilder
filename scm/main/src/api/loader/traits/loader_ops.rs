@@ -1,5 +1,5 @@
-use crate::api::error::config_error::ConfigError;
 use crate::api::loader::types::raw_feature::RawFeature;
+use crate::api::ConfigError;
 
 /// Type-erased view of a config source used internally by [`crate::api::loader::types::section_loader_impl::SectionLoaderImpl`].
 ///

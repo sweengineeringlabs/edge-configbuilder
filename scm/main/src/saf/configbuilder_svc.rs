@@ -1,15 +1,8 @@
 use std::path::PathBuf;
 
-use crate::api::configbuilder::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
-use crate::api::configbuilder::types::ConfigBuilderImpl;
-use crate::api::configbuilder::types::ConfigLoaderFactory;
-use crate::api::error::config_error::ConfigError;
-use crate::api::loader::types::feature::feature_state::FeatureState;
-use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
-use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
-use crate::api::validator::types::path_validator_impl::PathValidatorImpl;
-use crate::core::{
-    DefaultConfigBuilder, DefaultSectionLoader, DefaultValidator, DEFAULT_READ_TIMEOUT,
+use crate::api::{
+    ConfigBuilderImpl, ConfigError, ConfigLoaderFactory, FeatureState, PathValidatorImpl,
+    SectionLoaderImpl, SubstitutionConfigBuilderImpl, SubstitutionPolicy,
 };
 
 // ── Extension impls for the builder types ────────────────────────────────────
@@ -44,11 +37,13 @@ impl ConfigBuilderImpl {
     /// let cfg: AppConfig = loader.load_section("app").unwrap();
     /// ```
     pub fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
-        let core = DefaultConfigBuilder {
+        let core = crate::core::DefaultConfigBuilder {
             name: self.name,
             version: self.version,
             config_dirs: self.config_dirs,
-            read_timeout: self.read_timeout.unwrap_or(DEFAULT_READ_TIMEOUT),
+            read_timeout: self
+                .read_timeout
+                .unwrap_or(crate::core::DEFAULT_READ_TIMEOUT),
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -85,11 +80,11 @@ impl SubstitutionConfigBuilderImpl {
     /// let cfg: DbConfig = loader.load_section("database").unwrap();
     /// ```
     pub fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
-        let mut core = DefaultConfigBuilder {
+        let mut core = crate::core::DefaultConfigBuilder {
             name: self.name,
             version: self.version,
             config_dirs: self.config_dirs,
-            read_timeout: DEFAULT_READ_TIMEOUT,
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         core.substitution_policy = Some(self.policy);
@@ -126,11 +121,11 @@ impl ConfigLoaderFactory {
     /// let cfg: AppConfig = loader.load_section("app").unwrap_or_default();
     /// ```
     pub fn create_loader() -> Result<SectionLoaderImpl, ConfigError> {
-        let loader = DefaultConfigBuilder {
+        let loader = crate::core::DefaultConfigBuilder {
             name: String::new(),
             version: String::new(),
             config_dirs: Vec::new(),
-            read_timeout: DEFAULT_READ_TIMEOUT,
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -156,10 +151,10 @@ impl ConfigLoaderFactory {
     /// ```
     pub fn create_loader_for_dir(dir: impl Into<PathBuf>) -> SectionLoaderImpl {
         SectionLoaderImpl {
-            ops: Box::new(DefaultSectionLoader {
+            ops: Box::new(crate::core::DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: None,
-                read_timeout: DEFAULT_READ_TIMEOUT,
+                read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
             }),
         }
     }
@@ -195,11 +190,11 @@ impl ConfigLoaderFactory {
     /// let cfg: AppConfig = loader.load_section("ui").unwrap_or_default();
     /// ```
     pub fn create_loader_xdg(app_name: &str) -> Result<SectionLoaderImpl, ConfigError> {
-        let loader = DefaultConfigBuilder {
+        let loader = crate::core::DefaultConfigBuilder {
             name: app_name.to_owned(),
             version: String::new(),
             config_dirs: Vec::new(),
-            read_timeout: DEFAULT_READ_TIMEOUT,
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -225,7 +220,7 @@ impl ConfigLoaderFactory {
     /// ```
     pub fn create_validator() -> PathValidatorImpl {
         PathValidatorImpl {
-            ops: Box::new(DefaultValidator),
+            ops: Box::new(crate::core::DefaultValidator),
         }
     }
 
@@ -324,11 +319,11 @@ impl ConfigLoaderFactory {
     pub fn create_loader_with_substitution(
         policy: Box<dyn SubstitutionPolicy>,
     ) -> Result<SectionLoaderImpl, ConfigError> {
-        let mut loader = DefaultConfigBuilder {
+        let mut loader = crate::core::DefaultConfigBuilder {
             name: String::new(),
             version: String::new(),
             config_dirs: Vec::new(),
-            read_timeout: DEFAULT_READ_TIMEOUT,
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -358,10 +353,10 @@ impl ConfigLoaderFactory {
         policy: Box<dyn SubstitutionPolicy>,
     ) -> SectionLoaderImpl {
         SectionLoaderImpl {
-            ops: Box::new(DefaultSectionLoader {
+            ops: Box::new(crate::core::DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: Some(policy),
-                read_timeout: DEFAULT_READ_TIMEOUT,
+                read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
             }),
         }
     }
@@ -429,11 +424,11 @@ impl ConfigLoaderFactory {
         app_name: &str,
         policy: Box<dyn SubstitutionPolicy>,
     ) -> Result<SectionLoaderImpl, ConfigError> {
-        let mut loader = DefaultConfigBuilder {
+        let mut loader = crate::core::DefaultConfigBuilder {
             name: app_name.to_owned(),
             version: String::new(),
             config_dirs: Vec::new(),
-            read_timeout: DEFAULT_READ_TIMEOUT,
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);

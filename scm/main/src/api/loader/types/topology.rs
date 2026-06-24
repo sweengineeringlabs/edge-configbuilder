@@ -29,7 +29,7 @@ impl Topology {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::__internal::Topology;
+    /// use swe_edge_configbuilder::Topology;
     ///
     /// // broker depends on tls; cache depends on tls.
     /// // Expected order: tls (2) first, then cache (0) and broker (1) in any order.
@@ -49,7 +49,7 @@ impl Topology {
     /// Cycle detection:
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::__internal::Topology;
+    /// use swe_edge_configbuilder::Topology;
     ///
     /// // a requires b, b requires a — cycle.
     /// let result = Topology::sort(&["a", "b"], &[&["b"], &["a"]]);

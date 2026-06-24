@@ -1,7 +1,7 @@
 //! [`LoadedFeature`] — the full result of loading an optional config section.
 
-use crate::api::loader::types::feature::feature_record::FeatureRecord;
-use crate::api::loader::types::feature::feature_state::FeatureState;
+use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::types::feature_state::FeatureState;
 
 /// The full result of loading an optional feature section.
 ///
@@ -25,7 +25,7 @@ use crate::api::loader::types::feature::feature_state::FeatureState;
 /// // Simulating what the loader returns for an enabled section.
 /// let loaded = LoadedFeature {
 ///     state: FeatureState::Enabled(42_u32),
-///     record: FeatureRecordBuilder::new("counter").enabled(true).build(),
+///     record: Box::new(FeatureRecordBuilder::new("counter").enabled(true).build()),
 /// };
 ///
 /// assert!(loaded.state.is_enabled());
@@ -38,5 +38,5 @@ pub struct LoadedFeature<T> {
     pub state: FeatureState<T>,
 
     /// Metadata describing how the state was determined.
-    pub record: FeatureRecord,
+    pub record: Box<FeatureRecord>,
 }

@@ -331,7 +331,8 @@ fn test_feature_summary_display_shows_total_counts() {
 #[test]
 fn test_validate_dependencies_returns_ok_when_no_features_loaded() {
     let registry = FeatureRegistry::new();
-    assert!(registry.validate_dependencies().is_ok());
+    assert!(registry.records().is_empty());
+    assert!(matches!(registry.validate_dependencies(), Ok(())));
 }
 
 #[test]

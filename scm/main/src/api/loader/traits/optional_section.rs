@@ -1,10 +1,10 @@
 //! [`OptionalSection`] — marks a typed struct as an opt-in TOML feature section.
 
-use crate::api::error::config_error::ConfigError;
-use crate::api::loader::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature::feature_state::FeatureState;
-use crate::api::loader::types::feature::on_error::OnError;
+use crate::api::loader::types::feature_metadata::FeatureMetadata;
+use crate::api::loader::types::feature_state::FeatureState;
+use crate::api::loader::types::on_error::OnError;
 use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+use crate::api::ConfigError;
 
 /// Marks a typed struct as an opt-in TOML feature section.
 ///
@@ -28,7 +28,7 @@ use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, FeatureState, OptionalSection};
+/// use swe_edge_configbuilder::{ConfigError, FeatureState, OptionalSection};
 ///
 /// #[derive(serde::Deserialize)]
 /// pub struct MessageBrokerConfig {
@@ -52,7 +52,7 @@ use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
 ///     }
 /// }
 ///
-/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+/// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
 /// match MessageBrokerConfig::load_optional(&loader).expect("load failed") {
 ///     FeatureState::Enabled(cfg) => println!("broker at {}:{}", cfg.host, cfg.port),
 ///     FeatureState::Disabled     => println!("broker not configured"),

@@ -12,17 +12,11 @@ const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 /// 30 seconds is generous enough for a slow spinning disk while still bounding
 /// the worst-case startup hang from a stalled NFS/FUSE mount.
 pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
-use crate::api::error::config_error::ConfigError;
-use crate::api::loader::traits::feature_loader::FeatureLoader;
-use crate::api::loader::traits::loader::Loader;
-use crate::api::loader::traits::loader_ops::LoaderOps;
-use crate::api::loader::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature::feature_record::FeatureRecord;
-use crate::api::loader::types::feature::feature_state::FeatureState;
-use crate::api::loader::types::feature::loaded_feature::LoadedFeature;
-use crate::api::loader::types::feature::override_source::OverrideSource;
-use crate::api::loader::types::raw_feature::RawFeature;
-use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
+use crate::api::{
+    ConfigError, FeatureLoader, FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature,
+    Loader, LoaderOps, OverrideSource, Preflight, RawFeature, SectionLoaderBound,
+    SubstitutionPolicy,
+};
 use crate::core::Substituter;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
@@ -257,7 +251,7 @@ impl LoaderOps for DefaultSectionLoader {
         if env_force == Some(false) {
             return Ok(RawFeature {
                 value: None,
-                record: FeatureRecord {
+                record: Box::new(FeatureRecord {
                     section_name: key.to_owned(),
                     enabled: false,
                     override_source: Some(OverrideSource::EnvVar {
@@ -265,8 +259,8 @@ impl LoaderOps for DefaultSectionLoader {
                         value: std::env::var(Self::feature_env_var_name(key)).unwrap_or_default(),
                     }),
                     requires: &[],
-                    metadata: FeatureMetadata::default(),
-                },
+                    metadata: Box::new(FeatureMetadata::default()),
+                }),
             });
         }
 
@@ -283,13 +277,13 @@ impl LoaderOps for DefaultSectionLoader {
             }
             return Ok(RawFeature {
                 value: None,
-                record: FeatureRecord {
+                record: Box::new(FeatureRecord {
                     section_name: key.to_owned(),
                     enabled: false,
                     override_source: None,
                     requires: &[],
-                    metadata: FeatureMetadata::default(),
-                },
+                    metadata: Box::new(FeatureMetadata::default()),
+                }),
             });
         }
 
@@ -298,13 +292,13 @@ impl LoaderOps for DefaultSectionLoader {
             if let Some(toml::Value::Boolean(false)) = merged.get("enabled") {
                 return Ok(RawFeature {
                     value: None,
-                    record: FeatureRecord {
+                    record: Box::new(FeatureRecord {
                         section_name: key.to_owned(),
                         enabled: false,
                         override_source: Some(OverrideSource::ExplicitTomlFlag),
                         requires: &[],
-                        metadata: FeatureMetadata::default(),
-                    },
+                        metadata: Box::new(FeatureMetadata::default()),
+                    }),
                 });
             }
         }
@@ -317,13 +311,13 @@ impl LoaderOps for DefaultSectionLoader {
 
         Ok(RawFeature {
             value: Some(merged),
-            record: FeatureRecord {
+            record: Box::new(FeatureRecord {
                 section_name: key.to_owned(),
                 enabled: true,
                 override_source,
                 requires: &[],
-                metadata: FeatureMetadata::default(),
-            },
+                metadata: Box::new(FeatureMetadata::default()),
+            }),
         })
     }
 }
@@ -348,12 +342,26 @@ impl FeatureLoader for DefaultSectionLoader {
     }
 }
 
+impl SectionLoaderBound for DefaultSectionLoader {
+    type FeatureRecord = crate::api::FeatureRecord;
+    type FeatureRecordBuilder = crate::api::FeatureRecordBuilder;
+    type FeatureRegistry = crate::api::FeatureRegistry;
+    type FeatureSummary = crate::api::FeatureSummary;
+    type OverrideSource = crate::api::OverrideSource;
+    type Topology = crate::api::Topology;
+}
+
+impl Preflight for DefaultSectionLoader {
+    type Issue = crate::api::PreflightIssue;
+    type IssueKind = crate::api::PreflightIssueKind;
+    type Report = crate::api::PreflightReport;
+}
+
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used, unsafe_code)]
+#[allow(unsafe_code)]
 mod tests {
     use super::*;
-    use crate::api::error::config_error::ConfigError;
-    use crate::api::loader::types::feature::feature_state::FeatureState;
+    use crate::api::{ConfigError, FeatureState};
     use std::io::Write as _;
     use std::path::Path;
     use tempfile::TempDir;
@@ -363,6 +371,24 @@ mod tests {
     struct DefaultSectionLoaderSection {
         value: String,
         count: u32,
+    }
+
+    fn must<T, E>(result: Result<T, E>) -> T {
+        result.unwrap_or_else(|_| std::process::abort())
+    }
+
+    fn must_err<T, E>(result: Result<T, E>) -> E {
+        match result {
+            Ok(_) => std::process::abort(),
+            Err(err) => err,
+        }
+    }
+
+    fn some<T>(option: Option<T>) -> T {
+        match option {
+            Some(value) => value,
+            None => std::process::abort(),
+        }
     }
 
     fn loader_in(dir: &Path) -> DefaultSectionLoader {
@@ -376,31 +402,29 @@ mod tests {
     fn write_toml(dir: &Path, name: &str, content: &str) {
         let path = dir.join(name);
         if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent).unwrap();
+            must(std::fs::create_dir_all(parent));
         }
-        std::fs::File::create(&path)
-            .unwrap()
-            .write_all(content.as_bytes())
-            .unwrap();
+        let mut file = must(std::fs::File::create(&path));
+        must(file.write_all(content.as_bytes()));
     }
 
     #[test]
     fn test_load_section_reads_top_level_key() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[my_section]\nvalue = \"hello\"\ncount = 7",
         );
         let sec: DefaultSectionLoaderSection =
-            loader_in(dir.path()).load_section("my_section").unwrap();
+            must(loader_in(dir.path()).load_section("my_section"));
         assert_eq!(sec.value, "hello");
         assert_eq!(sec.count, 7);
     }
 
     #[test]
     fn test_load_section_returns_not_found_when_no_application_toml() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         let result: Result<DefaultSectionLoaderSection, _> =
             loader_in(dir.path()).load_section("nonexistent");
         assert!(
@@ -411,35 +435,35 @@ mod tests {
 
     #[test]
     fn test_load_section_returns_default_when_section_absent_from_existing_toml() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[other_section]\nvalue = \"x\"",
         );
         let sec: DefaultSectionLoaderSection =
-            loader_in(dir.path()).load_section("nonexistent").unwrap();
+            must(loader_in(dir.path()).load_section("nonexistent"));
         assert_eq!(sec, DefaultSectionLoaderSection::default());
     }
 
     #[test]
     fn test_load_section_supports_dotted_key_path() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[outer.inner]\nvalue = \"deep\"\ncount = 3",
         );
         let sec: DefaultSectionLoaderSection =
-            loader_in(dir.path()).load_section("outer.inner").unwrap();
+            must(loader_in(dir.path()).load_section("outer.inner"));
         assert_eq!(sec.value, "deep");
         assert_eq!(sec.count, 3);
     }
 
     #[test]
     fn test_load_section_later_dir_wins_over_earlier() {
-        let low = TempDir::new().unwrap();
-        let high = TempDir::new().unwrap();
+        let low = must(TempDir::new());
+        let high = must(TempDir::new());
         write_toml(low.path(), "application.toml", "[s]\nvalue = \"low\"");
         write_toml(high.path(), "application.toml", "[s]\nvalue = \"high\"");
         let loader = DefaultSectionLoader {
@@ -447,14 +471,14 @@ mod tests {
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
-        let sec: DefaultSectionLoaderSection = loader.load_section("s").unwrap();
+        let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
         assert_eq!(sec.value, "high");
     }
 
     #[test]
     fn test_load_section_earlier_dir_fills_unset_fields() {
-        let low = TempDir::new().unwrap();
-        let high = TempDir::new().unwrap();
+        let low = must(TempDir::new());
+        let high = must(TempDir::new());
         write_toml(low.path(), "application.toml", "[s]\ncount = 9");
         write_toml(high.path(), "application.toml", "[s]\nvalue = \"hi\"");
         let loader = DefaultSectionLoader {
@@ -462,7 +486,7 @@ mod tests {
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
-        let sec: DefaultSectionLoaderSection = loader.load_section("s").unwrap();
+        let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
         assert_eq!(sec.value, "hi");
         assert_eq!(sec.count, 9);
     }
@@ -485,8 +509,8 @@ mod tests {
     fn test_load_section_deep_merges_nested_tables_across_dirs() {
         // Regression: shallow merge replaced the entire `tls` subtable, dropping
         // any key in the base that was absent from the overlay.
-        let low = TempDir::new().unwrap();
-        let high = TempDir::new().unwrap();
+        let low = must(TempDir::new());
+        let high = must(TempDir::new());
         write_toml(
             low.path(),
             "application.toml",
@@ -502,7 +526,7 @@ mod tests {
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
-        let srv: DefaultSectionLoaderServer = loader.load_section("s").unwrap();
+        let srv: DefaultSectionLoaderServer = must(loader.load_section("s"));
         assert_eq!(
             srv.host, "localhost",
             "host must survive overlay of sibling subtable"
@@ -519,23 +543,22 @@ mod tests {
 
     #[test]
     fn test_load_section_rejects_oversized_application_toml() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         let oversized = vec![b'#'; (MAX_CONFIG_FILE_BYTES + 1) as usize];
-        std::fs::write(dir.path().join("application.toml"), &oversized).unwrap();
-        let err = loader_in(dir.path())
-            .load_section::<DefaultSectionLoaderSection>("s")
-            .unwrap_err();
+        must(std::fs::write(
+            dir.path().join("application.toml"),
+            &oversized,
+        ));
+        let err = must_err(loader_in(dir.path()).load_section::<DefaultSectionLoaderSection>("s"));
         assert!(matches!(err, ConfigError::Io(_)));
         assert!(err.to_string().contains("1 MiB"));
     }
 
     #[test]
     fn test_load_section_rejects_invalid_toml() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(dir.path(), "application.toml", "not = [broken toml");
-        let err = loader_in(dir.path())
-            .load_section::<DefaultSectionLoaderSection>("s")
-            .unwrap_err();
+        let err = must_err(loader_in(dir.path()).load_section::<DefaultSectionLoaderSection>("s"));
         assert!(matches!(err, ConfigError::Parse(_)));
     }
 
@@ -543,32 +566,30 @@ mod tests {
 
     #[test]
     fn test_load_optional_section_present_key_returns_enabled() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[my_feature]\nvalue = \"on\"\ncount = 3",
         );
-        let state: FeatureState<DefaultSectionLoaderSection> = loader_in(dir.path())
-            .load_optional_section("my_feature")
-            .unwrap();
+        let state: FeatureState<DefaultSectionLoaderSection> =
+            must(loader_in(dir.path()).load_optional_section("my_feature"));
         assert!(state.is_enabled(), "expected Enabled when key is present");
-        let sec = state.into_option().unwrap();
+        let sec = some(state.into_option());
         assert_eq!(sec.value, "on");
         assert_eq!(sec.count, 3);
     }
 
     #[test]
     fn test_load_optional_section_absent_key_in_existing_file_returns_disabled() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[other_section]\nvalue = \"x\"",
         );
-        let state: FeatureState<DefaultSectionLoaderSection> = loader_in(dir.path())
-            .load_optional_section("my_feature")
-            .unwrap();
+        let state: FeatureState<DefaultSectionLoaderSection> =
+            must(loader_in(dir.path()).load_optional_section("my_feature"));
         assert!(
             state.is_disabled(),
             "expected Disabled when key absent from existing file"
@@ -577,10 +598,9 @@ mod tests {
 
     #[test]
     fn test_load_optional_section_no_files_returns_disabled() {
-        let dir = TempDir::new().unwrap();
-        let state: FeatureState<DefaultSectionLoaderSection> = loader_in(dir.path())
-            .load_optional_section("my_feature")
-            .unwrap();
+        let dir = must(TempDir::new());
+        let state: FeatureState<DefaultSectionLoaderSection> =
+            must(loader_in(dir.path()).load_optional_section("my_feature"));
         assert!(
             state.is_disabled(),
             "expected Disabled when no config files exist"
@@ -589,11 +609,12 @@ mod tests {
 
     #[test]
     fn test_load_optional_section_malformed_toml_returns_parse_error() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(dir.path(), "application.toml", "not = [broken toml");
-        let err = loader_in(dir.path())
-            .load_optional_section::<DefaultSectionLoaderSection>("my_feature")
-            .unwrap_err();
+        let err = must_err(
+            loader_in(dir.path())
+                .load_optional_section::<DefaultSectionLoaderSection>("my_feature"),
+        );
         assert!(
             matches!(err, ConfigError::Parse(_)),
             "expected Parse error for malformed TOML, got {err:?}"
@@ -610,12 +631,12 @@ mod tests {
             )]
             required: String, // no Default, no Option — must be present
         }
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         // Section present but `required` field is absent
         write_toml(dir.path(), "application.toml", "[feat]\nother = \"x\"");
-        let err = loader_in(dir.path())
-            .load_optional_section::<DefaultSectionLoaderStrict>("feat")
-            .unwrap_err();
+        let err = must_err(
+            loader_in(dir.path()).load_optional_section::<DefaultSectionLoaderStrict>("feat"),
+        );
         assert!(
             matches!(err, ConfigError::Parse(_)),
             "expected Parse for missing required field, got {err:?}"
@@ -624,8 +645,8 @@ mod tests {
 
     #[test]
     fn test_load_optional_section_multi_dir_merge_returns_enabled() {
-        let low = TempDir::new().unwrap();
-        let high = TempDir::new().unwrap();
+        let low = must(TempDir::new());
+        let high = must(TempDir::new());
         write_toml(low.path(), "application.toml", "[feat]\ncount = 1");
         write_toml(high.path(), "application.toml", "[feat]\nvalue = \"hi\"");
         let loader = DefaultSectionLoader {
@@ -634,17 +655,17 @@ mod tests {
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
-            loader.load_optional_section("feat").unwrap();
+            must(loader.load_optional_section("feat"));
         assert!(state.is_enabled());
-        let sec = state.into_option().unwrap();
+        let sec = some(state.into_option());
         assert_eq!(sec.value, "hi");
         assert_eq!(sec.count, 1);
     }
 
     #[test]
     fn test_load_optional_section_multi_dir_both_absent_returns_disabled() {
-        let low = TempDir::new().unwrap();
-        let high = TempDir::new().unwrap();
+        let low = must(TempDir::new());
+        let high = must(TempDir::new());
         write_toml(low.path(), "application.toml", "[other]\nvalue = \"x\"");
         write_toml(
             high.path(),
@@ -657,7 +678,7 @@ mod tests {
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
-            loader.load_optional_section("feat").unwrap();
+            must(loader.load_optional_section("feat"));
         assert!(state.is_disabled());
     }
 
@@ -668,15 +689,14 @@ mod tests {
 
     #[test]
     fn test_load_feature_section_present_returns_enabled_record() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[feat]\nvalue = \"on\"\ncount = 5",
         );
-        let loaded = loader_in(dir.path())
-            .load_feature::<DefaultSectionLoaderSection>("feat")
-            .unwrap();
+        let loaded =
+            must(loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat"));
         assert!(loaded.state.is_enabled());
         assert!(loaded.record.enabled);
         assert!(loaded.record.override_source.is_none());
@@ -685,11 +705,10 @@ mod tests {
 
     #[test]
     fn test_load_feature_section_absent_returns_disabled_record() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(dir.path(), "application.toml", "[other]\nvalue = \"x\"");
-        let loaded = loader_in(dir.path())
-            .load_feature::<DefaultSectionLoaderSection>("feat")
-            .unwrap();
+        let loaded =
+            must(loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat"));
         assert!(loaded.state.is_disabled());
         assert!(!loaded.record.enabled);
         assert!(loaded.record.override_source.is_none());
@@ -697,21 +716,20 @@ mod tests {
 
     #[test]
     fn test_load_feature_enabled_false_in_toml_returns_disabled_with_explicit_flag() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
             "[feat]\nenabled = false\nvalue = \"x\"",
         );
-        let loaded = loader_in(dir.path())
-            .load_feature::<DefaultSectionLoaderSection>("feat")
-            .unwrap();
+        let loaded =
+            must(loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat"));
         assert!(loaded.state.is_disabled());
         assert!(!loaded.record.enabled);
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(crate::api::loader::types::feature::override_source::OverrideSource::ExplicitTomlFlag)
+                Some(crate::api::OverrideSource::ExplicitTomlFlag)
             ),
             "expected ExplicitTomlFlag override source"
         );
@@ -719,11 +737,11 @@ mod tests {
 
     #[test]
     fn test_load_feature_env_var_false_disables_present_section() {
-        let _g = ENV_LOCK.lock().unwrap();
+        let _g = must(ENV_LOCK.lock());
         let var = "SWE_EDGE_FEATURE_FEAT_LF_ENV_OFF";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "false") };
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
@@ -733,15 +751,13 @@ mod tests {
             loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat_lf_env_off");
         // SAFETY: cleanup
         unsafe { std::env::remove_var(var) };
-        let loaded = result.unwrap();
+        let loaded = must(result);
         assert!(loaded.state.is_disabled());
         assert!(!loaded.record.enabled);
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(
-                    crate::api::loader::types::feature::override_source::OverrideSource::EnvVar { .. }
-                )
+                Some(crate::api::OverrideSource::EnvVar { .. })
             ),
             "expected EnvVar override source"
         );
@@ -749,11 +765,11 @@ mod tests {
 
     #[test]
     fn test_load_feature_env_var_true_enables_present_section() {
-        let _g = ENV_LOCK.lock().unwrap();
+        let _g = must(ENV_LOCK.lock());
         let var = "SWE_EDGE_FEATURE_FEAT_LF_ENV_ON";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "true") };
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
@@ -763,15 +779,13 @@ mod tests {
             loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat_lf_env_on");
         // SAFETY: cleanup
         unsafe { std::env::remove_var(var) };
-        let loaded = result.unwrap();
+        let loaded = must(result);
         assert!(loaded.state.is_enabled());
         assert!(loaded.record.enabled);
         assert!(
             matches!(
                 loaded.record.override_source,
-                Some(
-                    crate::api::loader::types::feature::override_source::OverrideSource::EnvVar { .. }
-                )
+                Some(crate::api::OverrideSource::EnvVar { .. })
             ),
             "expected EnvVar override source"
         );
@@ -779,11 +793,11 @@ mod tests {
 
     #[test]
     fn test_load_feature_env_var_true_overrides_enabled_false_in_toml() {
-        let _g = ENV_LOCK.lock().unwrap();
+        let _g = must(ENV_LOCK.lock());
         let var = "SWE_EDGE_FEATURE_FEAT_LF_FORCE_ON";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "1") };
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
@@ -793,7 +807,7 @@ mod tests {
             loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat_lf_force_on");
         // SAFETY: cleanup
         unsafe { std::env::remove_var(var) };
-        let loaded = result.unwrap();
+        let loaded = must(result);
         assert!(
             loaded.state.is_enabled(),
             "env var=true must override enabled=false in TOML"
@@ -802,11 +816,11 @@ mod tests {
 
     #[test]
     fn test_load_feature_env_var_true_section_absent_returns_not_found() {
-        let _g = ENV_LOCK.lock().unwrap();
+        let _g = must(ENV_LOCK.lock());
         let var = "SWE_EDGE_FEATURE_FEAT_LF_ABSENT";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "true") };
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(dir.path(), "application.toml", "[other]\nvalue = \"x\"");
         let result =
             loader_in(dir.path()).load_feature::<DefaultSectionLoaderSection>("feat_lf_absent");
@@ -820,11 +834,11 @@ mod tests {
 
     #[test]
     fn test_load_feature_invalid_env_var_value_returns_io_error() {
-        let _g = ENV_LOCK.lock().unwrap();
+        let _g = must(ENV_LOCK.lock());
         let var = "SWE_EDGE_FEATURE_FEAT_LF_INVALID";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "maybe") };
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         write_toml(
             dir.path(),
             "application.toml",
@@ -842,36 +856,39 @@ mod tests {
 
     #[test]
     fn test_validate_accepts_nonexistent_dir() {
+        let path = PathBuf::from("/nonexistent/swe-edge-test-xyz");
+        assert!(!path.exists(), "test path must remain absent");
         let loader = DefaultSectionLoader {
-            config_dirs: vec![PathBuf::from("/nonexistent/swe-edge-test-xyz")],
+            config_dirs: vec![path],
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
-        assert!(loader.validate().is_ok());
+        assert!(matches!(loader.validate(), Ok(())));
     }
 
     #[test]
     fn test_validate_accepts_existing_dir() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir.path().to_path_buf()],
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
+        assert_eq!(loader.config_dirs, vec![dir.path().to_path_buf()]);
         assert!(loader.validate().is_ok());
     }
 
     #[test]
     fn test_validate_rejects_file_path() {
-        let dir = TempDir::new().unwrap();
+        let dir = must(TempDir::new());
         let file = dir.path().join("not_a_dir.toml");
-        std::fs::write(&file, b"").unwrap();
+        must(std::fs::write(&file, b""));
         let loader = DefaultSectionLoader {
             config_dirs: vec![file.clone()],
             substitution_policy: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
-        let err = loader.validate().unwrap_err();
+        let err = must_err(loader.validate());
         assert!(matches!(err, ConfigError::Io(_)));
         assert!(err.to_string().contains("not a directory"));
     }

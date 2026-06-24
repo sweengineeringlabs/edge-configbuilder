@@ -28,7 +28,13 @@ fn test_override_source_sets_field() {
             value: "false".into(),
         })
         .build();
-    assert!(r.override_source.is_some());
+    match r.override_source {
+        Some(OverrideSource::EnvVar { var_name, value }) => {
+            assert_eq!(var_name, "CACHE_ENABLED");
+            assert_eq!(value, "false");
+        }
+        other => panic!("expected EnvVar override source, got {other:?}"),
+    }
 }
 
 /// @covers: requires

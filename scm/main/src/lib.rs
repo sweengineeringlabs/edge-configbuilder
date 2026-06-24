@@ -23,50 +23,49 @@
 
 mod api;
 mod core;
-mod gateway;
 mod saf;
 
-pub use crate::api::configbuilder::traits::config_builder::ConfigBuilder;
-pub use crate::api::configbuilder::types::application_config::ApplicationConfig;
-pub use crate::api::configbuilder::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
-pub use crate::api::configbuilder::types::ConfigBuilderImpl;
-pub use crate::api::loader::traits::config_section::ConfigSection;
-pub use crate::api::loader::traits::feature_loader::FeatureLoader;
-pub use crate::api::loader::traits::loader::Loader;
-pub use crate::api::loader::traits::optional_section::OptionalSection;
-pub use crate::api::loader::types::feature::{
+#[cfg(any(test, feature = "test-utils"))]
+pub use crate::api::AllowAllPolicy;
+pub use crate::api::ApplicationConfig;
+pub use crate::api::ConfigBuilder;
+pub use crate::api::ConfigBuilderImpl;
+pub use crate::api::ConfigError;
+pub use crate::api::ConfigLoaderFactory;
+pub use crate::api::ConfigSection;
+pub use crate::api::FeatureLoader;
+pub use crate::api::FeatureRegistry;
+pub use crate::api::FeatureSummary;
+pub use crate::api::Loader;
+pub use crate::api::OptionalSection;
+pub use crate::api::PathValidatorImpl;
+pub use crate::api::Preflight;
+pub use crate::api::SectionLoaderImpl;
+pub use crate::api::SubstitutionConfigBuilderImpl;
+pub use crate::api::SubstitutionPolicy;
+pub use crate::api::Validator;
+pub use crate::api::ValidatorError;
+pub use crate::api::{CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy};
+pub use crate::api::{
     FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
     OverrideSource,
 };
-pub use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
-pub use crate::api::preflight::types::{PreflightIssue, PreflightIssueKind, PreflightReport};
-pub use crate::api::substitution::traits::substitution_policy::SubstitutionPolicy;
-#[cfg(any(test, feature = "test-utils"))]
-pub use crate::api::substitution::types::AllowAllPolicy;
-pub use crate::api::substitution::types::{
-    CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
-};
-pub use crate::api::validator::traits::validator::Validator;
-pub use crate::api::validator::types::path_validator_impl::PathValidatorImpl;
-pub use gateway::*;
+pub use crate::api::{PreflightIssue, PreflightIssueKind, PreflightReport};
+pub use saf::*;
 
 #[doc(hidden)]
-pub use crate::api::configbuilder::ConfigBuilderBound;
+pub use crate::api::ConfigBuilderBound;
 #[doc(hidden)]
-pub use crate::api::loader::SectionLoaderBound;
+pub use crate::api::PolicyCatalog;
 #[doc(hidden)]
-pub use crate::api::substitution::SubstituterBound;
+pub use crate::api::SectionLoaderBound;
 #[doc(hidden)]
-pub use crate::api::validator::ValidatorBound;
+pub use crate::api::SubstituterBound;
+#[doc(hidden)]
+pub use crate::api::ValidatorBound;
 
-/// Internal helpers exposed for use by `load_in_order!` and `preflight!` macros.
-///
-/// Not part of the public API — subject to change without notice.
 #[doc(hidden)]
-#[allow(missing_docs)]
-pub mod __internal {
-    pub use crate::api::loader::types::topology::Topology;
-}
+pub use crate::api::Topology;
 
 /// Load a set of optional feature sections in dependency order.
 ///
@@ -101,7 +100,7 @@ macro_rules! load_in_order {
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::__internal::Topology::sort(_names, _requires) {
+        match $crate::Topology::sort(_names, _requires) {
             Err(_msg) => Err($crate::ConfigError::validation("load_in_order", _msg)),
             Ok(_order) => {
                 let mut _result: Result<(), $crate::ConfigError> = Ok(());
@@ -161,7 +160,7 @@ macro_rules! preflight {
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::__internal::Topology::sort(_names, _requires) {
+        match $crate::Topology::sort(_names, _requires) {
             Err(ref _msg) => {
                 _report.push($crate::PreflightIssue {
                     section: String::from("dependency_graph"),

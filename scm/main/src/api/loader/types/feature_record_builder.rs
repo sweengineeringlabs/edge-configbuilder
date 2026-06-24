@@ -1,8 +1,8 @@
 //! [`FeatureRecordBuilder`] — fluent builder for [`FeatureRecord`].
 
-use crate::api::loader::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature::feature_record::FeatureRecord;
-use crate::api::loader::types::feature::override_source::OverrideSource;
+use crate::api::loader::types::feature_metadata::FeatureMetadata;
+use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::types::override_source::OverrideSource;
 
 /// Fluent builder for [`FeatureRecord`].
 ///
@@ -37,7 +37,7 @@ pub struct FeatureRecordBuilder {
     enabled: bool,
     override_source: Option<OverrideSource>,
     requires: &'static [&'static str],
-    metadata: FeatureMetadata,
+    metadata: Box<FeatureMetadata>,
 }
 
 impl FeatureRecordBuilder {
@@ -56,7 +56,7 @@ impl FeatureRecordBuilder {
             enabled: false,
             override_source: None,
             requires: &[],
-            metadata: FeatureMetadata::default(),
+            metadata: Box::new(FeatureMetadata::default()),
         }
     }
 
@@ -80,7 +80,7 @@ impl FeatureRecordBuilder {
 
     /// Set the static metadata annotations for the feature.
     pub fn metadata(mut self, v: FeatureMetadata) -> Self {
-        self.metadata = v;
+        self.metadata = Box::new(v);
         self
     }
 

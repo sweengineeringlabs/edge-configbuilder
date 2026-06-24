@@ -1,4 +1,4 @@
-use crate::api::error::config_error::ConfigError;
+use crate::api::ConfigError;
 
 /// Load typed TOML sections from a layered config chain.
 ///
@@ -7,19 +7,17 @@ use crate::api::error::config_error::ConfigError;
 /// Environment variable substitution (`{{VAR_NAME}}` syntax) is optionally supported
 /// when the loader was created with a [`SubstitutionPolicy`].
 ///
-/// The concrete implementation is [`SectionLoaderImpl`], obtained from the
-/// [`ConfigLoaderFactory`] family of functions.  This trait is in scope for
-/// generic code that accepts any loader; concrete call sites use the inherent
-/// methods on [`SectionLoaderImpl`] directly.
+/// The concrete implementation is [`SectionLoaderImpl`].  This trait is in
+/// scope for generic code that accepts any loader; concrete call sites use the
+/// inherent methods on [`SectionLoaderImpl`] directly.
 ///
 /// [`SubstitutionPolicy`]: crate::SubstitutionPolicy
 /// [`SectionLoaderImpl`]: crate::SectionLoaderImpl
-/// [`ConfigLoaderFactory`]: crate::ConfigLoaderFactory
 ///
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{ConfigLoaderFactory, Loader};
+/// use swe_edge_configbuilder::Loader;
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// struct AuthConfig { token_ttl_secs: u64 }
@@ -30,7 +28,7 @@ use crate::api::error::config_error::ConfigError;
 ///     loader.load_section("auth").unwrap_or_default()
 /// }
 ///
-/// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+/// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
 /// let cfg = load_auth(&loader);
 /// ```
 pub trait Loader {
@@ -44,12 +42,12 @@ pub trait Loader {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{ConfigLoaderFactory, Loader};
+    /// use swe_edge_configbuilder::Loader;
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct TlsConfig { cert_path: String }
     ///
-    /// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+    /// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
     /// let tls: TlsConfig = loader.load_section("tls").expect("readable");
     /// ```
     fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
@@ -64,8 +62,8 @@ pub trait Loader {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::{ConfigLoaderFactory, Loader};
-    /// let loader = ConfigLoaderFactory::create_loader_for_dir("/etc/my-app");
+    /// use swe_edge_configbuilder::Loader;
+    /// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
     /// loader.validate().expect("must be a directory if it exists");
     /// ```
     fn validate(&self) -> Result<(), ConfigError>;

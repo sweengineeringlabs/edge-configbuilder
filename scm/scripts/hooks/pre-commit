@@ -16,12 +16,7 @@ echo "  2/4 clippy..."
 cargo clippy --all-targets -- -D warnings
 
 echo "  3/4 arch audit..."
-# Exclude rules that are false positives for the scm/main/ layout:
-# 3,5 (src/ not at scm/ level), 39,42,43 (docs/.gitignore at repo root),
-# 71,93 (root whitelist/structure from scm/ pov), 96 (deps in main/src/ not src/),
-# 131 (gateway/ optional for lib crates), 170 (ConfigSection vs ConfigBuilder),
-# 200 (string-literal returns flagged as stubs), 201 (unwrap in #[cfg(test)])
-arch audit --rs -c 1-2,4,6-38,40-41,44-70,72-92,94-95,97-130,134-169,171-199,202-215
+arch audit --rs
 
 echo "  4/4 cargo audit..."
 cargo audit --deny unsound --deny yanked

@@ -13,5 +13,3 @@
 
 pub mod traits;
 pub mod types;
-
-pub use traits::config_builder_bound::ConfigBuilderBound;

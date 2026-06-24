@@ -1,4 +1,4 @@
-use crate::api::error::config_error::ConfigError;
+use crate::api::ConfigError;
 
 /// Category of a preflight issue.
 ///

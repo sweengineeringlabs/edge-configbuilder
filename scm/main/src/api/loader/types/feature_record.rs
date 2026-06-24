@@ -1,7 +1,7 @@
 //! [`FeatureRecord`] — a snapshot of one feature's state and why it got there.
 
-use crate::api::loader::types::feature::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature::override_source::OverrideSource;
+use crate::api::loader::types::feature_metadata::FeatureMetadata;
+use crate::api::loader::types::override_source::OverrideSource;
 
 /// A snapshot of one optional feature's resolved state.
 ///
@@ -54,5 +54,5 @@ pub struct FeatureRecord {
     /// feature via [`OptionalSection::metadata`].
     ///
     /// [`OptionalSection::metadata`]: crate::api::loader::traits::optional_section::OptionalSection::metadata
-    pub metadata: FeatureMetadata,
+    pub metadata: Box<FeatureMetadata>,
 }

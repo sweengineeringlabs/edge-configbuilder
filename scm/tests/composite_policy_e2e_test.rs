@@ -10,20 +10,14 @@ use swe_edge_configbuilder::{
 fn test_composite_policy_empty_policies_accepts_any_var() {
     // An empty composite policy has no constraints — everything must pass.
     let policy = CompositePolicy::new(vec![]);
-    assert!(
-        policy.validate("ANYTHING").is_ok(),
-        "empty composite must accept any variable"
-    );
+    assert_eq!(policy.validate("ANYTHING"), Ok(()));
 }
 
 #[test]
 fn test_composite_policy_all_pass_accepts_var() {
     // When all sub-policies accept the variable, the composite must accept it too.
     let policy = CompositePolicy::new(vec![Box::new(AllowAllPolicy), Box::new(AllowAllPolicy)]);
-    assert!(
-        policy.validate("MY_VAR").is_ok(),
-        "all sub-policies pass; composite must pass"
-    );
+    assert_eq!(policy.validate("MY_VAR"), Ok(()));
 }
 
 #[test]

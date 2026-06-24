@@ -1,7 +1,8 @@
 //! Public concrete path validator returned by `create_validator`.
 
-use crate::api::error::config_error::ConfigError;
+use crate::api::validator::errors::validator_error::ValidatorError;
 use crate::api::validator::traits::validator_ops::ValidatorOps;
+use crate::api::ConfigError;
 
 /// A ready-to-use path validator produced by [`ConfigLoaderFactory::create_validator`].
 ///
@@ -36,12 +37,12 @@ pub struct PathValidatorImpl {
 impl PathValidatorImpl {
     /// Returns `Ok(())` when `target` is a valid config path, `Err` otherwise.
     pub fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
-        self.ops.check_path(target)
+        self.ops.check_path(target).map_err(ConfigError::from)
     }
 }
 
 impl crate::api::validator::traits::validator::Validator for PathValidatorImpl {
-    fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
+    fn validate_path(&self, target: &std::path::Path) -> Result<(), ValidatorError> {
         self.ops.check_path(target)
     }
 }
