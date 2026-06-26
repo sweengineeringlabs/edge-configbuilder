@@ -7,7 +7,7 @@ use std::time::Duration;
 ///
 /// This is the **only type from which you can call `build_loader()`** to finalise
 /// configuration into a [`SectionLoaderImpl`].  The `build_loader` method is an
-/// inherent method added by an extension impl in `saf/` (not on the [`ConfigBuilder`]
+/// inherent method added by an extension impl in `saf/` (not on the builder
 /// trait) so that this declaration in `api/` carries no dependency on `core/`.
 ///
 /// Chain the fluent setters to configure XDG resolution, then call `build_loader()`
@@ -18,7 +18,7 @@ use std::time::Duration;
 /// SAF `create_config_builder()` functions return this concrete type, not
 /// `impl ConfigBuilder`.  Returning the opaque trait type would prevent callers
 /// from ever calling `build_loader()`, because `build_loader` is not part of the
-/// [`ConfigBuilder`] trait contract.
+/// builder trait contract.
 ///
 /// [`ConfigLoaderFactory::create_config_builder`]: crate::ConfigLoaderFactory::create_config_builder
 /// [`SectionLoaderImpl`]: crate::SectionLoaderImpl
