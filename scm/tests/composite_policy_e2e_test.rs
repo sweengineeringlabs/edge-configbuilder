@@ -3,20 +3,23 @@
 // @covers: api/types/loader/composite_policy.rs — CompositePolicy AND logic
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
-    AllowAllPolicy, CompositePolicy, PrefixWhitelistPolicy, SubstitutionPolicy,
+    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PrefixWhitelistPolicy, SubstitutionPolicy,
 };
 
 #[test]
 fn test_composite_policy_empty_policies_accepts_any_var() {
     // An empty composite policy has no constraints — everything must pass.
-    let policy = CompositePolicy::new(vec![]);
+    let policy = ConfigLoaderFactory::create_composite_policy(vec![]);
     assert_eq!(policy.validate("ANYTHING"), Ok(()));
 }
 
 #[test]
 fn test_composite_policy_all_pass_accepts_var() {
     // When all sub-policies accept the variable, the composite must accept it too.
-    let policy = CompositePolicy::new(vec![Box::new(AllowAllPolicy), Box::new(AllowAllPolicy)]);
+    let policy = ConfigLoaderFactory::create_composite_policy(vec![
+        Box::new(AllowAllPolicy),
+        Box::new(AllowAllPolicy),
+    ]);
     assert_eq!(policy.validate("MY_VAR"), Ok(()));
 }
 
@@ -24,9 +27,11 @@ fn test_composite_policy_all_pass_accepts_var() {
 fn test_composite_policy_one_fails_rejects_var() {
     // AND logic: if any sub-policy rejects, the composite must reject.
     // This is the key safety property — a single restrictive policy wins.
-    let policy = CompositePolicy::new(vec![
+    let policy = ConfigLoaderFactory::create_composite_policy(vec![
         Box::new(AllowAllPolicy),
-        Box::new(PrefixWhitelistPolicy::new(vec!["ALLOWED_".to_string()])),
+        Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
+            "ALLOWED_".to_string(),
+        ])),
     ]);
     let result = policy.validate("FORBIDDEN_VAR");
     assert!(
@@ -39,9 +44,13 @@ fn test_composite_policy_one_fails_rejects_var() {
 fn test_composite_policy_error_message_mentions_all_failures() {
     // The error message must include context from the failing policies so the
     // operator knows which policy rejected the variable and why.
-    let policy = CompositePolicy::new(vec![
-        Box::new(PrefixWhitelistPolicy::new(vec!["A_".to_string()])),
-        Box::new(PrefixWhitelistPolicy::new(vec!["B_".to_string()])),
+    let policy = ConfigLoaderFactory::create_composite_policy(vec![
+        Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
+            "A_".to_string(),
+        ])),
+        Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
+            "B_".to_string(),
+        ])),
     ]);
     let err = policy.validate("C_VAR").unwrap_err();
     assert!(
@@ -52,7 +61,7 @@ fn test_composite_policy_error_message_mentions_all_failures() {
 
 #[test]
 fn test_composite_policy_description_is_non_empty() {
-    let policy = CompositePolicy::new(vec![Box::new(AllowAllPolicy)]);
+    let policy = ConfigLoaderFactory::create_composite_policy(vec![Box::new(AllowAllPolicy)]);
     assert!(
         !policy.description().is_empty(),
         "CompositePolicy description must not be empty"

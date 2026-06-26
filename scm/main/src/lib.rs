@@ -79,20 +79,21 @@ pub use crate::api::Topology;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{load_in_order, ConfigLoaderFactory, FeatureRegistry, OptionalSection};
+/// use swe_edge_configbuilder::{load_in_order, ConfigLoaderFactory, OptionalSection};
 ///
 /// # #[derive(serde::Deserialize)] struct CacheConfig;
 /// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
 /// # #[derive(serde::Deserialize)] struct BrokerConfig;
 /// # impl OptionalSection for BrokerConfig { fn section_name() -> &'static str { "broker" } }
 /// let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
-/// let mut registry = FeatureRegistry::new();
+/// let mut registry = ConfigLoaderFactory::create_feature_registry();
 ///
 /// load_in_order!(&mut registry, &loader, CacheConfig, BrokerConfig)
 ///     .expect("dependency order must be acyclic");
 ///
-/// registry.validate_dependencies().expect("all dependencies satisfied");
-/// println!("{}", registry.summary());
+/// ConfigLoaderFactory::feature_registry_validate_dependencies(&registry)
+///     .expect("all dependencies satisfied");
+/// println!("{}", ConfigLoaderFactory::feature_registry_summary(&registry));
 /// ```
 #[macro_export]
 macro_rules! load_in_order {
@@ -100,15 +101,18 @@ macro_rules! load_in_order {
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::Topology::sort(_names, _requires) {
-            Err(_msg) => Err($crate::ConfigError::validation("load_in_order", _msg)),
+        match $crate::ConfigLoaderFactory::topology_sort(_names, _requires) {
+            Err(_msg) => Err($crate::ConfigError::Validation {
+                section: String::from("load_in_order"),
+                reason: _msg,
+            }),
             Ok(_order) => {
                 let mut _result: Result<(), $crate::ConfigError> = Ok(());
                 'load_loop: for &_idx in &_order {
                     let mut _j: usize = 0;
                     $(
                         if _idx == _j {
-                            if let Err(_e) = $registry.load::<$ty>($loader) {
+                            if let Err(_e) = $crate::ConfigLoaderFactory::feature_registry_load::<$ty>($registry, $loader) {
                                 _result = Err(_e);
                                 break 'load_loop;
                             }
@@ -155,12 +159,12 @@ macro_rules! load_in_order {
 #[macro_export]
 macro_rules! preflight {
     ($loader:expr, $($ty:ty),+ $(,)?) => {{
-        let mut _report = $crate::PreflightReport::new();
-        let mut _registry = $crate::FeatureRegistry::new();
+        let mut _report = $crate::ConfigLoaderFactory::create_preflight_report();
+        let mut _registry = $crate::ConfigLoaderFactory::create_feature_registry();
         let _names: &[&str] = &[$(<$ty as $crate::OptionalSection>::section_name()),+];
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
-        match $crate::Topology::sort(_names, _requires) {
+        match $crate::ConfigLoaderFactory::topology_sort(_names, _requires) {
             Err(ref _msg) => {
                 _report.push($crate::PreflightIssue {
                     section: String::from("dependency_graph"),
@@ -173,7 +177,7 @@ macro_rules! preflight {
                     let mut _j: usize = 0;
                     $(
                         if _idx == _j {
-                            match _registry.load::<$ty>($loader) {
+                            match $crate::ConfigLoaderFactory::feature_registry_load::<$ty>(&mut _registry, $loader) {
                                 Ok(_) => {}
                                 Err(_e) => {
                                     _report.push($crate::PreflightIssue {
@@ -190,7 +194,7 @@ macro_rules! preflight {
                 }
 
                 // Capture OnError::Disable degradations as ValidationError issues
-                for _record in _registry.records() {
+                for _record in $crate::ConfigLoaderFactory::feature_registry_records(&_registry) {
                     if let Some($crate::OverrideSource::ValidationError { ref reason }) =
                         _record.override_source
                     {
@@ -203,14 +207,13 @@ macro_rules! preflight {
                 }
 
                 // Check that every enabled feature's dependencies are satisfied
-                let _enabled: std::collections::HashSet<&str> = _registry
-                    .records()
+                let _enabled: std::collections::HashSet<&str> = $crate::ConfigLoaderFactory::feature_registry_records(&_registry)
                     .iter()
                     .filter(|_r| _r.enabled)
                     .map(|_r| _r.section_name.as_str())
                     .collect();
 
-                for _record in _registry.records() {
+                for _record in $crate::ConfigLoaderFactory::feature_registry_records(&_registry) {
                     if _record.enabled {
                         for _dep in _record.requires {
                             if !_enabled.contains(_dep) {

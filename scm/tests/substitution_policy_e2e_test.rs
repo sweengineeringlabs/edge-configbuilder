@@ -2,8 +2,8 @@
 #![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
-    AllowAllPolicy, CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy,
-    SubstitutionPolicy,
+    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PatternWhitelistPolicy,
+    PrefixWhitelistPolicy, SubstitutionPolicy,
 };
 
 #[test]
@@ -16,7 +16,8 @@ fn test_allow_all_policy_accepts_any_variable() {
 
 #[test]
 fn test_prefix_whitelist_policy_accepts_matching_prefix() {
-    let policy = PrefixWhitelistPolicy::new(vec!["APP_".into(), "SERVICE_".into()]);
+    let policy =
+        ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".into(), "SERVICE_".into()]);
 
     assert_eq!(policy.validate("APP_DEBUG"), Ok(()));
     assert_eq!(policy.validate("SERVICE_URL"), Ok(()));
@@ -25,7 +26,7 @@ fn test_prefix_whitelist_policy_accepts_matching_prefix() {
 
 #[test]
 fn test_prefix_whitelist_policy_rejects_non_matching_prefix() {
-    let policy = PrefixWhitelistPolicy::new(vec!["APP_".into()]);
+    let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".into()]);
 
     let result = policy.validate("DATABASE_PASSWORD");
     assert!(result.is_err());
@@ -37,7 +38,8 @@ fn test_prefix_whitelist_policy_rejects_non_matching_prefix() {
 #[test]
 fn test_pattern_whitelist_policy_accepts_matching_pattern() {
     let policy =
-        PatternWhitelistPolicy::new("^(APP|SERVICE)_[A-Z_]+$".into()).expect("valid regex");
+        ConfigLoaderFactory::create_pattern_whitelist_policy("^(APP|SERVICE)_[A-Z_]+$".into())
+            .expect("valid regex");
 
     assert!(policy.validate("APP_DEBUG").is_ok());
     assert!(policy.validate("SERVICE_URL").is_ok());
@@ -45,7 +47,8 @@ fn test_pattern_whitelist_policy_accepts_matching_pattern() {
 
 #[test]
 fn test_pattern_whitelist_policy_rejects_non_matching_pattern() {
-    let policy = PatternWhitelistPolicy::new("^APP_[A-Z_]+$".into()).expect("valid regex");
+    let policy = ConfigLoaderFactory::create_pattern_whitelist_policy("^APP_[A-Z_]+$".into())
+        .expect("valid regex");
 
     // Lowercase doesn't match
     let result = policy.validate("app_debug");
@@ -55,7 +58,7 @@ fn test_pattern_whitelist_policy_rejects_non_matching_pattern() {
 
 #[test]
 fn test_pattern_whitelist_policy_rejects_invalid_regex() {
-    let result = PatternWhitelistPolicy::new("[invalid(regex".into());
+    let result = ConfigLoaderFactory::create_pattern_whitelist_policy("[invalid(regex".into());
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Invalid regex pattern"));
 }
@@ -63,10 +66,14 @@ fn test_pattern_whitelist_policy_rejects_invalid_regex() {
 #[test]
 fn test_composite_policy_requires_all_policies_to_pass() {
     let policies: Vec<Box<dyn SubstitutionPolicy>> = vec![
-        Box::new(PrefixWhitelistPolicy::new(vec!["APP_".into()])),
-        Box::new(PatternWhitelistPolicy::new("^APP_[A-Z_]+$".into()).unwrap()),
+        Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
+            "APP_".into(),
+        ])),
+        Box::new(
+            ConfigLoaderFactory::create_pattern_whitelist_policy("^APP_[A-Z_]+$".into()).unwrap(),
+        ),
     ];
-    let policy = CompositePolicy::new(policies);
+    let policy = ConfigLoaderFactory::create_composite_policy(policies);
 
     // Must match both policies
     assert!(policy.validate("APP_DEBUG").is_ok());
@@ -83,10 +90,11 @@ fn test_policy_description() {
     let allow_all = AllowAllPolicy;
     assert!(allow_all.description().contains("AllowAll"));
 
-    let prefix = PrefixWhitelistPolicy::new(vec!["APP_".into(), "SERVICE_".into()]);
+    let prefix =
+        ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".into(), "SERVICE_".into()]);
     assert!(prefix.description().contains("APP_"));
     assert!(prefix.description().contains("SERVICE_"));
 
-    let pattern = PatternWhitelistPolicy::new("^APP_.*".into()).unwrap();
+    let pattern = ConfigLoaderFactory::create_pattern_whitelist_policy("^APP_.*".into()).unwrap();
     assert!(pattern.description().contains("APP_"));
 }

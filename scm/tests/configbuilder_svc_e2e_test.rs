@@ -96,6 +96,25 @@ fn test_create_config_builder_is_pre_seeded_with_package_name() {
 
 /// @covers: create_config_builder
 #[test]
+fn test_create_config_builder_can_build_loader_through_fluent_chain() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut f = std::fs::File::create(dir.path().join("application.toml")).unwrap();
+    writeln!(f, "[cfg]\nvalue = \"fluent\"").unwrap();
+
+    let cfg: Cfg = ConfigLoaderFactory::create_config_builder()
+        .with_name("ignored")
+        .with_version("9.9.9")
+        .with_config_dir(dir.path())
+        .build_loader()
+        .unwrap()
+        .load_section("cfg")
+        .unwrap();
+
+    assert_eq!(cfg.value, "fluent");
+}
+
+/// @covers: create_config_builder
+#[test]
 fn test_create_config_builder_returns_not_found_for_absent_section() {
     let result: Result<Cfg, _> = ConfigLoaderFactory::create_config_builder()
         .build_loader()

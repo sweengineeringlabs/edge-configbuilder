@@ -45,10 +45,10 @@ impl OptionalSection for BrokenSection {
     }
     fn validate_enabled(&self) -> Result<(), ConfigError> {
         if self.threshold < 0 {
-            return Err(ConfigError::validation(
-                Self::section_name(),
-                "threshold must be >= 0",
-            ));
+            return Err(ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "threshold must be >= 0".to_string(),
+            });
         }
         Ok(())
     }
@@ -67,10 +67,10 @@ impl OptionalSection for DegradedSection {
     }
     fn validate_enabled(&self) -> Result<(), ConfigError> {
         if self.threshold < 0 {
-            return Err(ConfigError::validation(
-                Self::section_name(),
-                "threshold must be non-negative",
-            ));
+            return Err(ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "threshold must be non-negative".to_string(),
+            });
         }
         Ok(())
     }

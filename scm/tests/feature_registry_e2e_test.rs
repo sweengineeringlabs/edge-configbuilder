@@ -46,10 +46,10 @@ impl OptionalSection for BrokerConfig {
 
     fn validate_enabled(&self) -> Result<(), ConfigError> {
         if self.tls_enabled && self.cert_path.is_none() {
-            return Err(ConfigError::validation(
-                Self::section_name(),
-                "cert_path is required when tls_enabled = true",
-            ));
+            return Err(ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "cert_path is required when tls_enabled = true".to_string(),
+            });
         }
         Ok(())
     }
@@ -76,10 +76,10 @@ impl OptionalSection for BrokerConfigDisable {
 
     fn validate_enabled(&self) -> Result<(), ConfigError> {
         if self.tls_enabled && self.cert_path.is_none() {
-            return Err(ConfigError::validation(
-                Self::section_name(),
-                "cert_path is required when tls_enabled = true",
-            ));
+            return Err(ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "cert_path is required when tls_enabled = true".to_string(),
+            });
         }
         Ok(())
     }

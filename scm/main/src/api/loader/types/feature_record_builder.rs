@@ -1,7 +1,6 @@
 //! [`FeatureRecordBuilder`] — fluent builder for [`FeatureRecord`].
 
 use crate::api::loader::types::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature_record::FeatureRecord;
 use crate::api::loader::types::override_source::OverrideSource;
 
 /// Fluent builder for [`FeatureRecord`].
@@ -33,74 +32,9 @@ use crate::api::loader::types::override_source::OverrideSource;
 /// assert_eq!(record.metadata.description, "Async message bus");
 /// ```
 pub struct FeatureRecordBuilder {
-    section_name: String,
-    enabled: bool,
-    override_source: Option<OverrideSource>,
-    requires: &'static [&'static str],
-    metadata: Box<FeatureMetadata>,
-}
-
-impl FeatureRecordBuilder {
-    /// Start a builder for the named TOML section.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use swe_edge_configbuilder::FeatureRecordBuilder;
-    /// let b = FeatureRecordBuilder::new("auth");
-    /// assert_eq!(b.build().section_name, "auth");
-    /// ```
-    pub fn new(section_name: impl Into<String>) -> Self {
-        Self {
-            section_name: section_name.into(),
-            enabled: false,
-            override_source: None,
-            requires: &[],
-            metadata: Box::new(FeatureMetadata::default()),
-        }
-    }
-
-    /// Set whether the feature resolved to enabled.
-    pub fn enabled(mut self, v: bool) -> Self {
-        self.enabled = v;
-        self
-    }
-
-    /// Set the override source that determined the resolved state.
-    pub fn override_source(mut self, v: OverrideSource) -> Self {
-        self.override_source = Some(v);
-        self
-    }
-
-    /// Set the static dependency slice declared by the feature.
-    pub fn requires(mut self, v: &'static [&'static str]) -> Self {
-        self.requires = v;
-        self
-    }
-
-    /// Set the static metadata annotations for the feature.
-    pub fn metadata(mut self, v: FeatureMetadata) -> Self {
-        self.metadata = Box::new(v);
-        self
-    }
-
-    /// Consume the builder and return a [`FeatureRecord`].
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use swe_edge_configbuilder::FeatureRecordBuilder;
-    /// let record = FeatureRecordBuilder::new("tls").enabled(true).build();
-    /// assert!(record.enabled);
-    /// assert!(record.override_source.is_none());
-    /// ```
-    pub fn build(self) -> FeatureRecord {
-        FeatureRecord {
-            section_name: self.section_name,
-            enabled: self.enabled,
-            override_source: self.override_source,
-            requires: self.requires,
-            metadata: self.metadata,
-        }
-    }
+    pub(crate) section_name: String,
+    pub(crate) enabled: bool,
+    pub(crate) override_source: Option<OverrideSource>,
+    pub(crate) requires: &'static [&'static str],
+    pub(crate) metadata: Box<FeatureMetadata>,
 }

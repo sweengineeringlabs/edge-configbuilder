@@ -1,5 +1,6 @@
 mod configbuilder;
 mod loader;
+mod preflight;
 mod substitution;
 mod validator;
 

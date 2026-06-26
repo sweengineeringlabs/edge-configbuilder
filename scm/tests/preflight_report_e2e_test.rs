@@ -1,58 +1,93 @@
 //! End-to-end tests for `PreflightReport`, `PreflightIssue`, and `PreflightIssueKind`.
 
-use swe_edge_configbuilder::{PreflightIssue, PreflightIssueKind, PreflightReport};
+use swe_edge_configbuilder::{
+    ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport,
+};
 
 // ── PreflightReport construction ──────────────────────────────────────────────
 
 #[test]
 fn test_preflight_report_new_has_no_issues() {
-    let report = PreflightReport::new();
-    assert!(report.is_ok());
-    assert_eq!(report.issue_count(), 0);
-    assert!(report.issues().is_empty());
+    let report = ConfigLoaderFactory::create_preflight_report();
+    assert!(ConfigLoaderFactory::preflight_report_is_ok(&report));
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issue_count(&report),
+        0
+    );
+    assert!(ConfigLoaderFactory::preflight_report_issues(&report).is_empty());
 }
 
 #[test]
 fn test_preflight_report_default_matches_new() {
     let report = PreflightReport::default();
-    assert!(report.is_ok());
-    assert_eq!(report.issue_count(), 0);
+    assert!(ConfigLoaderFactory::preflight_report_is_ok(&report));
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issue_count(&report),
+        0
+    );
 }
 
 #[test]
 fn test_preflight_report_push_increments_issue_count() {
-    let mut report = PreflightReport::new();
-    report.push(PreflightIssue {
-        section: "cache".into(),
-        kind: PreflightIssueKind::LoadError,
-        message: "file not found".into(),
-    });
-    assert!(!report.is_ok());
-    assert_eq!(report.issue_count(), 1);
+    let mut report = ConfigLoaderFactory::create_preflight_report();
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "cache".into(),
+            kind: PreflightIssueKind::LoadError,
+            message: "file not found".into(),
+        },
+    );
+    assert!(!ConfigLoaderFactory::preflight_report_is_ok(&report));
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issue_count(&report),
+        1
+    );
 }
 
 #[test]
 fn test_preflight_report_push_multiple_issues_all_accessible() {
-    let mut report = PreflightReport::new();
-    report.push(PreflightIssue {
-        section: "a".into(),
-        kind: PreflightIssueKind::LoadError,
-        message: "io error".into(),
-    });
-    report.push(PreflightIssue {
-        section: "b".into(),
-        kind: PreflightIssueKind::ValidationError,
-        message: "invalid config".into(),
-    });
-    report.push(PreflightIssue {
-        section: "dep_graph".into(),
-        kind: PreflightIssueKind::DependencyMissing,
-        message: "requires 'c'".into(),
-    });
-    assert_eq!(report.issue_count(), 3);
-    assert_eq!(report.issues()[0].section, "a");
-    assert_eq!(report.issues()[1].section, "b");
-    assert_eq!(report.issues()[2].section, "dep_graph");
+    let mut report = ConfigLoaderFactory::create_preflight_report();
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "a".into(),
+            kind: PreflightIssueKind::LoadError,
+            message: "io error".into(),
+        },
+    );
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "b".into(),
+            kind: PreflightIssueKind::ValidationError,
+            message: "invalid config".into(),
+        },
+    );
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "dep_graph".into(),
+            kind: PreflightIssueKind::DependencyMissing,
+            message: "requires 'c'".into(),
+        },
+    );
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issue_count(&report),
+        3
+    );
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issues(&report)[0].section,
+        "a"
+    );
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issues(&report)[1].section,
+        "b"
+    );
+    assert_eq!(
+        ConfigLoaderFactory::preflight_report_issues(&report)[2].section,
+        "dep_graph"
+    );
 }
 
 // ── PreflightIssueKind variants ───────────────────────────────────────────────
@@ -117,30 +152,36 @@ fn test_preflight_issue_clone_preserves_all_fields() {
 
 #[test]
 fn test_preflight_report_display_ok_shows_ok() {
-    let report = PreflightReport::new();
+    let report = ConfigLoaderFactory::create_preflight_report();
     assert_eq!(report.to_string(), "preflight: OK");
 }
 
 #[test]
 fn test_preflight_report_display_with_issues_shows_issue_count() {
-    let mut report = PreflightReport::new();
-    report.push(PreflightIssue {
-        section: "cache".into(),
-        kind: PreflightIssueKind::LoadError,
-        message: "boom".into(),
-    });
+    let mut report = ConfigLoaderFactory::create_preflight_report();
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "cache".into(),
+            kind: PreflightIssueKind::LoadError,
+            message: "boom".into(),
+        },
+    );
     let output = report.to_string();
     assert!(output.contains("1 issue"), "got: {output}");
 }
 
 #[test]
 fn test_preflight_report_display_includes_section_name_and_message() {
-    let mut report = PreflightReport::new();
-    report.push(PreflightIssue {
-        section: "broker".into(),
-        kind: PreflightIssueKind::ValidationError,
-        message: "cert_path required".into(),
-    });
+    let mut report = ConfigLoaderFactory::create_preflight_report();
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "broker".into(),
+            kind: PreflightIssueKind::ValidationError,
+            message: "cert_path required".into(),
+        },
+    );
     let output = report.to_string();
     assert!(output.contains("broker"), "section name missing: {output}");
     assert!(
@@ -152,11 +193,14 @@ fn test_preflight_report_display_includes_section_name_and_message() {
 
 #[test]
 fn test_preflight_report_display_cycle_tag_appears() {
-    let mut report = PreflightReport::new();
-    report.push(PreflightIssue {
-        section: "dependency_graph".into(),
-        kind: PreflightIssueKind::DependencyCycle,
-        message: "cycle detected".into(),
-    });
+    let mut report = ConfigLoaderFactory::create_preflight_report();
+    ConfigLoaderFactory::preflight_report_push(
+        &mut report,
+        PreflightIssue {
+            section: "dependency_graph".into(),
+            kind: PreflightIssueKind::DependencyCycle,
+            message: "cycle detected".into(),
+        },
+    );
     assert!(report.to_string().contains("CYCLE"));
 }

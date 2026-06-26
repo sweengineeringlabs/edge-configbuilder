@@ -25,10 +25,10 @@ impl OptionalSection for BrokerConfig {
 
     fn validate_enabled(&self) -> Result<(), ConfigError> {
         if self.tls_enabled && self.cert_path.is_none() {
-            return Err(ConfigError::validation(
-                Self::section_name(),
-                "cert_path is required when tls_enabled = true",
-            ));
+            return Err(ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "cert_path is required when tls_enabled = true".to_string(),
+            });
         }
         Ok(())
     }
@@ -167,7 +167,10 @@ fn test_optional_section_load_optional_default_validation_always_passes() {
 
 #[test]
 fn test_config_error_validation_constructor_formats_section_and_reason() {
-    let err = ConfigError::validation("my_section", "host must not be empty");
+    let err = ConfigError::Validation {
+        section: "my_section".to_string(),
+        reason: "host must not be empty".to_string(),
+    };
     let msg = err.to_string();
     assert!(
         msg.contains("my_section"),

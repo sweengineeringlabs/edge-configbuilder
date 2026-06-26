@@ -3,7 +3,7 @@
 use swe_edge_configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::SectionLoaderImpl;
+use swe_edge_configbuilder::{Loader, SectionLoaderImpl};
 use tempfile::TempDir;
 
 fn make_loader(content: &str) -> (TempDir, SectionLoaderImpl) {
@@ -24,7 +24,7 @@ struct Cfg {
 #[test]
 fn test_section_loader_impl_load_section_returns_value_from_toml() {
     let (_dir, loader) = make_loader("[app]\nvalue = \"hello\"");
-    let cfg: Cfg = loader.load_section("app").unwrap();
+    let cfg: Cfg = Loader::load_section(&loader, "app").unwrap();
     assert_eq!(cfg.value, "hello");
 }
 
@@ -32,7 +32,7 @@ fn test_section_loader_impl_load_section_returns_value_from_toml() {
 #[test]
 fn test_section_loader_impl_load_section_absent_key_returns_default() {
     let (_dir, loader) = make_loader("[other]\nvalue = \"x\"");
-    let cfg: Cfg = loader.load_section("app").unwrap();
+    let cfg: Cfg = Loader::load_section(&loader, "app").unwrap();
     assert_eq!(cfg.value, "");
 }
 
@@ -41,7 +41,7 @@ fn test_section_loader_impl_load_section_absent_key_returns_default() {
 fn test_section_loader_impl_validate_existing_dir_returns_ok() {
     let dir = TempDir::new().unwrap();
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
-    assert!(loader.validate().is_ok());
+    assert!(Loader::validate(&loader).is_ok());
 }
 
 /// @covers: DefaultSectionLoader::read_with_timeout
@@ -74,7 +74,7 @@ fn test_load_section_times_out_on_stalled_read() {
         .build_loader()
         .expect("loader creation must succeed");
 
-    let err = loader.load_section::<Cfg>("app").unwrap_err();
+    let err = Loader::load_section::<Cfg>(&loader, "app").unwrap_err();
     assert!(
         matches!(err, ConfigError::Io(_)),
         "expected Io error on stalled read, got {err:?}"

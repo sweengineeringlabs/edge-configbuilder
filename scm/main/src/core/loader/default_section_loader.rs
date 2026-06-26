@@ -14,8 +14,8 @@ const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
 use crate::api::{
     ConfigError, FeatureLoader, FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature,
-    Loader, LoaderOps, OverrideSource, Preflight, RawFeature, SectionLoaderBound,
-    SubstitutionPolicy,
+    Loader, LoaderOps, OnError, OptionalSection, OverrideSource, Preflight, RawFeature,
+    SectionLoaderBound, SubstitutionPolicy,
 };
 use crate::core::Substituter;
 
@@ -103,6 +103,19 @@ impl DefaultSectionLoader {
                 "invalid value for env var {var_name}: '{val}'; \
                  accepted values: true/false, 1/0, yes/no, on/off"
             ))),
+        }
+    }
+
+    /// Resolve the `SWE_EDGE_FEATURE_*_ON_ERROR` policy for a feature key.
+    pub(crate) fn resolve_feature_on_error<T: OptionalSection>(key: &str) -> OnError {
+        let var_name = format!(
+            "SWE_EDGE_FEATURE_{}_ON_ERROR",
+            key.to_uppercase().replace('.', "_")
+        );
+        match std::env::var(&var_name).as_deref() {
+            Ok("disable") => OnError::Disable,
+            Ok("fail") => OnError::Fail,
+            _ => T::on_error(),
         }
     }
 
@@ -371,6 +384,16 @@ mod tests {
     struct DefaultSectionLoaderSection {
         value: String,
         count: u32,
+    }
+
+    impl OptionalSection for DefaultSectionLoaderSection {
+        fn section_name() -> &'static str {
+            Box::leak(String::from("env_fallback").into_boxed_str())
+        }
+
+        fn on_error() -> OnError {
+            OnError::Fail
+        }
     }
 
     fn must<T, E>(result: Result<T, E>) -> T {
@@ -852,6 +875,20 @@ mod tests {
             matches!(result, Err(ConfigError::Io(_))),
             "invalid env var value must return Io error, got {result:?}"
         );
+    }
+
+    #[test]
+    fn test_resolve_feature_on_error_prefers_env_override_over_trait_default() {
+        let _g = must(ENV_LOCK.lock());
+        let var = "SWE_EDGE_FEATURE_ENV_FALLBACK_ON_ERROR";
+        // SAFETY: test-only, serialized by ENV_LOCK
+        unsafe { std::env::set_var(var, "disable") };
+        let resolved = DefaultSectionLoader::resolve_feature_on_error::<DefaultSectionLoaderSection>(
+            "env_fallback",
+        );
+        // SAFETY: cleanup
+        unsafe { std::env::remove_var(var) };
+        assert!(matches!(resolved, OnError::Disable));
     }
 
     #[test]

@@ -125,10 +125,10 @@ impl OptionalSection for StrictFeature {
 
     fn validate_enabled(&self) -> Result<(), swe_edge_configbuilder::ConfigError> {
         if self.require_tls && self.cert_path.is_none() {
-            return Err(swe_edge_configbuilder::ConfigError::validation(
-                Self::section_name(),
-                "cert_path is required when require_tls = true",
-            ));
+            return Err(swe_edge_configbuilder::ConfigError::Validation {
+                section: Self::section_name().to_string(),
+                reason: "cert_path is required when require_tls = true".to_string(),
+            });
         }
         Ok(())
     }

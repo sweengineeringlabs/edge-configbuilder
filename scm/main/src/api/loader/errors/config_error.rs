@@ -12,13 +12,13 @@ use thiserror::Error;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::ConfigError;
+/// use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory};
 ///
 /// // Construct a validation error with an actionable message.
-/// let err = ConfigError::validation(
-///     "auth",
-///     "cert_path is required when tls_enabled = true",
-/// );
+/// let err = ConfigError::Validation {
+///     section: "auth".to_string(),
+///     reason: "cert_path is required when tls_enabled = true".to_string(),
+/// };
 /// assert!(err.to_string().contains("cert_path"));
 ///
 /// // Match on the variant.
@@ -66,23 +66,4 @@ pub enum ConfigError {
         /// Human-readable description of the constraint that was violated.
         reason: String,
     },
-}
-
-impl ConfigError {
-    /// Construct a [`ConfigError::Validation`] with the section name and reason.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use swe_edge_configbuilder::ConfigError;
-    ///
-    /// let err = ConfigError::validation("tls", "key_path is required");
-    /// assert!(matches!(err, ConfigError::Validation { .. }));
-    /// ```
-    pub fn validation(section: impl Into<String>, reason: impl Into<String>) -> Self {
-        Self::Validation {
-            section: section.into(),
-            reason: reason.into(),
-        }
-    }
 }

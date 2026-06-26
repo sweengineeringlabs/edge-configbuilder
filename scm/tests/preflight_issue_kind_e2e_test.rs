@@ -1,5 +1,5 @@
 //! @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
-use swe_edge_configbuilder::{ConfigError, PreflightIssueKind};
+use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, PreflightIssueKind};
 
 #[test]
 fn test_from_config_error_parse_error_maps_to_load_error() {
@@ -41,7 +41,10 @@ fn test_from_config_error_not_found_maps_to_load_error() {
 fn test_from_config_error_validation_error_maps_to_validation_error() {
     // Validation errors occur after successful parse — they are semantic failures
     // and must be classified separately from I/O failures in the preflight report.
-    let e = ConfigError::validation("cache", "ttl must be > 0");
+    let e = ConfigError::Validation {
+        section: "cache".to_string(),
+        reason: "ttl must be > 0".to_string(),
+    };
     assert_eq!(
         PreflightIssueKind::from_config_error(&e),
         PreflightIssueKind::ValidationError,
