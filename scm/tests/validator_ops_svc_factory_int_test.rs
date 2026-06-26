@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use swe_edge_configbuilder::VALIDATOR_OPS_SVC_FACTORY;
 
 #[test]

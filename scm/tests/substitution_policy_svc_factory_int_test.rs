@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use swe_edge_configbuilder::SUBSTITUTION_POLICY_SVC_FACTORY;
 
 #[test]

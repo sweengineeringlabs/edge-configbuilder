@@ -1,5 +1,5 @@
 //! @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, PreflightIssueKind};
+use swe_edge_configbuilder::{ConfigError, PreflightIssueKind};
 
 #[test]
 fn test_from_config_error_parse_error_maps_to_load_error() {

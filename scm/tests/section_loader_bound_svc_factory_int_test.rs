@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use swe_edge_configbuilder::SECTION_LOADER_BOUND_SVC_FACTORY;
 
 #[test]

@@ -1,6 +1,6 @@
 //! Tests for PrefixWhitelistPolicy substitution.
 // @covers: api/types/loader/prefix_whitelist_policy.rs — PrefixWhitelistPolicy
-use swe_edge_configbuilder::{ConfigLoaderFactory, PrefixWhitelistPolicy, SubstitutionPolicy};
+use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
 
 #[test]
 fn test_prefix_whitelist_policy_accepts_variable_with_matching_prefix() {

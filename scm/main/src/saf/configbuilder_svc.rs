@@ -912,6 +912,7 @@ impl FeatureRegistry {
 }
 
 impl FeatureRecordBuilder {
+    /// Create a new record builder for the named section.
     pub fn new(section_name: impl Into<String>) -> Self {
         Self {
             section_name: section_name.into(),
@@ -922,26 +923,31 @@ impl FeatureRecordBuilder {
         }
     }
 
+    /// Mark the feature as enabled or disabled.
     pub fn enabled(mut self, v: bool) -> Self {
         self.enabled = v;
         self
     }
 
+    /// Record the source that overrode the feature state.
     pub fn override_source(mut self, v: OverrideSource) -> Self {
         self.override_source = Some(v);
         self
     }
 
+    /// Attach the required feature dependencies.
     pub fn requires(mut self, v: &'static [&'static str]) -> Self {
         self.requires = v;
         self
     }
 
+    /// Attach feature metadata to the record under construction.
     pub fn metadata(mut self, v: FeatureMetadata) -> Self {
         self.metadata = Box::new(v);
         self
     }
 
+    /// Finalize the builder and return the feature record.
     pub fn build(self) -> FeatureRecord {
         FeatureRecord {
             section_name: self.section_name,
@@ -954,6 +960,7 @@ impl FeatureRecordBuilder {
 }
 
 impl SectionLoaderImpl {
+    /// Load and deserialize a named section.
     pub fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
@@ -966,10 +973,12 @@ impl SectionLoaderImpl {
             .map_err(|e: toml::de::Error| ConfigError::Parse(e.to_string()))
     }
 
+    /// Validate the loader's configured directories.
     pub fn validate(&self) -> Result<(), ConfigError> {
         self.ops.validate_dirs()
     }
 
+    /// Load a named feature and return its state plus record metadata.
     pub fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,
@@ -988,6 +997,7 @@ impl SectionLoaderImpl {
         })
     }
 
+    /// Load a named section and return only its enabled/disabled state.
     pub fn load_optional_section<T>(&self, key: &str) -> Result<FeatureState<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,
@@ -997,6 +1007,7 @@ impl SectionLoaderImpl {
 }
 
 impl Topology {
+    /// Return a topological ordering of the provided names.
     pub fn sort(names: &[&str], requires: &[&[&str]]) -> Result<Vec<usize>, String> {
         let n = names.len();
         let index: std::collections::HashMap<&str, usize> = names
@@ -1053,6 +1064,7 @@ impl Topology {
 }
 
 impl PreflightIssueKind {
+    /// Map a config error to the matching preflight issue kind.
     pub fn from_config_error(e: &ConfigError) -> Self {
         match e {
             ConfigError::Parse(_) | ConfigError::Io(_) | ConfigError::NotFound(_) => {
@@ -1064,34 +1076,41 @@ impl PreflightIssueKind {
 }
 
 impl PreflightReport {
+    /// Create an empty preflight report.
     pub fn new() -> Self {
         Self { issues: Vec::new() }
     }
 
+    /// Add a preflight issue to the report.
     pub fn push(&mut self, issue: PreflightIssue) {
         self.issues.push(issue);
     }
 
+    /// Return true when the report contains no issues.
     pub fn is_ok(&self) -> bool {
         self.issues.is_empty()
     }
 
+    /// Borrow the collected preflight issues.
     pub fn issues(&self) -> &[PreflightIssue] {
         &self.issues
     }
 
+    /// Return the number of collected issues.
     pub fn issue_count(&self) -> usize {
         self.issues.len()
     }
 }
 
 impl CompositePolicy {
+    /// Create a composite policy from the supplied policy list.
     pub fn new(policies: Vec<Box<dyn SubstitutionPolicy>>) -> Self {
         Self { policies }
     }
 }
 
 impl PatternWhitelistPolicy {
+    /// Create a regex-backed whitelist policy.
     pub fn new(pattern: String) -> Result<Self, String> {
         regex::Regex::new(&pattern)
             .map(|regex| Self {
@@ -1101,22 +1120,26 @@ impl PatternWhitelistPolicy {
             .map_err(|e| format!("Invalid regex pattern: {}", e))
     }
 
+    /// Return the original regex pattern string.
     pub fn pattern(&self) -> &str {
         &self.pattern_str
     }
 }
 
 impl PrefixWhitelistPolicy {
+    /// Create a prefix-based whitelist policy.
     pub fn new(prefixes: Vec<String>) -> Self {
         Self { prefixes }
     }
 
+    /// Return the configured allowed prefixes.
     pub fn prefixes(&self) -> &[String] {
         &self.prefixes
     }
 }
 
 impl PathValidatorImpl {
+    /// Validate a filesystem path using the configured validator.
     pub fn validate_path(&self, target: &std::path::Path) -> Result<(), ConfigError> {
         self.ops.check_path(target).map_err(ConfigError::from)
     }

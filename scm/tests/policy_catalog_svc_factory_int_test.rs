@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use swe_edge_configbuilder::POLICY_CATALOG_SVC_FACTORY;
 
 #[test]
