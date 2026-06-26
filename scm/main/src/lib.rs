@@ -166,11 +166,14 @@ macro_rules! preflight {
 
         match $crate::ConfigLoaderFactory::topology_sort(_names, _requires) {
             Err(ref _msg) => {
-                _report.push($crate::PreflightIssue {
-                    section: String::from("dependency_graph"),
-                    kind: $crate::PreflightIssueKind::DependencyCycle,
-                    message: _msg.clone(),
-                });
+                $crate::ConfigLoaderFactory::preflight_report_push(
+                    &mut _report,
+                    $crate::PreflightIssue {
+                        section: String::from("dependency_graph"),
+                        kind: $crate::PreflightIssueKind::DependencyCycle,
+                        message: _msg.clone(),
+                    },
+                );
             }
             Ok(_order) => {
                 for &_idx in &_order {
@@ -180,12 +183,15 @@ macro_rules! preflight {
                             match $crate::ConfigLoaderFactory::feature_registry_load::<$ty>(&mut _registry, $loader) {
                                 Ok(_) => {}
                                 Err(_e) => {
-                                    _report.push($crate::PreflightIssue {
-                                        section: <$ty as $crate::OptionalSection>::section_name()
-                                            .to_owned(),
-                                        kind: $crate::PreflightIssueKind::from_config_error(&_e),
-                                        message: _e.to_string(),
-                                    });
+                                    $crate::ConfigLoaderFactory::preflight_report_push(
+                                        &mut _report,
+                                        $crate::PreflightIssue {
+                                            section: <$ty as $crate::OptionalSection>::section_name()
+                                                .to_owned(),
+                                            kind: $crate::PreflightIssueKind::from_config_error(&_e),
+                                            message: _e.to_string(),
+                                        },
+                                    );
                                 }
                             }
                         }
@@ -198,11 +204,14 @@ macro_rules! preflight {
                     if let Some($crate::OverrideSource::ValidationError { ref reason }) =
                         _record.override_source
                     {
-                        _report.push($crate::PreflightIssue {
-                            section: _record.section_name.clone(),
-                            kind: $crate::PreflightIssueKind::ValidationError,
-                            message: reason.clone(),
-                        });
+                        $crate::ConfigLoaderFactory::preflight_report_push(
+                            &mut _report,
+                            $crate::PreflightIssue {
+                                section: _record.section_name.clone(),
+                                kind: $crate::PreflightIssueKind::ValidationError,
+                                message: reason.clone(),
+                            },
+                        );
                     }
                 }
 
@@ -217,14 +226,17 @@ macro_rules! preflight {
                     if _record.enabled {
                         for _dep in _record.requires {
                             if !_enabled.contains(_dep) {
-                                _report.push($crate::PreflightIssue {
-                                    section: _record.section_name.clone(),
-                                    kind: $crate::PreflightIssueKind::DependencyMissing,
-                                    message: format!(
-                                        "requires '{}' but it is not enabled",
-                                        _dep
-                                    ),
-                                });
+                                $crate::ConfigLoaderFactory::preflight_report_push(
+                                    &mut _report,
+                                    $crate::PreflightIssue {
+                                        section: _record.section_name.clone(),
+                                        kind: $crate::PreflightIssueKind::DependencyMissing,
+                                        message: format!(
+                                            "requires '{}' but it is not enabled",
+                                            _dep
+                                        ),
+                                    },
+                                );
                             }
                         }
                     }

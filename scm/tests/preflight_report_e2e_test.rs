@@ -124,7 +124,7 @@ fn test_preflight_issue_kind_all_four_variants_are_clone_eq() {
 // ── PreflightIssue fields ─────────────────────────────────────────────────────
 
 #[test]
-fn test_preflight_issue_fields_are_publicly_constructible() {
+fn test_preflight_issue_struct_roundtrips_all_fields() {
     let issue = PreflightIssue {
         section: "broker".to_owned(),
         kind: PreflightIssueKind::ValidationError,

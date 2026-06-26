@@ -1077,12 +1077,12 @@ impl PreflightIssueKind {
 
 impl PreflightReport {
     /// Create an empty preflight report.
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self { issues: Vec::new() }
     }
 
     /// Add a preflight issue to the report.
-    pub fn push(&mut self, issue: PreflightIssue) {
+    pub(crate) fn push(&mut self, issue: PreflightIssue) {
         self.issues.push(issue);
     }
 
