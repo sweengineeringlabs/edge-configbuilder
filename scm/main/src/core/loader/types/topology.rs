@@ -4,7 +4,7 @@ use crate::api::{ConfigError, Topology, TopologyOps};
 
 impl Topology {
     /// Return a topological ordering of the provided names.
-    pub fn sort(names: &[&str], requires: &[&[&str]]) -> Result<Vec<usize>, String> {
+    pub(crate) fn sort(names: &[&str], requires: &[&[&str]]) -> Result<Vec<usize>, String> {
         let n = names.len();
         let index: std::collections::HashMap<&str, usize> = names
             .iter()

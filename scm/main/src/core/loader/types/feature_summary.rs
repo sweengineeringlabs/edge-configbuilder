@@ -6,22 +6,22 @@ use crate::{FeatureSummary, OverrideSource};
 
 impl FeatureSummary {
     /// Count enabled feature records.
-    pub fn enabled_count(&self) -> usize {
+    pub(crate) fn enabled_count(&self) -> usize {
         self.records.iter().filter(|r| r.enabled).count()
     }
 
     /// Count disabled feature records.
-    pub fn disabled_count(&self) -> usize {
+    pub(crate) fn disabled_count(&self) -> usize {
         self.records.iter().filter(|r| !r.enabled).count()
     }
 
     /// Count total feature records.
-    pub fn total_count(&self) -> usize {
+    pub(crate) fn total_count(&self) -> usize {
         self.records.len()
     }
 
     /// Return `true` when all records are enabled.
-    pub fn all_enabled(&self) -> bool {
+    pub(crate) fn all_enabled(&self) -> bool {
         self.records.iter().all(|r| r.enabled)
     }
 }

@@ -3,7 +3,7 @@ use crate::{CompositePolicy, SubstitutionPolicy};
 
 impl CompositePolicy {
     /// Create a composite policy from the supplied policy list.
-    pub fn new(policies: Vec<Box<dyn SubstitutionPolicy>>) -> Self {
+    pub(crate) fn new(policies: Vec<Box<dyn SubstitutionPolicy>>) -> Self {
         Self { policies }
     }
 }

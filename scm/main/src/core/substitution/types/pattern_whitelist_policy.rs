@@ -3,7 +3,7 @@ use crate::{PatternWhitelistPolicy, SubstitutionPolicy};
 
 impl PatternWhitelistPolicy {
     /// Create a regex-backed whitelist policy.
-    pub fn new(pattern: String) -> Result<Self, String> {
+    pub(crate) fn new(pattern: String) -> Result<Self, String> {
         regex::Regex::new(&pattern)
             .map(|regex| Self {
                 pattern: regex,
@@ -13,7 +13,7 @@ impl PatternWhitelistPolicy {
     }
 
     /// Return the original regex pattern string.
-    pub fn pattern(&self) -> &str {
+    pub(crate) fn pattern(&self) -> &str {
         &self.pattern_str
     }
 }
