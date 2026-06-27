@@ -1,5 +1,5 @@
 //! Tests for FeatureState — enabled/disabled feature values.
-use swe_edge_configbuilder::FeatureState;
+use swe_edge_configbuilder::{FeatureState, FeatureStateOps as _};
 
 // ── is_enabled / is_disabled ──────────────────────────────────────────────────
 

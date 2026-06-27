@@ -31,7 +31,6 @@ pub use crate::api::ApplicationConfig;
 pub use crate::api::ConfigBuilder;
 pub use crate::api::ConfigBuilderImpl;
 pub use crate::api::ConfigError;
-pub use crate::api::ConfigLoaderFactory;
 pub use crate::api::ConfigSection;
 pub use crate::api::FeatureLoader;
 pub use crate::api::FeatureRegistry;

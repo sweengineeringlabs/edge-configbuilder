@@ -3,7 +3,7 @@
 use swe_edge_configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::FeatureState;
+use swe_edge_configbuilder::{FeatureLoader as _, FeatureState, FeatureStateOps as _};
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {

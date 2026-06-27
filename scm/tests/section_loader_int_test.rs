@@ -1,6 +1,6 @@
 //! Integration tests for swe-edge-config section loading.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
 
 use std::io::Write as _;
 use tempfile::TempDir;

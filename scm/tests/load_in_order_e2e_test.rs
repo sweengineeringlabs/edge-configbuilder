@@ -3,7 +3,7 @@
 
 use serde::Deserialize;
 use swe_edge_configbuilder::{
-    load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, OptionalSection,
+    load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, OptionalSection,
 };
 use tempfile::TempDir;
 
@@ -180,7 +180,7 @@ fn test_load_in_order_cycle_error_section_is_load_in_order() {
     let err = load_in_order!(&mut registry, &loader, CycleX, CycleY).unwrap_err();
     match err {
         ConfigError::Validation { section, reason } => {
-            assert_eq!(section, "load_in_order");
+            assert_eq!(section, "dependency_graph");
             assert!(
                 reason.contains("cycle"),
                 "reason must mention cycle: {reason}"

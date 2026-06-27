@@ -1,7 +1,7 @@
 //! Tests for the ValidatorOps internal trait via PathValidatorImpl.
 #![allow(clippy::unwrap_used)]
 
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigLoaderFactory, Validator as _};
 /// @covers: validator_ops::ValidatorOps::check_path
 #[test]
 fn test_validator_ops_check_path_directory_returns_ok() {

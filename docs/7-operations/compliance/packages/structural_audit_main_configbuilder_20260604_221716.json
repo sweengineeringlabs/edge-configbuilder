@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-06-04T20:17:16.700944100+00:00",
+  "results": [
+    {
+      "id": 147,
+      "category": "workspace",
+      "description": "Workspace root Cargo.toml must not contain [package] — workspace roots must be virtual",
+      "result": {
+        "status": "pass"
+      }
+    },
+    {
+      "id": 179,
+      "category": "workspace",
+      "description": "When 2+ workspace members share a common parent directory, use a glob pattern (<parent>/*) instead of explicit enumeration",
+      "result": {
+        "status": "pass"
+      }
+    },
+    {
+      "id": 183,
+      "category": "workspace",
+      "description": "[workspace].exclude must not be used — every crate on disk must be a member or deleted",
+      "result": {
+        "status": "pass"
+      }
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 0.6089
+  },
+  "project_layout": "library",
+  "application_type": "lib"
+}

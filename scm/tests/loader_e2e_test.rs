@@ -1,7 +1,7 @@
 //! Smoke tests for `create_loader` — verifies the factory produces usable instances.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory};
+use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, Loader as _};
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]

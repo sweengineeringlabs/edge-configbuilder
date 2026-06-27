@@ -5,6 +5,7 @@
 use serde::Deserialize;
 use swe_edge_configbuilder::{
     preflight, ConfigError, ConfigLoaderFactory, OnError, OptionalSection, PreflightIssueKind,
+    PreflightReportOps as _,
 };
 use tempfile::TempDir;
 

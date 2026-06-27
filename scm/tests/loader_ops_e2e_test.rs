@@ -2,7 +2,7 @@
 #![allow(clippy::unwrap_used)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {

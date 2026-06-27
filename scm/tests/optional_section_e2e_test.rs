@@ -1,6 +1,6 @@
 //! Tests for OptionalSection trait — load_optional and validate_enabled.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, OptionalSection};
+use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, FeatureStateOps as _, OptionalSection};
 use tempfile::TempDir;
 
 fn write_toml(dir: &std::path::Path, content: &str) {

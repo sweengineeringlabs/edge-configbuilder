@@ -118,7 +118,6 @@ impl ConfigBuilder for DefaultConfigBuilder {
 impl ConfigBuilderBound for DefaultConfigBuilder {
     type ApplicationConfig = crate::api::ApplicationConfig;
     type Builder = crate::api::ConfigBuilderImpl;
-    type Factory = crate::api::ConfigLoaderFactory;
     type SubstitutionBuilder = crate::api::SubstitutionConfigBuilderImpl;
 }
 

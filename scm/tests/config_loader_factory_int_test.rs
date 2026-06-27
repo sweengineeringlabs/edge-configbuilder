@@ -1,6 +1,6 @@
 //! Integration tests for [`ConfigLoaderFactory`].
 
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _, Validator as _};
 
 fn must<T, E>(result: Result<T, E>) -> T {
     match result {

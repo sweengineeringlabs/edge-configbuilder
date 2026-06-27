@@ -1,7 +1,7 @@
 //! Tests for public config service factory functions.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::io::Write as _;
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory};
+use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigError, ConfigLoaderFactory, Loader as _, Validator as _, ValidatorError};
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]
@@ -83,7 +83,7 @@ fn test_validate_path_file_returns_error() {
     let err = ConfigLoaderFactory::create_validator()
         .validate_path(&file_path)
         .unwrap_err();
-    assert!(matches!(err, ConfigError::Io(_)));
+    assert!(matches!(err, ValidatorError::Io(_)));
     assert!(err.to_string().contains("not a directory"));
 }
 

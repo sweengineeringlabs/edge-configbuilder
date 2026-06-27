@@ -1,7 +1,7 @@
 //! End-to-end tests for `PathValidatorImpl`.
 #![allow(clippy::unwrap_used)]
 
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigLoaderFactory, Validator as _};
 /// @covers: path_validator_impl::PathValidatorImpl::validate_path
 #[test]
 fn test_path_validator_impl_existing_dir_returns_ok() {
