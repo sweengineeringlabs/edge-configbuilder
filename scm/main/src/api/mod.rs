@@ -7,8 +7,10 @@ mod preflight;
 mod substitution;
 mod validator;
 
+pub use configbuilder::traits::builder_finalizer::BuilderFinalizer;
 pub use configbuilder::traits::config_builder::ConfigBuilder;
 pub use configbuilder::traits::config_builder_bound::ConfigBuilderBound;
+pub use configbuilder::traits::config_builder_init::ConfigBuilderInit;
 pub use configbuilder::types::application_config::ApplicationConfig;
 pub use configbuilder::types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
 pub use configbuilder::types::ConfigBuilderImpl;

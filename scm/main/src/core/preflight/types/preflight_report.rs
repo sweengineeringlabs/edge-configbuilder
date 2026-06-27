@@ -1,6 +1,47 @@
 use std::fmt;
 
-use crate::{PreflightIssueKind, PreflightReport};
+use crate::{PreflightIssue, PreflightIssueKind, PreflightReport};
+
+impl PreflightReport {
+    /// Create an empty preflight report.
+    pub(crate) fn new() -> Self {
+        Self { issues: Vec::new() }
+    }
+
+    /// Add a preflight issue to the report.
+    pub(crate) fn push(&mut self, issue: PreflightIssue) {
+        self.issues.push(issue);
+    }
+
+    /// Return true when the report contains no issues.
+    pub fn is_ok(&self) -> bool {
+        self.issues.is_empty()
+    }
+
+    /// Borrow the collected preflight issues.
+    pub fn issues(&self) -> &[PreflightIssue] {
+        &self.issues
+    }
+
+    /// Return the number of collected issues.
+    pub fn issue_count(&self) -> usize {
+        self.issues.len()
+    }
+}
+
+impl crate::api::PreflightReportOps for PreflightReport {
+    fn is_ok(&self) -> bool {
+        PreflightReport::is_ok(self)
+    }
+
+    fn issues(&self) -> &[crate::api::PreflightIssue] {
+        PreflightReport::issues(self)
+    }
+
+    fn issue_count(&self) -> usize {
+        PreflightReport::issue_count(self)
+    }
+}
 
 impl Default for PreflightReport {
     fn default() -> Self {

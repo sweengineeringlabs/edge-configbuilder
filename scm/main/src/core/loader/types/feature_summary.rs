@@ -4,6 +4,46 @@ use std::fmt;
 
 use crate::{FeatureSummary, OverrideSource};
 
+impl FeatureSummary {
+    /// Count enabled feature records.
+    pub fn enabled_count(&self) -> usize {
+        self.records.iter().filter(|r| r.enabled).count()
+    }
+
+    /// Count disabled feature records.
+    pub fn disabled_count(&self) -> usize {
+        self.records.iter().filter(|r| !r.enabled).count()
+    }
+
+    /// Count total feature records.
+    pub fn total_count(&self) -> usize {
+        self.records.len()
+    }
+
+    /// Return `true` when all records are enabled.
+    pub fn all_enabled(&self) -> bool {
+        self.records.iter().all(|r| r.enabled)
+    }
+}
+
+impl crate::api::FeatureSummaryOps for FeatureSummary {
+    fn enabled_count(&self) -> usize {
+        FeatureSummary::enabled_count(self)
+    }
+
+    fn disabled_count(&self) -> usize {
+        FeatureSummary::disabled_count(self)
+    }
+
+    fn total_count(&self) -> usize {
+        FeatureSummary::total_count(self)
+    }
+
+    fn all_enabled(&self) -> bool {
+        FeatureSummary::all_enabled(self)
+    }
+}
+
 impl fmt::Display for FeatureSummary {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(

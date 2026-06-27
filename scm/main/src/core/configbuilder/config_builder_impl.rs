@@ -1,10 +1,89 @@
 use std::path::PathBuf;
+use std::time::Duration;
 
-use crate::api::{ConfigBuilder, ConfigBuilderImpl};
+use crate::api::{ConfigBuilder, ConfigBuilderImpl, ConfigError, SectionLoaderImpl};
+
+impl ConfigBuilderImpl {
+    /// Create an empty builder with no name, version, or config dirs set.
+    pub fn new() -> Self {
+        Self {
+            name: String::new(),
+            version: String::new(),
+            config_dirs: Vec::new(),
+            read_timeout: None,
+        }
+    }
+
+    /// Return the configured application name.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Return the configured application version.
+    pub fn version(&self) -> &str {
+        &self.version
+    }
+
+    /// Set the application name.
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
+        self
+    }
+
+    /// Set the application version string.
+    pub fn with_version(mut self, version: impl Into<String>) -> Self {
+        self.version = version.into();
+        self
+    }
+
+    /// Append an explicit config directory.
+    pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.config_dirs.push(dir.into());
+        self
+    }
+
+    /// Override the default 30-second read deadline.
+    pub fn with_read_timeout(mut self, timeout: Duration) -> Self {
+        self.read_timeout = Some(timeout);
+        self
+    }
+
+    /// Consume the builder and return a ready-to-use section loader.
+    pub fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
+        let core = super::DefaultConfigBuilder {
+            name: self.name,
+            version: self.version,
+            config_dirs: self.config_dirs,
+            read_timeout: self.read_timeout.unwrap_or(crate::core::loader::DEFAULT_READ_TIMEOUT),
+        }.build_loader_internal()?;
+        Ok(SectionLoaderImpl {
+            ops: Box::new(core),
+        })
+    }
+}
 
 impl Default for ConfigBuilderImpl {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl crate::api::ConfigBuilderInit for ConfigBuilderImpl {
+    fn new() -> Self {
+        ConfigBuilderImpl::new()
+    }
+
+    fn with_read_timeout(self, timeout: Duration) -> Self {
+        ConfigBuilderImpl::with_read_timeout(self, timeout)
+    }
+}
+
+impl crate::api::BuilderFinalizer for ConfigBuilderImpl {
+    type Loader = SectionLoaderImpl;
+    type Error = ConfigError;
+
+    fn build_loader(self) -> Result<Self::Loader, Self::Error> {
+        ConfigBuilderImpl::build_loader(self)
     }
 }
 
