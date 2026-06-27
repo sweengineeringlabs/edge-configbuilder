@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use crate::{
+use crate::api::{
     CompositePolicy, ConfigBuilderImpl, ConfigError, FeatureMetadata,
     FeatureRecord, FeatureRecordBuilder, FeatureRegistry, FeatureState, FeatureSummary,
     LoadedFeature, OnError, OptionalSection, OverrideSource, PathValidatorImpl,

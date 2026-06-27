@@ -1,6 +1,6 @@
 //! Public concrete section loader returned by the `saf/` factory functions.
 
-use crate::{ConfigError, FeatureLoader, FeatureState, LoadedFeature, Loader, SectionLoaderImpl};
+use crate::api::{ConfigError, FeatureLoader, FeatureState, LoadedFeature, Loader, SectionLoaderImpl};
 
 impl SectionLoaderImpl {
     /// Load and deserialize a named section.
@@ -49,7 +49,7 @@ impl SectionLoaderImpl {
     }
 }
 
-impl Loader for crate::SectionLoaderImpl {
+impl Loader for SectionLoaderImpl {
     fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
@@ -62,7 +62,7 @@ impl Loader for crate::SectionLoaderImpl {
     }
 }
 
-impl FeatureLoader for crate::SectionLoaderImpl {
+impl FeatureLoader for SectionLoaderImpl {
     fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,
