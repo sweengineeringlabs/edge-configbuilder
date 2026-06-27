@@ -4,7 +4,7 @@ use crate::{ConfigError, FeatureLoader, FeatureState, LoadedFeature, Loader, Sec
 
 impl SectionLoaderImpl {
     /// Load and deserialize a named section.
-    pub fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
+    pub(crate) fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
     {
@@ -17,12 +17,12 @@ impl SectionLoaderImpl {
     }
 
     /// Validate the loader's configured directories.
-    pub fn validate(&self) -> Result<(), ConfigError> {
+    pub(crate) fn validate(&self) -> Result<(), ConfigError> {
         self.ops.validate_dirs()
     }
 
     /// Load a named feature and return its state plus record metadata.
-    pub fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
+    pub(crate) fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -41,7 +41,7 @@ impl SectionLoaderImpl {
     }
 
     /// Load a named section and return only its enabled/disabled state.
-    pub fn load_optional_section<T>(&self, key: &str) -> Result<FeatureState<T>, ConfigError>
+    pub(crate) fn load_optional_section<T>(&self, key: &str) -> Result<FeatureState<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,
     {

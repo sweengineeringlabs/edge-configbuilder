@@ -14,17 +14,17 @@ impl PreflightReport {
     }
 
     /// Return true when the report contains no issues.
-    pub fn is_ok(&self) -> bool {
+    pub(crate) fn is_ok(&self) -> bool {
         self.issues.is_empty()
     }
 
     /// Borrow the collected preflight issues.
-    pub fn issues(&self) -> &[PreflightIssue] {
+    pub(crate) fn issues(&self) -> &[PreflightIssue] {
         &self.issues
     }
 
     /// Return the number of collected issues.
-    pub fn issue_count(&self) -> usize {
+    pub(crate) fn issue_count(&self) -> usize {
         self.issues.len()
     }
 }

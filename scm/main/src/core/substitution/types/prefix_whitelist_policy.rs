@@ -3,12 +3,12 @@ use crate::{PrefixWhitelistPolicy, SubstitutionPolicy};
 
 impl PrefixWhitelistPolicy {
     /// Create a prefix-based whitelist policy.
-    pub fn new(prefixes: Vec<String>) -> Self {
+    pub(crate) fn new(prefixes: Vec<String>) -> Self {
         Self { prefixes }
     }
 
     /// Return the configured allowed prefixes.
-    pub fn prefixes(&self) -> &[String] {
+    pub(crate) fn prefixes(&self) -> &[String] {
         &self.prefixes
     }
 }

@@ -7,7 +7,7 @@ use crate::{
 
 impl FeatureRegistry {
     /// Create an empty registry.
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             records: Vec::new(),
             observers: Vec::new(),
@@ -15,12 +15,12 @@ impl FeatureRegistry {
     }
 
     /// Register a callback to observe loaded records.
-    pub fn on_load(&mut self, observer: impl Fn(&FeatureRecord) + 'static) {
+    pub(crate) fn on_load(&mut self, observer: impl Fn(&FeatureRecord) + 'static) {
         self.observers.push(Box::new(observer));
     }
 
     /// Load a feature section and record its state.
-    pub fn load<T>(&mut self, loader: &SectionLoaderImpl) -> Result<FeatureState<T>, ConfigError>
+    pub(crate) fn load<T>(&mut self, loader: &SectionLoaderImpl) -> Result<FeatureState<T>, ConfigError>
     where
         T: OptionalSection,
     {
@@ -68,7 +68,7 @@ impl FeatureRegistry {
     }
 
     /// Validate recorded dependencies.
-    pub fn validate_dependencies(&self) -> Result<(), ConfigError> {
+    pub(crate) fn validate_dependencies(&self) -> Result<(), ConfigError> {
         let enabled: std::collections::HashSet<&str> = self
             .records
             .iter()
@@ -105,12 +105,12 @@ impl FeatureRegistry {
     }
 
     /// Borrow the recorded feature records.
-    pub fn records(&self) -> &[FeatureRecord] {
+    pub(crate) fn records(&self) -> &[FeatureRecord] {
         &self.records
     }
 
     /// Build a snapshot summary of the recorded features.
-    pub fn summary(&self) -> crate::FeatureSummary {
+    pub(crate) fn summary(&self) -> crate::FeatureSummary {
         crate::FeatureSummary {
             records: self.records.clone(),
         }
