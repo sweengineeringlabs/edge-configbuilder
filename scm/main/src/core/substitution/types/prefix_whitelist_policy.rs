@@ -1,6 +1,18 @@
 use crate::api::SubstitutionError;
 use crate::{PrefixWhitelistPolicy, SubstitutionPolicy};
 
+impl PrefixWhitelistPolicy {
+    /// Create a prefix-based whitelist policy.
+    pub fn new(prefixes: Vec<String>) -> Self {
+        Self { prefixes }
+    }
+
+    /// Return the configured allowed prefixes.
+    pub fn prefixes(&self) -> &[String] {
+        &self.prefixes
+    }
+}
+
 impl SubstitutionPolicy for PrefixWhitelistPolicy {
     fn validate(&self, var_name: &str) -> Result<(), SubstitutionError> {
         if self
