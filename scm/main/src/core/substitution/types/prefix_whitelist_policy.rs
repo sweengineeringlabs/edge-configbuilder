@@ -1,7 +1,8 @@
+use crate::api::SubstitutionError;
 use crate::{PrefixWhitelistPolicy, SubstitutionPolicy};
 
 impl SubstitutionPolicy for PrefixWhitelistPolicy {
-    fn validate(&self, var_name: &str) -> Result<(), String> {
+    fn validate(&self, var_name: &str) -> Result<(), SubstitutionError> {
         if self
             .prefixes
             .iter()
@@ -9,11 +10,14 @@ impl SubstitutionPolicy for PrefixWhitelistPolicy {
         {
             Ok(())
         } else {
-            Err(format!(
-                "Variable '{}' does not match any allowed prefix: {}",
-                var_name,
-                self.prefixes.join(", ")
-            ))
+            Err(SubstitutionError::VariableRejected {
+                var_name: var_name.to_string(),
+                reason: format!(
+                    "does not match any allowed prefix: {}",
+                    self.prefixes.join(", ")
+                ),
+                policy: self.description(),
+            })
         }
     }
 

@@ -79,14 +79,7 @@ impl<'a> Substituter<'a> {
 
     /// Substitute a single environment variable.
     fn substitute_var(&self, var_name: &str) -> Result<String, SubstitutionError> {
-        // Validate the variable name using the policy
-        self.policy
-            .validate(var_name)
-            .map_err(|reason| SubstitutionError::VariableRejected {
-                var_name: var_name.to_string(),
-                reason,
-                policy: self.policy.description(),
-            })?;
+        self.policy.validate(var_name)?;
 
         // Get the variable value
         env::var(var_name).map_err(|_| SubstitutionError::VariableNotFound {
