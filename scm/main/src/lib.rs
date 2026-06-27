@@ -42,6 +42,7 @@ pub use crate::api::PathValidatorImpl;
 pub use crate::api::Preflight;
 pub use crate::api::SectionLoaderImpl;
 pub use crate::api::SubstitutionConfigBuilderImpl;
+pub use crate::api::SubstitutionError;
 pub use crate::api::SubstitutionPolicy;
 pub use crate::api::Validator;
 pub use crate::api::ValidatorError;

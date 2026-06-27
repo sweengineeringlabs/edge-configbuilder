@@ -49,3 +49,7 @@ expect_used = "warn"
 [[example]]
 name = "load_section"
 path = "examples/load_section.rs"
+
+[package.metadata.arch]
+application_type = "lib"
+service_type     = "config"

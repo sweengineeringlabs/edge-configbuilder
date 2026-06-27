@@ -3,7 +3,8 @@
 // @covers: api/types/loader/composite_policy.rs — CompositePolicy AND logic
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
-    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PrefixWhitelistPolicy, SubstitutionPolicy,
+    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PrefixWhitelistPolicy, SubstitutionError,
+    SubstitutionPolicy,
 };
 
 #[test]
@@ -54,8 +55,8 @@ fn test_composite_policy_error_message_mentions_all_failures() {
     ]);
     let err = policy.validate("C_VAR").unwrap_err();
     assert!(
-        !err.is_empty(),
-        "error message must not be empty when both policies reject"
+        matches!(&err, SubstitutionError::VariableRejected { reason, .. } if !reason.is_empty()),
+        "error must be a rejection with a non-empty reason when both policies reject"
     );
 }
 

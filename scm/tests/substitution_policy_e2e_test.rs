@@ -3,7 +3,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
     AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PatternWhitelistPolicy,
-    PrefixWhitelistPolicy, SubstitutionPolicy,
+    PrefixWhitelistPolicy, SubstitutionError, SubstitutionPolicy,
 };
 
 #[test]
@@ -30,9 +30,10 @@ fn test_prefix_whitelist_policy_rejects_non_matching_prefix() {
 
     let result = policy.validate("DATABASE_PASSWORD");
     assert!(result.is_err());
-    assert!(result
-        .unwrap_err()
-        .contains("does not match any allowed prefix"));
+    assert!(matches!(
+        result.unwrap_err(),
+        SubstitutionError::VariableRejected { reason, .. } if reason.contains("does not match any allowed prefix")
+    ));
 }
 
 #[test]
@@ -53,7 +54,10 @@ fn test_pattern_whitelist_policy_rejects_non_matching_pattern() {
     // Lowercase doesn't match
     let result = policy.validate("app_debug");
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("does not match pattern"));
+    assert!(matches!(
+        result.unwrap_err(),
+        SubstitutionError::VariableRejected { reason, .. } if reason.contains("does not match pattern")
+    ));
 }
 
 #[test]

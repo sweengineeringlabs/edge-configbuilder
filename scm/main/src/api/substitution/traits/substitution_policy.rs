@@ -22,11 +22,16 @@
 /// struct UppercaseOnlyPolicy;
 ///
 /// impl SubstitutionPolicy for UppercaseOnlyPolicy {
-///     fn validate(&self, var_name: &str) -> Result<(), String> {
+///     fn validate(&self, var_name: &str) -> Result<(), swe_edge_configbuilder::SubstitutionError> {
+///         use swe_edge_configbuilder::SubstitutionError;
 ///         if var_name.chars().all(|c| c.is_ascii_uppercase() || c == '_') {
 ///             Ok(())
 ///         } else {
-///             Err(format!("'{}' must be UPPER_SNAKE_CASE", var_name))
+///             Err(SubstitutionError::VariableRejected {
+///                 var_name: var_name.to_string(),
+///                 reason: format!("'{}' must be UPPER_SNAKE_CASE", var_name),
+///                 policy: "UppercaseOnly".to_string(),
+///             })
 ///         }
 ///     }
 ///     fn description(&self) -> String {
@@ -53,7 +58,7 @@ pub trait SubstitutionPolicy: Send + Sync {
     ///     .validate("APP_HOST")
     ///     .is_ok());
     /// ```
-    fn validate(&self, var_name: &str) -> Result<(), String>;
+    fn validate(&self, var_name: &str) -> Result<(), crate::api::SubstitutionError>;
 
     /// Human-readable label included in rejection error messages.
     ///

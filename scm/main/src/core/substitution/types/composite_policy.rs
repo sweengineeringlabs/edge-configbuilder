@@ -1,3 +1,4 @@
+use crate::api::SubstitutionError;
 use crate::{CompositePolicy, SubstitutionPolicy};
 
 impl std::fmt::Debug for CompositePolicy {
@@ -9,17 +10,23 @@ impl std::fmt::Debug for CompositePolicy {
 }
 
 impl SubstitutionPolicy for CompositePolicy {
-    fn validate(&self, var_name: &str) -> Result<(), String> {
-        let mut errors = Vec::new();
+    fn validate(&self, var_name: &str) -> Result<(), SubstitutionError> {
+        let mut reasons = Vec::new();
         for policy in &self.policies {
-            if let Err(e) = policy.validate(var_name) {
-                errors.push(e);
+            if let Err(SubstitutionError::VariableRejected { reason, .. }) =
+                policy.validate(var_name)
+            {
+                reasons.push(reason);
             }
         }
-        if errors.is_empty() {
+        if reasons.is_empty() {
             Ok(())
         } else {
-            Err(format!("Validation failed: {}", errors.join(" AND ")))
+            Err(SubstitutionError::VariableRejected {
+                var_name: var_name.to_string(),
+                reason: reasons.join(" AND "),
+                policy: self.description(),
+            })
         }
     }
 
