@@ -1,4 +1,4 @@
-use crate::{ConfigError, PathValidatorImpl, ValidatorError};
+use crate::api::{ConfigError, PathValidatorImpl, ValidatorError};
 
 impl PathValidatorImpl {
     /// Validate a filesystem path using the configured validator.

@@ -1,6 +1,6 @@
 //! [`FeatureRegistry`] — startup feature collector and dependency validator.
 
-use crate::{
+use crate::api::{
     ConfigError, FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureRegistry,
     FeatureState, LoadedFeature, OnError, OptionalSection, OverrideSource, SectionLoaderImpl,
 };
