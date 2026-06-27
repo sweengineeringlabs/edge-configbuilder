@@ -1,7 +1,7 @@
 //! Contract tests for the validator error message constant.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigLoaderFactory, Validator as _};
 /// @covers: api/validator_bound::NOT_A_DIR_MSG
 #[test]
 fn test_validate_path_file_error_contains_not_a_directory_phrase() {

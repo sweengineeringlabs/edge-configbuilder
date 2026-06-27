@@ -4,6 +4,7 @@ mod config;
 mod config_builder_bound_svc_factory;
 mod config_builder_svc_factory;
 mod config_section_svc_factory;
+mod configbuilder;
 mod configbuilder_svc;
 mod feature;
 mod feature_loader_svc_factory;
@@ -26,6 +27,8 @@ mod validator;
 mod validator_bound_svc_factory;
 mod validator_ops_svc_factory;
 mod validator_svc_factory;
+
+pub(crate) use configbuilder::ConfigLoaderFactory;
 
 #[doc(hidden)]
 pub use config::CONFIG_BUILDER_SVC;

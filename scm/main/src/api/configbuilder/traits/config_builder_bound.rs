@@ -1,7 +1,7 @@
 //! Interface counterpart for [`crate::core::configbuilder::default_config_builder::DefaultConfigBuilder`].
 
 use crate::api::{
-    ApplicationConfig, ConfigBuilderImpl, ConfigLoaderFactory, SubstitutionConfigBuilderImpl,
+    ApplicationConfig, ConfigBuilderImpl, SubstitutionConfigBuilderImpl,
 };
 
 /// API contract marker for the default config builder.
@@ -14,9 +14,6 @@ pub trait ConfigBuilderBound {
 
     /// Public fluent builder type produced by the factory.
     type Builder: Into<ConfigBuilderImpl>;
-
-    /// Static factory namespace type.
-    type Factory: Into<ConfigLoaderFactory>;
 
     /// Public fluent builder type with substitution policy attached.
     type SubstitutionBuilder: Into<SubstitutionConfigBuilderImpl>;

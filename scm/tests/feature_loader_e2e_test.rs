@@ -4,7 +4,7 @@
 //! ENV_LOCK serializes all such tests within this binary to prevent data races.
 #![allow(unsafe_code)]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory, FeatureState};
+use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigError, ConfigLoaderFactory, FeatureLoader as _, FeatureState, FeatureStateOps as _};
 use tempfile::TempDir;
 
 // Serialize all env-var-touching tests within this test binary.

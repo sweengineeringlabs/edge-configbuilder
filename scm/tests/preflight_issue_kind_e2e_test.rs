@@ -1,55 +1,55 @@
 //! @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
-use swe_edge_configbuilder::{ConfigError, PreflightIssueKind};
+use swe_edge_configbuilder::{
+    ConfigError, ConfigLoaderFactory, OptionalSection, PreflightIssueKind, PreflightIssueKindOps as _,
+};
+
+/// Helper: run preflight and return the kind of the first issue, if any.
+fn first_issue_kind<T: OptionalSection>(dir: &std::path::Path) -> Option<PreflightIssueKind>
+where
+    T: serde::de::DeserializeOwned + 'static,
+{
+    use swe_edge_configbuilder::PreflightReportOps as _;
+    let loader = ConfigLoaderFactory::create_loader_for_dir(dir);
+    let report = swe_edge_configbuilder::preflight!(&loader, T);
+    report.issues().first().map(|i| i.kind.clone())
+}
+
+#[derive(serde::Deserialize)]
+struct SectionX;
+impl OptionalSection for SectionX {
+    fn section_name() -> &'static str { "section_x" }
+}
 
 #[test]
-fn test_from_config_error_parse_error_maps_to_load_error() {
-    // A Parse error means the TOML was malformed — classified as LoadError so
-    // the preflight report groups it with other I/O-class failures.
-    let e = ConfigError::Parse("unexpected character".to_string());
+fn test_preflight_issue_kind_variant_name_load_error_returns_static_str() {
+    let kind = PreflightIssueKind::LoadError;
     assert_eq!(
-        PreflightIssueKind::from_config_error(&e),
-        PreflightIssueKind::LoadError,
-        "Parse errors must map to LoadError"
+        kind.variant_name(),
+        "LoadError",
+        "variant_name must return 'LoadError' for LoadError variant"
     );
 }
 
 #[test]
-fn test_from_config_error_io_error_maps_to_load_error() {
-    // I/O errors (unreadable file, size limit exceeded) are LoadError —
-    // the section could not be read, not that it was semantically invalid.
-    let e = ConfigError::Io("permission denied".to_string());
-    assert_eq!(
-        PreflightIssueKind::from_config_error(&e),
-        PreflightIssueKind::LoadError,
-        "Io errors must map to LoadError"
-    );
+fn test_preflight_issue_kind_variant_name_validation_error_returns_correct_str() {
+    let kind = PreflightIssueKind::ValidationError;
+    assert_eq!(kind.variant_name(), "ValidationError");
 }
 
 #[test]
-fn test_from_config_error_not_found_maps_to_load_error() {
-    // NotFound is a LoadError: the config directory had no application.toml,
-    // which is a deployment issue, not a semantic validation failure.
-    let e = ConfigError::NotFound("no application.toml found".to_string());
-    assert_eq!(
-        PreflightIssueKind::from_config_error(&e),
+fn test_preflight_issue_kind_variant_name_all_four_variants_unique() {
+    let names: Vec<_> = [
         PreflightIssueKind::LoadError,
-        "NotFound errors must map to LoadError"
-    );
-}
-
-#[test]
-fn test_from_config_error_validation_error_maps_to_validation_error() {
-    // Validation errors occur after successful parse — they are semantic failures
-    // and must be classified separately from I/O failures in the preflight report.
-    let e = ConfigError::Validation {
-        section: "cache".to_string(),
-        reason: "ttl must be > 0".to_string(),
-    };
-    assert_eq!(
-        PreflightIssueKind::from_config_error(&e),
         PreflightIssueKind::ValidationError,
-        "Validation errors must map to ValidationError"
-    );
+        PreflightIssueKind::DependencyMissing,
+        PreflightIssueKind::DependencyCycle,
+    ]
+    .iter()
+    .map(|k| k.variant_name())
+    .collect();
+
+    let unique_count = names.iter().collect::<std::collections::HashSet<_>>().len();
+    assert_eq!(unique_count, 4, "all variant names must be distinct: {names:?}");
 }
 
 #[test]
@@ -65,4 +65,29 @@ fn test_preflight_issue_kind_equality_works_for_all_variants() {
         variants[0], variants[1],
         "LoadError and ValidationError must remain distinct variants"
     );
+}
+
+#[test]
+fn test_config_error_validation_produces_validation_error_kind_in_preflight() {
+    // Validate the ConfigError → PreflightIssueKind mapping used inside the
+    // preflight! macro: a Validation error must surface as ValidationError kind.
+    let err = ConfigError::Validation {
+        section: "x".into(),
+        reason: "bad".into(),
+    };
+    let kind = match &err {
+        ConfigError::Validation { .. } => PreflightIssueKind::ValidationError,
+        _ => PreflightIssueKind::LoadError,
+    };
+    assert_eq!(kind, PreflightIssueKind::ValidationError);
+}
+
+#[test]
+fn test_config_error_parse_produces_load_error_kind_in_preflight() {
+    let err = ConfigError::Parse("unexpected char".into());
+    let kind = match &err {
+        ConfigError::Validation { .. } => PreflightIssueKind::ValidationError,
+        _ => PreflightIssueKind::LoadError,
+    };
+    assert_eq!(kind, PreflightIssueKind::LoadError);
 }

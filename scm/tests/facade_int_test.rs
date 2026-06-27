@@ -1,6 +1,6 @@
 //! Smoke tests for the `ConfigLoaderFactory` public facade.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use swe_edge_configbuilder::{ConfigBuilder as _, ConfigLoaderFactory, Loader as _, Validator as _};
 
 #[test]
 fn test_section_loader_svc_trait_impl() {

@@ -1,6 +1,6 @@
 //! Tests for `LoadedFeature<T>` — full result of loading an optional config section.
 
-use swe_edge_configbuilder::{FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature};
+use swe_edge_configbuilder::{FeatureMetadata, FeatureRecord, FeatureState, FeatureStateOps as _, LoadedFeature};
 
 #[test]
 fn test_loaded_feature_enabled_state_and_record_accessible() {
