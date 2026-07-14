@@ -3,5 +3,5 @@
 mod factory;
 mod svc;
 
-pub(crate) use factory::ConfigLoaderFactory;
+pub use factory::ConfigLoaderFactory;
 pub(crate) use svc::*;

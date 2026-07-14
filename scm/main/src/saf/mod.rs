@@ -28,7 +28,7 @@ mod validator_bound_svc_factory;
 mod validator_ops_svc_factory;
 mod validator_svc_factory;
 
-pub(crate) use configbuilder::ConfigLoaderFactory;
+pub use configbuilder::ConfigLoaderFactory;
 
 #[doc(hidden)]
 pub use config::CONFIG_BUILDER_SVC;
