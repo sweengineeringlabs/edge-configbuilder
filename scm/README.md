@@ -1,173 +1,192 @@
-# swe-edge-config
+# swe-edge-configbuilder
 
 Standalone, runtime-independent TOML section loader for swe-edge services.
 
 Provides XDG-aware, layered config section loading for any `T: DeserializeOwned + Default`.
 Library crates can depend on this crate directly without pulling in `swe-edge-runtime-main`.
 
+All consumer-facing behavior is reached through `ConfigLoaderFactory` — the crate's SAF
+(Service Access Facade). You never construct a loader, builder, or policy type directly.
+
 ## Features
 
-- **Layered config resolution**: merges config from multiple directories with later sources winning
-- **XDG Base Directory support**: automatic path resolution via `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, `$SWE_EDGE_CONFIG_DIR`
-- **Dotted key paths**: load nested sections with `"outer.inner"` syntax
-- **Optional environment variable substitution**: inject env vars into TOML with `{{VAR_NAME}}` syntax and pluggable security policies
+- **Layered config resolution** — merges config from multiple directories, later sources win
+- **XDG Base Directory support** — automatic path resolution via `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, `$SWE_EDGE_CONFIG_DIR`
+- **Dotted key paths** — load nested sections with `"outer.inner"` syntax
+- **Optional feature sections** — `OptionalSection`/`FeatureRegistry` with dependency-ordered loading, env-var overrides, and graceful degradation
+- **Preflight validation** — dry-run every feature section at startup and collect all issues before serving traffic
+- **`{{VAR_NAME}}` substitution** — inject values into TOML with pluggable name policies and pluggable value sources
 
 ## Basic Usage
 
-```rust
-use swe_edge_config::create_loader;
+```rust,no_run
+use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
 
 #[derive(serde::Deserialize, Default)]
 struct BrokerConfig { host: String, port: u16 }
 
-let loader = create_loader()?;
+let loader = ConfigLoaderFactory::create_loader()?;
 let cfg: BrokerConfig = loader.load_section("broker")?;
+# Ok::<(), swe_edge_configbuilder::ConfigError>(())
 ```
+
+`create_loader()` resolves config directories via the XDG chain (`$SWE_EDGE_CONFIG_DIR`,
+`$XDG_CONFIG_DIRS`, `$XDG_CONFIG_HOME`, falling back to `./config`). Use
+`ConfigLoaderFactory::create_loader_for_dir(path)` to read from an explicit directory instead,
+or `ConfigLoaderFactory::create_loader_xdg(app_name)` to XDG-resolve under a named app.
 
 ## Environment Variable Substitution
 
-Substitute environment variables in TOML config using `{{VAR_NAME}}` syntax. Substitution is **opt-in** and requires an explicit security policy.
+Substitute values into TOML using `{{VAR_NAME}}` syntax. Substitution is **opt-in** and
+requires an explicit name policy — a placeholder is only substituted if the policy allows
+that variable name.
 
-### AllowAllPolicy (unsafe — testing only)
+### `AllowAllPolicy` (test-only)
 
-```rust
-use swe_edge_config::{create_loader_with_substitution, AllowAllPolicy};
+Gated behind the `test-utils` feature; never use in production.
 
-#[derive(serde::Deserialize, Default)]
-struct DbConfig { 
-    host: String,
-    port: u16,
-    password: String,
-}
+```rust,no_run
+use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
 
-let policy = AllowAllPolicy;
-let loader = create_loader_with_substitution(Box::new(policy))?;
-
-// TOML: [db]
-//       host = "{{DB_HOST}}"
-//       password = "{{DB_PASSWORD}}"
-let cfg: DbConfig = loader.load_section("db")?;
-// Substitutes from environment: DB_HOST, DB_PASSWORD
+let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+    "config/",
+    Box::new(AllowAllPolicy),
+);
 ```
 
-### PrefixWhitelistPolicy (recommended for production)
+### `PrefixWhitelistPolicy` (recommended default)
 
-Restrict substitution to environment variables with allowed prefixes:
+Restrict substitution to variable names with an allowed prefix:
 
-```rust
-use swe_edge_config::{create_loader_with_substitution, PrefixWhitelistPolicy};
+```rust,no_run
+use swe_edge_configbuilder::ConfigLoaderFactory;
 
-let policy = PrefixWhitelistPolicy::new(vec![
-    "APP_".into(),
-    "DB_".into(),
-    "SERVICE_".into(),
+let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
+    "APP_".to_string(),
+    "DB_".to_string(),
 ]);
-let loader = create_loader_with_substitution(Box::new(policy))?;
+let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+    "config/",
+    Box::new(policy),
+);
 
 // TOML: [db]
 //       host = "{{DB_HOST}}"
-//       port = "5432"
-// 
-// OK: DB_HOST matches DB_ prefix
-// Error: would fail if you used {{PRIVATE_KEY}} (no matching prefix)
-let cfg: DbConfig = loader.load_section("db")?;
+// OK: DB_HOST matches the DB_ prefix.
+// Rejected: {{PRIVATE_KEY}} — no prefix matches.
 ```
 
-### PatternWhitelistPolicy (regex-based validation)
+### `PatternWhitelistPolicy` (regex-based)
 
-Use regex patterns for fine-grained control:
+```rust,no_run
+use swe_edge_configbuilder::ConfigLoaderFactory;
 
-```rust
-use swe_edge_config::{create_loader_with_substitution, PatternWhitelistPolicy};
-
-let policy = PatternWhitelistPolicy::new(
-    "^(APP|SERVICE)_[A-Z_]+$".into()
+let policy = ConfigLoaderFactory::create_pattern_whitelist_policy(
+    "^(APP|SERVICE)_[A-Z_]+$".to_string(),
 )?;
-let loader = create_loader_with_substitution(Box::new(policy))?;
-
-// TOML: [service]
-//       url = "{{SERVICE_API_URL}}"
-// OK: matches pattern
-let cfg = loader.load_section("service")?;
+let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+    "config/",
+    Box::new(policy),
+);
+# Ok::<(), String>(())
 ```
 
-### CompositePolicy (layered validation)
+### `CompositePolicy` (combine policies — any one allowing is enough)
 
-Combine multiple policies — all must pass:
-
-```rust
-use swe_edge_config::{
-    create_loader_with_substitution,
-    PrefixWhitelistPolicy,
-    PatternWhitelistPolicy,
-    CompositePolicy,
-    SubstitutionPolicy,
-};
+```rust,no_run
+use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
 
 let policies: Vec<Box<dyn SubstitutionPolicy>> = vec![
-    Box::new(PrefixWhitelistPolicy::new(vec!["APP_".into()])),
-    Box::new(PatternWhitelistPolicy::new("^APP_[A-Z_]+$".into())?),
+    Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()])),
 ];
-let policy = CompositePolicy::new(policies);
-let loader = create_loader_with_substitution(Box::new(policy))?;
+let policy = ConfigLoaderFactory::create_composite_policy(policies);
+let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
+    "config/",
+    Box::new(policy),
+);
 ```
 
-## Escaping Literal Braces
+### Pluggable value source: `ValueResolver`
 
-To use literal `{{` or `}}` in your TOML without substitution, escape them:
+By default, substitution values come from `std::env::var` (`EnvValueResolver`). Supply a
+custom `ValueResolver` to source values from a secrets backend or anywhere else instead —
+the name policy still gates which variable names are allowed; the resolver only controls
+*where the value comes from*:
 
-```toml
-# TOML: [docs]
-#       note = "Use \{\{VAR_NAME\}\} for substitution"
-# 
-# Result: "Use {{VAR_NAME}} for substitution"
-```
+```rust,no_run
+use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionError, ValueResolver};
 
-## Substitution Error Handling
-
-Substitution can fail if:
-- Environment variable doesn't exist
-- Variable name rejected by security policy
-- Invalid placeholder syntax (nested placeholders)
-
-```rust
-use swe_edge_config::ConfigError;
-
-match loader.load_section::<MyConfig>("section") {
-    Ok(cfg) => { /* use cfg */ }
-    Err(ConfigError::Io(msg)) => {
-        eprintln!("Substitution failed: {}", msg);
-        // Error includes file path and config key for debugging
+struct StaticResolver;
+impl ValueResolver for StaticResolver {
+    fn resolve(&self, var_name: &str, location: &str) -> Result<String, SubstitutionError> {
+        match var_name {
+            "APP_GREETING" => Ok("hello".to_string()),
+            _ => Err(SubstitutionError::VariableNotFound {
+                var_name: var_name.to_string(),
+                location: location.to_string(),
+            }),
+        }
     }
-    Err(e) => eprintln!("Config error: {}", e),
+}
+
+let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]);
+let loader = ConfigLoaderFactory::create_loader_for_dir_with_resolver(
+    "config/",
+    Box::new(policy),
+    Box::new(StaticResolver),
+);
+```
+
+### Escaping Literal Braces
+
+To use literal `{{`/`}}` without substitution, escape them: `\{\{VAR_NAME\}\}` renders as
+`{{VAR_NAME}}`.
+
+## Preflight Validation
+
+Dry-run every feature section, collecting **all** issues instead of stopping at the first:
+
+```rust,no_run
+use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
+
+# #[derive(serde::Deserialize)] struct CacheConfig;
+# impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
+let loader = ConfigLoaderFactory::create_loader_for_dir("config/");
+let report = preflight!(&loader, CacheConfig);
+
+if !report.is_ok() {
+    eprintln!("{report}");
+    std::process::exit(1);
 }
 ```
 
-## Configuration Layering
+## Optional Feature Sections
 
-Config directories are searched in order; later sources override earlier ones **at the key level** (deep merge for TOML tables):
-
-```
-$XDG_CONFIG_DIRS/app/application.toml  (lowest priority)
-    ↓ merged into ↓
-$XDG_CONFIG_HOME/app/application.toml
-    ↓ merged into ↓
-$SWE_EDGE_CONFIG_DIR/application.toml (if set)
-    ↓ merged into ↓
-builder.with_config_dir("/explicit/path")  (highest priority)
-```
-
-Tables are recursively merged; scalars and arrays are replaced.
+Load a set of `OptionalSection` types in dependency order via `load_in_order!`, or manage a
+`FeatureRegistry` directly for observer hooks and startup summaries — see the
+[`ConfigLoaderFactory`] and [`OptionalSection`] rustdoc for the full API.
 
 ## Builder Pattern
 
-For more control over paths and substitution together:
+For more control over directories and substitution together:
 
-```rust
-use swe_edge_config::{create_config_builder_with_substitution, PrefixWhitelistPolicy};
+```rust,no_run
+use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
 
-let policy = PrefixWhitelistPolicy::new(vec!["APP_".into()]);
-let loader = create_config_builder_with_substitution(Box::new(policy))
+let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]);
+let loader = ConfigLoaderFactory::create_config_builder_with_substitution(Box::new(policy))
     .with_config_dir("/etc/myapp")
     .build_loader()?;
+# Ok::<(), swe_edge_configbuilder::ConfigError>(())
 ```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Overview](docs/README.md) | WHAT + WHY — capabilities and design rationale |
+| [Architecture](docs/architecture.md) | SEA module layout, data flow, key contracts |
+| [Rustdoc](https://docs.rs/swe-edge-configbuilder) | Full API reference |
+
+[`ConfigLoaderFactory`]: https://docs.rs/swe-edge-configbuilder/latest/swe_edge_configbuilder/struct.ConfigLoaderFactory.html
+[`OptionalSection`]: https://docs.rs/swe-edge-configbuilder/latest/swe_edge_configbuilder/trait.OptionalSection.html

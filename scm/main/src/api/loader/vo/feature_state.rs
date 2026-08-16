@@ -10,7 +10,7 @@
 /// degradation, dependency validation, observer hooks). Use
 /// [`ConfigLoaderFactory::load_feature_section`] for one-off ad-hoc loading.
 ///
-/// [`FeatureRegistry::load`]: crate::FeatureRegistry::load
+/// [`FeatureRegistry::load`]: crate::FeatureRegistryOps::load
 /// [`ConfigLoaderFactory::load_feature_section`]: crate::ConfigLoaderFactory::load_feature_section
 ///
 /// # Examples

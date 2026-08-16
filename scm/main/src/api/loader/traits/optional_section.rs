@@ -69,7 +69,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// Checked by [`FeatureRegistry::validate_dependencies`] after all features
     /// are loaded.  Default: no dependencies (`&[]`).
     ///
-    /// [`FeatureRegistry::validate_dependencies`]: crate::api::loader::vo::feature_registry::FeatureRegistry::validate_dependencies
+    /// [`FeatureRegistry::validate_dependencies`]: crate::FeatureRegistryOps::validate_dependencies
     fn requires() -> &'static [&'static str] {
         &[]
     }
@@ -117,7 +117,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     ///
     /// [`on_error`]: OptionalSection::on_error
     /// [`requires`]: OptionalSection::requires
-    /// [`FeatureRegistry::load`]: crate::api::loader::vo::feature_registry::FeatureRegistry::load
+    /// [`FeatureRegistry::load`]: crate::FeatureRegistryOps::load
     fn load_optional(loader: &SectionLoaderImpl) -> Result<FeatureState<Self>, ConfigError>
     where
         Self: Sized,

@@ -32,8 +32,8 @@ use std::path::PathBuf;
 ///     .expect("config dir accessible");
 /// ```
 ///
-/// [`ConfigBuilderImpl`]: crate::api::configbuilder::vo::ConfigBuilderImpl
-/// [`SubstitutionConfigBuilderImpl`]: crate::api::configbuilder::vo::substitution_config_builder_impl::SubstitutionConfigBuilderImpl
+/// [`ConfigBuilderImpl`]: crate::ConfigBuilderImpl
+/// [`SubstitutionConfigBuilderImpl`]: crate::SubstitutionConfigBuilderImpl
 pub trait ConfigBuilder: Sized {
     /// Return the configured application name.
     fn name(&self) -> &str;

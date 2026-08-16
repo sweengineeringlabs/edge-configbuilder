@@ -9,9 +9,9 @@ Key capabilities:
 - **`ConfigSection` / `OptionalSection`** — typed TOML section loading for any `T: DeserializeOwned + Default`
 - **XDG-aware layered resolution** — searches `$XDG_CONFIG_DIRS`, `$XDG_CONFIG_HOME`, `$SWE_EDGE_CONFIG_DIR`, and explicit paths; later sources win at the key level
 - **Dotted key paths** — load nested sections with `"outer.inner"` syntax
-- **Environment variable substitution** — inject env vars via `{{VAR_NAME}}` placeholders with pluggable security policies (`PrefixWhitelistPolicy`, `PatternWhitelistPolicy`, `CompositePolicy`)
+- **`{{VAR_NAME}}` substitution** — pluggable name policies (`PrefixWhitelistPolicy`, `PatternWhitelistPolicy`, `CompositePolicy`) gate *which* variables are allowed; a pluggable `ValueResolver` (default: `EnvValueResolver`, backed by `std::env::var`) controls *where* their values come from — e.g. a secrets backend instead of the process environment
 - **Preflight validation** — validates config shape and reports structured `PreflightIssue` list before runtime
-- **`ConfigBuilderImpl` / `ConfigLoaderFactory`** — SAF factories; callers never name concrete loader types
+- **`ConfigLoaderFactory`** — the crate's SAF; all consumer-facing behavior is reached through it, so `api/` and `core/` stay internal to the crate's architecture
 
 ## WHY
 

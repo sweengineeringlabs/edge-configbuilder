@@ -36,6 +36,8 @@ pub use saf::*;
 /// Returns `Err(ConfigError::Validation)` if a dependency cycle is detected.
 /// The first load failure propagates and stops further loading.
 ///
+/// [`FeatureRegistry::load`]: crate::FeatureRegistryOps::load
+///
 /// # Examples
 ///
 /// ```rust,no_run

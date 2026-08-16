@@ -5,11 +5,13 @@ use crate::api::loader::vo::override_source::OverrideSource;
 
 /// Fluent builder for [`FeatureRecord`].
 ///
-/// Start with [`FeatureRecordBuilder::new`], chain the setter methods, then call
-/// [`build`] to obtain a [`FeatureRecord`].  Fields not explicitly set default
-/// to: `enabled = false`, no override source, no dependencies, empty metadata.
+/// Start with [`FeatureRecordBuilderOps::new`], chain the setter methods, then
+/// call [`build`] to obtain a [`FeatureRecord`].  Fields not explicitly set
+/// default to: `enabled = false`, no override source, no dependencies, empty
+/// metadata.
 ///
-/// [`build`]: FeatureRecordBuilder::build
+/// [`FeatureRecordBuilderOps::new`]: crate::FeatureRecordBuilderOps::new
+/// [`build`]: crate::FeatureRecordBuilderOps::build
 /// [`FeatureRecord`]: crate::FeatureRecord
 ///
 /// # Examples
