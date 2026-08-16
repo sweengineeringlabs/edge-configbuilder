@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.3] - 2026-08-16
+
+### Fixed
+
+- `cargo doc` now builds with zero warnings (was 7 `private_intra_doc_links` findings — doc comments pointing at `pub(crate)` inherent methods instead of their public `*Ops` trait method).
+- `SubstitutionConfigBuilderImpl` — the return type of `ConfigLoaderFactory::create_config_builder_with_substitution()` — is now reachable from the crate root; it never was, even before this crate's public-surface cleanup.
+- `Cargo.toml`'s `version` field now matches the crate's own release tags (was 5 releases behind).
+
+### Documentation
+
+- Rewrote `README.md`, `CHANGELOG.md`, and `docs/architecture.md` to match the current API and module layout; all had drifted significantly out of date. Removed two root-level `architecture.md` duplicates and a duplicate root `CHANGELOG.md`, consolidating on `scm/` as the single source of truth.
+
 ## [0.5.2] - 2026-08-16
 
 ### Fixed
