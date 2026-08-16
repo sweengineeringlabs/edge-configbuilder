@@ -15,9 +15,12 @@ pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
 use crate::api::{
     ConfigError, FeatureLoader, FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature,
     Loader, LoaderOps, OnError, OptionalSection, OverrideSource, Preflight, RawFeature,
-    SectionLoaderBound, SubstitutionPolicy,
+    SectionLoaderBound, SubstitutionPolicy, ValueResolver,
 };
 use crate::core::Substituter;
+use crate::EnvValueResolver;
+
+static DEFAULT_VALUE_RESOLVER: EnvValueResolver = EnvValueResolver;
 
 /// Loads an arbitrary TOML section from a layered chain of config directories.
 ///
@@ -31,6 +34,9 @@ use crate::core::Substituter;
 pub(crate) struct DefaultSectionLoader {
     pub(crate) config_dirs: Vec<PathBuf>,
     pub(crate) substitution_policy: Option<Box<dyn SubstitutionPolicy>>,
+    /// Value source for `{{VAR_NAME}}` substitution. Defaults to
+    /// [`EnvValueResolver`] (`std::env::var`) when `None`.
+    pub(crate) value_resolver: Option<Box<dyn ValueResolver>>,
     /// Wall-clock deadline for each `application.toml` read.
     pub(crate) read_timeout: Duration,
 }
@@ -59,6 +65,23 @@ impl DefaultSectionLoader {
                 path.display()
             ))),
         }
+    }
+
+    /// Apply `{{VAR_NAME}}` substitution to `text` when a substitution policy is
+    /// configured, resolving values via `self.value_resolver` (defaulting to
+    /// [`EnvValueResolver`] when unset).
+    fn apply_substitution(&self, text: String, location: String) -> Result<String, ConfigError> {
+        let Some(ref policy) = self.substitution_policy else {
+            return Ok(text);
+        };
+        let resolver: &dyn ValueResolver = self
+            .value_resolver
+            .as_deref()
+            .unwrap_or(&DEFAULT_VALUE_RESOLVER);
+        let substituter = Substituter::new(policy.as_ref(), resolver, location);
+        substituter
+            .substitute(&text)
+            .map_err(|e| ConfigError::Io(e.to_string()))
     }
 
     fn merge_toml(base: toml::Value, overlay: toml::Value) -> toml::Value {
@@ -141,15 +164,7 @@ impl DefaultSectionLoader {
             }
             let text = Self::read_with_timeout(&path, self.read_timeout)?;
 
-            let text = if let Some(ref policy) = self.substitution_policy {
-                let substituter =
-                    Substituter::new(policy.as_ref(), format!("{}:{}", path.display(), key));
-                substituter
-                    .substitute(&text)
-                    .map_err(|e| ConfigError::Io(e.to_string()))?
-            } else {
-                text
-            };
+            let text = self.apply_substitution(text, format!("{}:{}", path.display(), key))?;
 
             let val: toml::Value =
                 toml::from_str(&text).map_err(|e| ConfigError::Parse(e.to_string()))?;
@@ -218,15 +233,7 @@ impl LoaderOps for DefaultSectionLoader {
             }
             let text = Self::read_with_timeout(&path, self.read_timeout)?;
 
-            let text = if let Some(ref policy) = self.substitution_policy {
-                let substituter =
-                    Substituter::new(policy.as_ref(), format!("{}:{}", path.display(), key));
-                substituter
-                    .substitute(&text)
-                    .map_err(|e| ConfigError::Io(e.to_string()))?
-            } else {
-                text
-            };
+            let text = self.apply_substitution(text, format!("{}:{}", path.display(), key))?;
 
             let val: toml::Value =
                 toml::from_str(&text).map_err(|e| ConfigError::Parse(e.to_string()))?;
@@ -418,6 +425,7 @@ mod tests {
         DefaultSectionLoader {
             config_dirs: vec![dir.to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         }
     }
@@ -492,6 +500,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
@@ -507,6 +516,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
@@ -547,6 +557,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let srv: DefaultSectionLoaderServer = must(loader.load_section("s"));
@@ -675,6 +686,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
@@ -698,6 +710,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![low.path().to_path_buf(), high.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
@@ -898,6 +911,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![path],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         assert!(matches!(loader.validate(), Ok(())));
@@ -909,6 +923,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir.path().to_path_buf()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         assert_eq!(loader.config_dirs, vec![dir.path().to_path_buf()]);
@@ -923,6 +938,7 @@ mod tests {
         let loader = DefaultSectionLoader {
             config_dirs: vec![file.clone()],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
         };
         let err = must_err(loader.validate());

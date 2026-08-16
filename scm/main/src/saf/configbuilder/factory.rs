@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::api::{
     CompositePolicy, ConfigBuilderImpl, ConfigError, FeatureRegistry, PathValidatorImpl,
     PatternWhitelistPolicy, PrefixWhitelistPolicy, PreflightReport, SectionLoaderImpl,
-    SubstitutionConfigBuilderImpl, SubstitutionPolicy,
+    SubstitutionConfigBuilderImpl, SubstitutionPolicy, ValueResolver,
 };
 
 /// SAF facade: the single supported entry point for constructing loaders,
@@ -89,6 +89,7 @@ impl ConfigLoaderFactory {
             ops: Box::new(crate::core::DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: None,
+                value_resolver: None,
                 read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
             }),
         }
@@ -289,6 +290,7 @@ impl ConfigLoaderFactory {
             ops: Box::new(crate::core::DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
                 substitution_policy: Some(policy),
+                value_resolver: None,
                 read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
             }),
         }
@@ -323,6 +325,72 @@ impl ConfigLoaderFactory {
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
+        Ok(SectionLoaderImpl {
+            ops: Box::new(loader),
+        })
+    }
+
+    /// Build a loader using XDG-resolved config directories with `{{VAR}}` substitution,
+    /// resolving values via `resolver` instead of `std::env::var`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
+    pub fn create_loader_with_resolver(
+        policy: Box<dyn SubstitutionPolicy>,
+        resolver: Box<dyn ValueResolver>,
+    ) -> Result<SectionLoaderImpl, ConfigError> {
+        let mut loader = crate::core::DefaultConfigBuilder {
+            name: String::new(),
+            version: String::new(),
+            config_dirs: Vec::new(),
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+        }
+        .build_loader_internal()?;
+        loader.substitution_policy = Some(policy);
+        loader.value_resolver = Some(resolver);
+        Ok(SectionLoaderImpl {
+            ops: Box::new(loader),
+        })
+    }
+
+    /// Build a loader that reads `application.toml` only from `dir`, with `{{VAR}}`
+    /// substitution resolved via `resolver` instead of `std::env::var`.
+    pub fn create_loader_for_dir_with_resolver(
+        dir: impl Into<PathBuf>,
+        policy: Box<dyn SubstitutionPolicy>,
+        resolver: Box<dyn ValueResolver>,
+    ) -> SectionLoaderImpl {
+        SectionLoaderImpl {
+            ops: Box::new(crate::core::DefaultSectionLoader {
+                config_dirs: vec![dir.into()],
+                substitution_policy: Some(policy),
+                value_resolver: Some(resolver),
+                read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            }),
+        }
+    }
+
+    /// Build a loader using XDG-resolved config directories for `app_name`, with
+    /// `{{VAR}}` substitution resolved via `resolver` instead of `std::env::var`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
+    pub fn create_loader_xdg_with_resolver(
+        app_name: &str,
+        policy: Box<dyn SubstitutionPolicy>,
+        resolver: Box<dyn ValueResolver>,
+    ) -> Result<SectionLoaderImpl, ConfigError> {
+        let mut loader = crate::core::DefaultConfigBuilder {
+            name: app_name.to_owned(),
+            version: String::new(),
+            config_dirs: Vec::new(),
+            read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+        }
+        .build_loader_internal()?;
+        loader.substitution_policy = Some(policy);
+        loader.value_resolver = Some(resolver);
         Ok(SectionLoaderImpl {
             ops: Box::new(loader),
         })

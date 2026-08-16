@@ -35,6 +35,7 @@ mod validator;
 mod validator_bound_svc_factory;
 mod validator_ops_svc_factory;
 mod validator_svc_factory;
+mod value_resolver_svc_factory;
 
 pub use crate::api::BuilderFinalizer;
 pub use crate::api::ConfigBuilderImpl;
@@ -100,3 +101,5 @@ pub use validator_bound_svc_factory::VALIDATOR_BOUND_SVC_FACTORY;
 pub use validator_ops_svc_factory::VALIDATOR_OPS_SVC_FACTORY;
 #[doc(hidden)]
 pub use validator_svc_factory::VALIDATOR_SVC_FACTORY;
+#[doc(hidden)]
+pub use value_resolver_svc_factory::VALUE_RESOLVER_SVC_FACTORY;

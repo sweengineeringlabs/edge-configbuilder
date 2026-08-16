@@ -46,9 +46,12 @@ pub use substitution::error::substitution_error::SubstitutionError;
 pub use substitution::substituter::Substituter as SubstituterBound;
 pub use substitution::traits::policy_catalog::PolicyCatalog;
 pub use substitution::traits::substitution_policy::SubstitutionPolicy;
+pub use substitution::traits::value_resolver::ValueResolver;
 #[cfg(any(test, feature = "test-utils"))]
 pub use substitution::types::AllowAllPolicy;
-pub use substitution::types::{CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy};
+pub use substitution::types::{
+    CompositePolicy, EnvValueResolver, PatternWhitelistPolicy, PrefixWhitelistPolicy,
+};
 pub use validator::errors::validator_error::ValidatorError;
 pub use validator::traits::validator::Validator;
 pub use validator::traits::validator_bound::ValidatorBound;

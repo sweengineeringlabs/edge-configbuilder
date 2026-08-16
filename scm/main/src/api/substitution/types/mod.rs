@@ -3,11 +3,13 @@
 #[cfg(any(test, feature = "test-utils"))]
 pub mod allow_all_policy;
 pub mod composite_policy;
+pub mod env_value_resolver;
 pub mod pattern_whitelist_policy;
 pub mod prefix_whitelist_policy;
 
 #[cfg(any(test, feature = "test-utils"))]
 pub use allow_all_policy::AllowAllPolicy;
 pub use composite_policy::CompositePolicy;
+pub use env_value_resolver::EnvValueResolver;
 pub use pattern_whitelist_policy::PatternWhitelistPolicy;
 pub use prefix_whitelist_policy::PrefixWhitelistPolicy;

@@ -1,21 +1,32 @@
 use crate::api::{
     PolicyCatalog, SubstituterBound as SubstituterContract, SubstitutionError, SubstitutionPolicy,
+    ValueResolver,
 };
 use regex::Regex;
-use std::env;
 
-/// Performs environment variable substitution on a string value.
+/// Performs value substitution on a string value.
 ///
 /// Supports `{{VAR_NAME}}` syntax. Escaping is supported via `\{\{` and `\}\}`.
+/// Values are looked up via a [`ValueResolver`] — [`EnvValueResolver`](crate::EnvValueResolver)
+/// by default, backed by `std::env::var`.
 pub(crate) struct Substituter<'a> {
     policy: &'a dyn SubstitutionPolicy,
+    resolver: &'a dyn ValueResolver,
     location: String,
 }
 
 impl<'a> Substituter<'a> {
-    /// Create a new substituter with a reference to a policy.
-    pub(crate) fn new(policy: &'a dyn SubstitutionPolicy, location: String) -> Self {
-        Self { policy, location }
+    /// Create a new substituter with a policy and value resolver.
+    pub(crate) fn new(
+        policy: &'a dyn SubstitutionPolicy,
+        resolver: &'a dyn ValueResolver,
+        location: String,
+    ) -> Self {
+        Self {
+            policy,
+            resolver,
+            location,
+        }
     }
 
     /// Substitute all `{{VAR_NAME}}` placeholders in the given value.
@@ -77,15 +88,10 @@ impl<'a> Substituter<'a> {
             .replace("\x00ESCAPED_CLOSE\x00", "}}"))
     }
 
-    /// Substitute a single environment variable.
+    /// Substitute a single variable via the configured resolver.
     fn substitute_var(&self, var_name: &str) -> Result<String, SubstitutionError> {
         self.policy.validate(var_name)?;
-
-        // Get the variable value
-        env::var(var_name).map_err(|_| SubstitutionError::VariableNotFound {
-            var_name: var_name.to_string(),
-            location: self.location.clone(),
-        })
+        self.resolver.resolve(var_name, &self.location)
     }
 }
 
@@ -104,20 +110,22 @@ impl<'a> PolicyCatalog for Substituter<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::api::AllowAllPolicy;
+    use crate::api::{AllowAllPolicy, EnvValueResolver};
+
+    static RESOLVER: EnvValueResolver = EnvValueResolver;
 
     fn must<T, E>(result: Result<T, E>) -> T {
         result.unwrap_or_else(|_| std::process::abort())
     }
 
     fn substituter(policy: &dyn SubstitutionPolicy) -> Substituter<'_> {
-        Substituter::new(policy, "test_location".to_string())
+        Substituter::new(policy, &RESOLVER, "test_location".to_string())
     }
 
     #[test]
     fn test_new() {
         let policy = AllowAllPolicy;
-        let sub = Substituter::new(&policy, "test_file.toml".to_string());
+        let sub = Substituter::new(&policy, &RESOLVER, "test_file.toml".to_string());
         assert!(!sub.location.is_empty());
     }
 

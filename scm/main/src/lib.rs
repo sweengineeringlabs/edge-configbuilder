@@ -41,7 +41,10 @@ pub use crate::api::SubstitutionError;
 pub use crate::api::SubstitutionPolicy;
 pub use crate::api::Validator;
 pub use crate::api::ValidatorError;
-pub use crate::api::{CompositePolicy, PatternWhitelistPolicy, PrefixWhitelistPolicy};
+pub use crate::api::ValueResolver;
+pub use crate::api::{
+    CompositePolicy, EnvValueResolver, PatternWhitelistPolicy, PrefixWhitelistPolicy,
+};
 pub use crate::api::{
     FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
     OverrideSource,

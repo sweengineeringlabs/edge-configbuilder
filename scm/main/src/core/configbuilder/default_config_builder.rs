@@ -38,6 +38,7 @@ impl DefaultConfigBuilder {
             let loader = DefaultSectionLoader {
                 config_dirs: self.config_dirs,
                 substitution_policy: None,
+                value_resolver: None,
                 read_timeout: self.read_timeout,
             };
             loader.validate()?;
@@ -66,6 +67,7 @@ impl DefaultConfigBuilder {
             let loader = DefaultSectionLoader {
                 config_dirs: dirs,
                 substitution_policy: None,
+                value_resolver: None,
                 read_timeout: self.read_timeout,
             };
             loader.validate()?;
@@ -83,6 +85,7 @@ impl DefaultConfigBuilder {
         let loader = DefaultSectionLoader {
             config_dirs: vec![dir],
             substitution_policy: None,
+            value_resolver: None,
             read_timeout: self.read_timeout,
         };
         loader.validate()?;
