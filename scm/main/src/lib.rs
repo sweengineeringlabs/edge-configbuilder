@@ -25,46 +25,7 @@ mod api;
 mod core;
 mod saf;
 
-#[cfg(any(test, feature = "test-utils"))]
-pub use crate::api::AllowAllPolicy;
-pub use crate::api::ApplicationConfig;
-pub use crate::api::ConfigBuilder;
-pub use crate::api::ConfigError;
-pub use crate::api::ConfigSection;
-pub use crate::api::FeatureLoader;
-pub use crate::api::FeatureRegistry;
-pub use crate::api::FeatureSummary;
-pub use crate::api::Loader;
-pub use crate::api::OptionalSection;
-pub use crate::api::Preflight;
-pub use crate::api::SubstitutionError;
-pub use crate::api::SubstitutionPolicy;
-pub use crate::api::Validator;
-pub use crate::api::ValidatorError;
-pub use crate::api::ValueResolver;
-pub use crate::api::{
-    CompositePolicy, EnvValueResolver, PatternWhitelistPolicy, PrefixWhitelistPolicy,
-};
-pub use crate::api::{
-    FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureState, LoadedFeature, OnError,
-    OverrideSource,
-};
-pub use crate::api::{PreflightIssue, PreflightIssueKind, PreflightReport};
 pub use saf::*;
-
-#[doc(hidden)]
-pub use crate::api::ConfigBuilderBound;
-#[doc(hidden)]
-pub use crate::api::PolicyCatalog;
-#[doc(hidden)]
-pub use crate::api::SectionLoaderBound;
-#[doc(hidden)]
-pub use crate::api::SubstituterBound;
-#[doc(hidden)]
-pub use crate::api::ValidatorBound;
-
-#[doc(hidden)]
-pub use crate::api::Topology;
 
 /// Load a set of optional feature sections in dependency order.
 ///
