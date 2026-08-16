@@ -1,7 +1,8 @@
 //! Integration tests for `PreflightReportOps` — `is_ok`, `issues`, `issue_count`.
 #![allow(missing_docs)]
 use swe_edge_configbuilder::{
-    ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport, PreflightReportOps as _,
+    ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport,
+    PreflightReportOps as _,
 };
 
 fn push_load_error(report: &mut PreflightReport) {
@@ -55,7 +56,11 @@ fn test_issues_contains_pushed_issue_with_correct_section_error() {
     let mut report = ConfigLoaderFactory::create_preflight_report();
     push_load_error(&mut report);
     assert_eq!(report.issues().len(), 1);
-    assert_eq!(report.issues()[0].section, "db", "issue section must match pushed value");
+    assert_eq!(
+        report.issues()[0].section,
+        "db",
+        "issue section must match pushed value"
+    );
 }
 
 #[test]
@@ -72,7 +77,11 @@ fn test_issues_preserves_insertion_order_edge() {
         );
     }
     let sections: Vec<&str> = report.issues().iter().map(|i| i.section.as_str()).collect();
-    assert_eq!(sections, ["a", "b", "c"], "issues must be stored in insertion order");
+    assert_eq!(
+        sections,
+        ["a", "b", "c"],
+        "issues must be stored in insertion order"
+    );
 }
 
 // ── issue_count ───────────────────────────────────────────────────────────────
@@ -93,7 +102,11 @@ fn test_issue_count_increments_with_each_push_error() {
     push_load_error(&mut report);
     assert_eq!(report.issue_count(), 1, "count must increase after push");
     push_load_error(&mut report);
-    assert_eq!(report.issue_count(), 2, "count must increase after second push");
+    assert_eq!(
+        report.issue_count(),
+        2,
+        "count must increase after second push"
+    );
 }
 
 #[test]

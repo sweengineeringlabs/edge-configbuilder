@@ -99,7 +99,10 @@ fn test_map_transforms_inner_value_when_enabled_happy() {
 fn test_map_propagates_disabled_without_calling_closure_error() {
     let s: FeatureState<u32> = FeatureState::Disabled;
     let called = std::cell::Cell::new(false);
-    let result = s.map(|v| { called.set(true); v });
+    let result = s.map(|v| {
+        called.set(true);
+        v
+    });
     assert!(!called.get());
     assert!(result.is_disabled());
 }
@@ -172,8 +175,14 @@ fn test_unwrap_or_else_calls_closure_when_disabled_error() {
 fn test_unwrap_or_else_closure_not_called_when_enabled_edge() {
     let s: FeatureState<u32> = FeatureState::Enabled(1);
     let called = std::cell::Cell::new(false);
-    s.unwrap_or_else(|| { called.set(true); 0 });
-    assert!(!called.get(), "closure must not be invoked when state is Enabled");
+    s.unwrap_or_else(|| {
+        called.set(true);
+        0
+    });
+    assert!(
+        !called.get(),
+        "closure must not be invoked when state is Enabled"
+    );
 }
 
 // ── enabled_or_default ────────────────────────────────────────────────────────

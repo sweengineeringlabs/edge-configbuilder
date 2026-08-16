@@ -3,7 +3,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use swe_edge_configbuilder::{
-    ConfigLoaderFactory, ConfigSection, FeatureState, FeatureStateOps as _, OnError, OptionalSection,
+    ConfigLoaderFactory, ConfigSection, FeatureState, FeatureStateOps as _, OnError,
+    OptionalSection,
 };
 
 use std::io::Write as _;

@@ -1,6 +1,8 @@
 //! Load a typed configuration section from application.toml via ConfigBuilder.
 
-use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _};
+use swe_edge_configbuilder::{
+    BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
+};
 #[derive(Debug, Default, serde::Deserialize)]
 #[serde(default)]
 struct BrokerConfig {

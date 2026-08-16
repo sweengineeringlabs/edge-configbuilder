@@ -7,7 +7,7 @@
 //! # Usage
 //!
 //! ```rust,no_run
-//! use swe_edge_configbuilder::ConfigLoaderFactory;
+//! use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
 //!
 //! #[derive(serde::Deserialize, Default)]
 //! struct CompletionConfig { model: String, max_tokens: u32 }
@@ -98,10 +98,7 @@ macro_rules! load_in_order {
         let _requires: &[&[&str]] = &[$(<$ty as $crate::OptionalSection>::requires()),+];
 
         match $crate::ConfigLoaderFactory::topology_sort(_names, _requires) {
-            Err(_msg) => Err($crate::ConfigError::Validation {
-                section: String::from("load_in_order"),
-                reason: _msg,
-            }),
+            Err(_msg) => Err(_msg),
             Ok(_order) => {
                 let mut _result: Result<(), $crate::ConfigError> = Ok(());
                 'load_loop: for &_idx in &_order {
@@ -138,7 +135,7 @@ macro_rules! load_in_order {
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection};
+/// use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
 ///
 /// # #[derive(serde::Deserialize)] struct CacheConfig;
 /// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
@@ -167,7 +164,7 @@ macro_rules! preflight {
                     $crate::PreflightIssue {
                         section: String::from("dependency_graph"),
                         kind: $crate::PreflightIssueKind::DependencyCycle,
-                        message: _msg.clone(),
+                        message: _msg.to_string(),
                     },
                 );
             }
@@ -184,7 +181,7 @@ macro_rules! preflight {
                                         $crate::PreflightIssue {
                                             section: <$ty as $crate::OptionalSection>::section_name()
                                                 .to_owned(),
-                                            kind: $crate::PreflightIssueKind::from_config_error(&_e),
+                                            kind: $crate::ConfigLoaderFactory::preflight_issue_kind_from_config_error(&_e),
                                             message: _e.to_string(),
                                         },
                                     );

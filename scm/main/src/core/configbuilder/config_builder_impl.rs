@@ -54,8 +54,11 @@ impl ConfigBuilderImpl {
             name: self.name,
             version: self.version,
             config_dirs: self.config_dirs,
-            read_timeout: self.read_timeout.unwrap_or(crate::core::loader::DEFAULT_READ_TIMEOUT),
-        }.build_loader_internal()?;
+            read_timeout: self
+                .read_timeout
+                .unwrap_or(crate::core::loader::DEFAULT_READ_TIMEOUT),
+        }
+        .build_loader_internal()?;
         Ok(SectionLoaderImpl {
             ops: Box::new(core),
         })
@@ -89,11 +92,11 @@ impl crate::api::BuilderFinalizer for ConfigBuilderImpl {
 
 impl ConfigBuilder for ConfigBuilderImpl {
     fn name(&self) -> &str {
-        &self.name
+        ConfigBuilderImpl::name(self)
     }
 
     fn version(&self) -> &str {
-        &self.version
+        ConfigBuilderImpl::version(self)
     }
 
     fn with_name(self, name: impl Into<String>) -> Self {

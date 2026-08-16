@@ -5,7 +5,8 @@
 use std::sync::{Arc, Mutex};
 use swe_edge_configbuilder::{
     ConfigError, ConfigLoaderFactory, FeatureMetadata, FeatureRegistry, FeatureRegistryOps as _,
-    FeatureState, FeatureStateOps as _, FeatureSummaryOps as _, OnError, OptionalSection, OverrideSource,
+    FeatureState, FeatureStateOps as _, FeatureSummaryOps as _, OnError, OptionalSection,
+    OverrideSource,
 };
 
 static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

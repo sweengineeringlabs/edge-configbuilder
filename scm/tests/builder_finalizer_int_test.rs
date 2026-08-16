@@ -1,15 +1,23 @@
 //! Integration tests for the `BuilderFinalizer` trait — `build_loader`.
-#![allow(missing_docs, clippy::unwrap_used)]
-use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _};
+#![allow(missing_docs, clippy::unwrap_used, clippy::expect_used)]
+use swe_edge_configbuilder::{
+    BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
+};
 
 #[test]
 fn test_build_loader_with_valid_config_dir_happy() {
     let dir = tempfile::tempdir().unwrap();
-    std::fs::write(dir.path().join("application.toml"), "[app]\nname = \"test\"\n").unwrap();
+    std::fs::write(
+        dir.path().join("application.toml"),
+        "[app]\nname = \"test\"\n",
+    )
+    .unwrap();
 
     #[derive(serde::Deserialize, Default)]
     #[serde(default)]
-    struct App { name: String }
+    struct App {
+        name: String,
+    }
 
     let loader = ConfigLoaderFactory::create_config_builder()
         .with_config_dir(dir.path())
@@ -26,7 +34,10 @@ fn test_build_loader_with_file_path_instead_of_dir_error() {
     let result = ConfigLoaderFactory::create_config_builder()
         .with_config_dir(file.path())
         .build_loader();
-    assert!(result.is_err(), "a file path must be rejected as config dir");
+    assert!(
+        result.is_err(),
+        "a file path must be rejected as config dir"
+    );
 }
 
 #[test]

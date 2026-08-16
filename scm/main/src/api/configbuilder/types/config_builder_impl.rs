@@ -26,7 +26,10 @@ use std::time::Duration;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::ConfigBuilderImpl;
+/// use swe_edge_configbuilder::{
+///     BuilderFinalizer as _, ConfigBuilder as _, ConfigBuilderImpl, ConfigBuilderInit as _,
+///     Loader as _,
+/// };
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// struct AuthConfig { token_ttl_secs: u64 }

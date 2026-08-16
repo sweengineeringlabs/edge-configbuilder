@@ -16,7 +16,7 @@ impl PrefixWhitelistPolicy {
 impl SubstitutionPolicy for PrefixWhitelistPolicy {
     fn validate(&self, var_name: &str) -> Result<(), SubstitutionError> {
         if self
-            .prefixes
+            .prefixes()
             .iter()
             .any(|p| var_name.starts_with(p.as_str()))
         {
@@ -26,7 +26,7 @@ impl SubstitutionPolicy for PrefixWhitelistPolicy {
                 var_name: var_name.to_string(),
                 reason: format!(
                     "does not match any allowed prefix: {}",
-                    self.prefixes.join(", ")
+                    self.prefixes().join(", ")
                 ),
                 policy: self.description(),
             })
@@ -34,6 +34,6 @@ impl SubstitutionPolicy for PrefixWhitelistPolicy {
     }
 
     fn description(&self) -> String {
-        format!("PrefixWhitelist({})", self.prefixes.join(", "))
+        format!("PrefixWhitelist({})", self.prefixes().join(", "))
     }
 }

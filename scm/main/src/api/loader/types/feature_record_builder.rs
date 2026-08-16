@@ -15,7 +15,9 @@ use crate::api::loader::types::override_source::OverrideSource;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{FeatureMetadata, FeatureRecordBuilder, OverrideSource};
+/// use swe_edge_configbuilder::{
+///     FeatureMetadata, FeatureRecordBuilder, FeatureRecordBuilderOps as _, OverrideSource,
+/// };
 ///
 /// let record = FeatureRecordBuilder::new("message_broker")
 ///     .enabled(true)

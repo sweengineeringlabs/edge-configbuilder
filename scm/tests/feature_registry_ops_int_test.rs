@@ -1,5 +1,5 @@
 //! Integration tests for `FeatureRegistryOps` — `new`, `on_load`, `records`, `summary`, `validate_dependencies`.
-#![allow(missing_docs, clippy::unwrap_used)]
+#![allow(missing_docs, clippy::unwrap_used, clippy::expect_used)]
 use swe_edge_configbuilder::{
     ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, FeatureSummaryOps as _,
     OptionalSection,
@@ -7,17 +7,27 @@ use swe_edge_configbuilder::{
 
 #[derive(serde::Deserialize, Default)]
 #[serde(default)]
-struct CacheSection { ttl: u32 }
+struct CacheSection {
+    ttl: u32,
+}
 impl OptionalSection for CacheSection {
-    fn section_name() -> &'static str { "cache" }
+    fn section_name() -> &'static str {
+        "cache"
+    }
 }
 
 #[derive(serde::Deserialize, Default)]
 #[serde(default)]
-struct BrokerSection { host: String }
+struct BrokerSection {
+    host: String,
+}
 impl OptionalSection for BrokerSection {
-    fn section_name() -> &'static str { "broker" }
-    fn requires() -> &'static [&'static str] { &["cache"] }
+    fn section_name() -> &'static str {
+        "broker"
+    }
+    fn requires() -> &'static [&'static str] {
+        &["cache"]
+    }
 }
 
 // ── new ───────────────────────────────────────────────────────────────────────
@@ -33,7 +43,11 @@ fn test_new_validate_dependencies_on_empty_registry_returns_ok_error() {
     let reg = FeatureRegistry::new();
     reg.validate_dependencies()
         .expect("empty registry must have no unsatisfied dependencies");
-    assert_eq!(reg.records().len(), 0, "freshly created registry must have no records");
+    assert_eq!(
+        reg.records().len(),
+        0,
+        "freshly created registry must have no records"
+    );
 }
 
 #[test]
@@ -91,7 +105,8 @@ fn test_records_returns_all_loaded_features_happy() {
     std::fs::write(
         dir.path().join("application.toml"),
         "[cache]\nttl = 1\n[broker]\nhost = \"localhost\"\n",
-    ).unwrap();
+    )
+    .unwrap();
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut reg = FeatureRegistry::new();
     let _ = reg.load::<CacheSection>(&loader);
@@ -153,7 +168,8 @@ fn test_validate_dependencies_satisfied_deps_return_ok_happy() {
     std::fs::write(
         dir.path().join("application.toml"),
         "[cache]\nttl = 1\n[broker]\n",
-    ).unwrap();
+    )
+    .unwrap();
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut reg = FeatureRegistry::new();
     let _ = reg.load::<CacheSection>(&loader);
@@ -168,10 +184,11 @@ fn test_validate_dependencies_missing_dep_returns_err_error() {
     std::fs::write(
         dir.path().join("application.toml"),
         "[broker]\nhost = \"localhost\"\n",
-    ).unwrap();
+    )
+    .unwrap();
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir.path());
     let mut reg = FeatureRegistry::new();
-    let _ = reg.load::<CacheSection>(&loader);  // disabled — absent from TOML
+    let _ = reg.load::<CacheSection>(&loader); // disabled — absent from TOML
     let _ = reg.load::<BrokerSection>(&loader); // enabled — requires cache
     assert!(reg.validate_dependencies().is_err());
 }

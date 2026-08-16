@@ -20,7 +20,10 @@ use crate::api::loader::types::feature_state::FeatureState;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{FeatureRecordBuilder, FeatureState, LoadedFeature};
+/// use swe_edge_configbuilder::{
+///     FeatureRecordBuilderOps as _, FeatureRecordBuilder, FeatureState, FeatureStateOps as _,
+///     LoadedFeature,
+/// };
 ///
 /// // Simulating what the loader returns for an enabled section.
 /// let loaded = LoadedFeature {

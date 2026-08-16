@@ -1,8 +1,8 @@
 //! [`FeatureRegistry`] — startup feature collector and dependency validator.
 
 use crate::api::{
-    ConfigError, FeatureMetadata, FeatureRecord, FeatureRecordBuilder, FeatureRegistry,
-    FeatureState, LoadedFeature, OnError, OptionalSection, OverrideSource, SectionLoaderImpl,
+    ConfigError, FeatureRecord, FeatureRecordBuilder, FeatureRegistry, FeatureState, LoadedFeature,
+    OnError, OptionalSection, OverrideSource, SectionLoaderImpl,
 };
 
 impl FeatureRegistry {
@@ -20,7 +20,10 @@ impl FeatureRegistry {
     }
 
     /// Load a feature section and record its state.
-    pub(crate) fn load<T>(&mut self, loader: &SectionLoaderImpl) -> Result<FeatureState<T>, ConfigError>
+    pub(crate) fn load<T>(
+        &mut self,
+        loader: &SectionLoaderImpl,
+    ) -> Result<FeatureState<T>, ConfigError>
     where
         T: OptionalSection,
     {

@@ -2,8 +2,8 @@
 
 pub mod config_section;
 pub mod feature_loader;
-pub mod feature_registry_ops;
 pub mod feature_record_builder_ops;
+pub mod feature_registry_ops;
 pub mod feature_state_ops;
 pub mod feature_summary_ops;
 pub mod loader;

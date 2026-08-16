@@ -1,8 +1,6 @@
 //! Interface counterpart for [`crate::core::configbuilder::default_config_builder::DefaultConfigBuilder`].
 
-use crate::api::{
-    ApplicationConfig, ConfigBuilderImpl, SubstitutionConfigBuilderImpl,
-};
+use crate::api::{ApplicationConfig, ConfigBuilderImpl, SubstitutionConfigBuilderImpl};
 
 /// API contract marker for the default config builder.
 ///

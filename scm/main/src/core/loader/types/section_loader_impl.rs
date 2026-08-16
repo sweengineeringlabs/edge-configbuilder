@@ -1,6 +1,8 @@
 //! Public concrete section loader returned by the `saf/` factory functions.
 
-use crate::api::{ConfigError, FeatureLoader, FeatureState, LoadedFeature, Loader, SectionLoaderImpl};
+use crate::api::{
+    ConfigError, FeatureLoader, FeatureState, LoadedFeature, Loader, SectionLoaderImpl,
+};
 
 impl SectionLoaderImpl {
     /// Load and deserialize a named section.

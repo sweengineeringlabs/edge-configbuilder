@@ -32,18 +32,30 @@ mod tests {
     #[test]
     fn test_from_config_error_parse_error_returns_load_error() {
         let e = ConfigError::Parse("unexpected token".into());
-        assert_eq!(PreflightIssueKind::from_config_error(&e), PreflightIssueKind::LoadError);
+        assert_eq!(
+            PreflightIssueKind::from_config_error(&e),
+            PreflightIssueKind::LoadError
+        );
     }
 
     #[test]
     fn test_from_config_error_validation_error_returns_validation_error() {
-        let e = ConfigError::Validation { section: "auth".into(), reason: "missing cert".into() };
-        assert_eq!(PreflightIssueKind::from_config_error(&e), PreflightIssueKind::ValidationError);
+        let e = ConfigError::Validation {
+            section: "auth".into(),
+            reason: "missing cert".into(),
+        };
+        assert_eq!(
+            PreflightIssueKind::from_config_error(&e),
+            PreflightIssueKind::ValidationError
+        );
     }
 
     #[test]
     fn test_from_config_error_not_found_maps_to_load_error() {
         let e = ConfigError::NotFound("/etc/app".into());
-        assert_eq!(PreflightIssueKind::from_config_error(&e), PreflightIssueKind::LoadError);
+        assert_eq!(
+            PreflightIssueKind::from_config_error(&e),
+            PreflightIssueKind::LoadError
+        );
     }
 }

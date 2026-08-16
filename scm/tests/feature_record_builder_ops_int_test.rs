@@ -35,7 +35,10 @@ fn test_enabled_true_marks_feature_as_enabled_happy() {
 
 #[test]
 fn test_enabled_false_after_true_resets_to_disabled_error() {
-    let r = FeatureRecordBuilder::new("cache").enabled(true).enabled(false).build();
+    let r = FeatureRecordBuilder::new("cache")
+        .enabled(true)
+        .enabled(false)
+        .build();
     assert!(!r.enabled, "last enabled(false) must win");
 }
 

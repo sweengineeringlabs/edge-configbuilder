@@ -3,7 +3,8 @@
 
 use serde::Deserialize;
 use swe_edge_configbuilder::{
-    load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, OptionalSection,
+    load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _,
+    OptionalSection,
 };
 use tempfile::TempDir;
 

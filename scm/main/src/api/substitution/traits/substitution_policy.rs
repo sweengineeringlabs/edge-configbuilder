@@ -53,8 +53,8 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
-    /// assert!(PrefixWhitelistPolicy::new(vec!["APP_".to_string()])
+    /// use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
+    /// assert!(ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()])
     ///     .validate("APP_HOST")
     ///     .is_ok());
     /// ```
@@ -68,9 +68,9 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{PrefixWhitelistPolicy, SubstitutionPolicy};
+    /// use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
     /// assert_eq!(
-    ///     PrefixWhitelistPolicy::new(vec!["APP_".to_string()]).description(),
+    ///     ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]).description(),
     ///     "PrefixWhitelist(APP_)"
     /// );
     /// ```

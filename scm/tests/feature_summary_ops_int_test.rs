@@ -7,16 +7,24 @@ use swe_edge_configbuilder::{
 
 #[derive(serde::Deserialize, Default)]
 #[serde(default)]
-struct Alpha { value: i32 }
+struct Alpha {
+    value: i32,
+}
 impl OptionalSection for Alpha {
-    fn section_name() -> &'static str { "alpha" }
+    fn section_name() -> &'static str {
+        "alpha"
+    }
 }
 
 #[derive(serde::Deserialize, Default)]
 #[serde(default)]
-struct Beta { value: i32 }
+struct Beta {
+    value: i32,
+}
 impl OptionalSection for Beta {
-    fn section_name() -> &'static str { "beta" }
+    fn section_name() -> &'static str {
+        "beta"
+    }
 }
 
 fn make_registry_with_toml(content: &str) -> FeatureRegistry {

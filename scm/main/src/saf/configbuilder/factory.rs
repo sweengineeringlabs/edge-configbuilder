@@ -1,12 +1,13 @@
 use std::path::PathBuf;
 
 use crate::api::{
-    CompositePolicy, ConfigBuilderImpl, ConfigError, FeatureLoader as _, FeatureRegistry,
-    FeatureRegistryOps as _, PathValidatorImpl, PatternWhitelistPolicy, PreflightReport,
-    PreflightReportOps as _, PrefixWhitelistPolicy, SectionLoaderImpl,
+    CompositePolicy, ConfigBuilderImpl, ConfigError, FeatureRegistry, PathValidatorImpl,
+    PatternWhitelistPolicy, PrefixWhitelistPolicy, PreflightReport, SectionLoaderImpl,
     SubstitutionConfigBuilderImpl, SubstitutionPolicy,
 };
 
+/// SAF facade: the single supported entry point for constructing loaders,
+/// builders, and policies without depending on `core/` or `api/` directly.
 pub struct ConfigLoaderFactory;
 
 impl ConfigLoaderFactory {
@@ -17,7 +18,8 @@ impl ConfigLoaderFactory {
         let _ = crate::api::FeatureState::Enabled(1_u8).into_option();
         let _ = crate::api::FeatureState::Enabled(1_u8).as_option();
         let _ = crate::api::FeatureState::Enabled(1_u8).map(|n| n + 1);
-        let _ = crate::api::FeatureState::Enabled(1_u8).and_then(|n| crate::api::FeatureState::Enabled(n + 1));
+        let _ = crate::api::FeatureState::Enabled(1_u8)
+            .and_then(|n| crate::api::FeatureState::Enabled(n + 1));
         let _ = crate::api::FeatureState::Enabled(1_u8).unwrap_or(0);
         let _ = crate::api::FeatureState::<u8>::Disabled.unwrap_or_else(|| 0);
         let _ = crate::api::FeatureState::<u8>::Disabled.enabled_or_default();
@@ -31,7 +33,8 @@ impl ConfigLoaderFactory {
         use crate::api::TopologyOps as _;
         let _ = crate::api::Topology.sort(&["a"], &[&[]]);
 
-        let _ = crate::api::PreflightIssueKind::from_config_error(&ConfigError::Parse(String::new()));
+        let _ =
+            crate::api::PreflightIssueKind::from_config_error(&ConfigError::Parse(String::new()));
         let mut report = Self::create_preflight_report();
         report.push(crate::api::PreflightIssue {
             section: String::from("touch_section"),
@@ -48,7 +51,6 @@ impl ConfigLoaderFactory {
             let _ = p.pattern_str.len();
         }
         let _ = Self::create_composite_policy(vec![]);
-        use crate::api::Validator as _;
         let _ = PathValidatorImpl {
             ops: Box::new(crate::core::DefaultValidator),
         }
@@ -62,6 +64,11 @@ impl ConfigLoaderFactory {
             .build();
     }
 
+    /// Build a loader using XDG-resolved config directories with no app name.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
     pub fn create_loader() -> Result<SectionLoaderImpl, ConfigError> {
         Self::touch_core_api();
         let loader = crate::core::DefaultConfigBuilder {
@@ -76,6 +83,7 @@ impl ConfigLoaderFactory {
         })
     }
 
+    /// Build a loader that reads `application.toml` only from `dir`.
     pub fn create_loader_for_dir(dir: impl Into<PathBuf>) -> SectionLoaderImpl {
         SectionLoaderImpl {
             ops: Box::new(crate::core::DefaultSectionLoader {
@@ -86,6 +94,11 @@ impl ConfigLoaderFactory {
         }
     }
 
+    /// Build a loader using XDG-resolved config directories for `app_name`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
     pub fn create_loader_xdg(app_name: &str) -> Result<SectionLoaderImpl, ConfigError> {
         let loader = crate::core::DefaultConfigBuilder {
             name: app_name.to_owned(),
@@ -99,44 +112,67 @@ impl ConfigLoaderFactory {
         })
     }
 
+    /// Create the default filesystem path validator.
     pub fn create_validator() -> PathValidatorImpl {
         PathValidatorImpl {
             ops: Box::new(crate::core::DefaultValidator),
         }
     }
 
+    /// Create an empty preflight report with no recorded issues.
     pub fn create_preflight_report() -> PreflightReport {
         PreflightReport { issues: Vec::new() }
     }
 
+    /// Return `true` when `report` has no recorded issues.
     pub fn preflight_report_is_ok(report: &PreflightReport) -> bool {
         report.is_ok()
     }
 
+    /// Append `issue` to `report`.
     pub fn preflight_report_push(report: &mut PreflightReport, issue: crate::api::PreflightIssue) {
         report.push(issue);
     }
 
+    /// Borrow the issues recorded on `report`.
     pub fn preflight_report_issues(report: &PreflightReport) -> &[crate::api::PreflightIssue] {
         report.issues()
     }
 
+    /// Return the number of issues recorded on `report`.
     pub fn preflight_report_issue_count(report: &PreflightReport) -> usize {
         report.issue_count()
     }
 
-    pub fn create_prefix_whitelist_policy(prefixes: Vec<String>) -> PrefixWhitelistPolicy {
-        PrefixWhitelistPolicy { prefixes }
+    /// Classify a [`ConfigError`] into the [`crate::api::PreflightIssueKind`] it represents.
+    pub fn preflight_issue_kind_from_config_error(
+        e: &ConfigError,
+    ) -> crate::api::PreflightIssueKind {
+        crate::api::PreflightIssueKind::from_config_error(e)
     }
 
-    pub fn create_pattern_whitelist_policy(pattern: String) -> Result<PatternWhitelistPolicy, String> {
+    /// Create a substitution policy that allows env vars matching any of `prefixes`.
+    pub fn create_prefix_whitelist_policy(prefixes: Vec<String>) -> PrefixWhitelistPolicy {
+        PrefixWhitelistPolicy::new(prefixes)
+    }
+
+    /// Create a substitution policy that allows env vars matching a regex `pattern`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with a description if `pattern` is not a valid regex.
+    pub fn create_pattern_whitelist_policy(
+        pattern: String,
+    ) -> Result<PatternWhitelistPolicy, String> {
         PatternWhitelistPolicy::new(pattern)
     }
 
+    /// Create a substitution policy that allows an env var when any of `policies` allows it.
     pub fn create_composite_policy(policies: Vec<Box<dyn SubstitutionPolicy>>) -> CompositePolicy {
-        CompositePolicy { policies }
+        CompositePolicy::new(policies)
     }
 
+    /// Create an empty feature registry.
     pub fn create_feature_registry() -> FeatureRegistry {
         FeatureRegistry {
             records: Vec::new(),
@@ -144,6 +180,11 @@ impl ConfigLoaderFactory {
         }
     }
 
+    /// Load a feature section into `registry`, recording its resolved state.
+    ///
+    /// # Errors
+    ///
+    /// Propagates any [`ConfigError`] returned by `loader`.
     pub fn feature_registry_load<T>(
         registry: &mut FeatureRegistry,
         loader: &SectionLoaderImpl,
@@ -154,18 +195,28 @@ impl ConfigLoaderFactory {
         registry.load(loader)
     }
 
+    /// Borrow the feature records collected on `registry`.
     pub fn feature_registry_records(registry: &FeatureRegistry) -> &[crate::api::FeatureRecord] {
         registry.records()
     }
 
+    /// Build a point-in-time snapshot of `registry`'s recorded features.
     pub fn feature_registry_summary(registry: &FeatureRegistry) -> crate::api::FeatureSummary {
         registry.summary()
     }
 
-    pub fn feature_registry_validate_dependencies(registry: &FeatureRegistry) -> Result<(), ConfigError> {
+    /// Validate that every enabled feature in `registry` has its dependencies enabled.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError::Validation`](crate::ConfigError::Validation) listing unsatisfied dependencies.
+    pub fn feature_registry_validate_dependencies(
+        registry: &FeatureRegistry,
+    ) -> Result<(), ConfigError> {
         registry.validate_dependencies()
     }
 
+    /// Register a callback invoked with each feature record as it is loaded.
     pub fn feature_registry_on_load(
         registry: &mut FeatureRegistry,
         observer: impl Fn(&crate::api::FeatureRecord) + 'static,
@@ -173,11 +224,17 @@ impl ConfigLoaderFactory {
         registry.on_load(observer)
     }
 
+    /// Compute a topological load order over `names` given each name's `requires`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError::Validation`](crate::ConfigError::Validation) listing the nodes in a detected cycle.
     pub fn topology_sort(names: &[&str], requires: &[&[&str]]) -> Result<Vec<usize>, ConfigError> {
         use crate::api::TopologyOps as _;
         crate::api::Topology.sort(names, requires)
     }
 
+    /// Create an empty concrete config builder ready for fluent configuration.
     pub fn create_config_builder() -> ConfigBuilderImpl {
         ConfigBuilderImpl {
             name: env!("CARGO_PKG_NAME").to_string(),
@@ -187,6 +244,11 @@ impl ConfigLoaderFactory {
         }
     }
 
+    /// Load one optional feature section from `loader` without a registry.
+    ///
+    /// # Errors
+    ///
+    /// Propagates any [`ConfigError`] returned while reading or parsing the section.
     pub fn load_feature_section<T>(
         loader: &SectionLoaderImpl,
         key: &str,
@@ -197,7 +259,14 @@ impl ConfigLoaderFactory {
         loader.load_optional_section(key)
     }
 
-    pub fn create_loader_with_substitution(policy: Box<dyn SubstitutionPolicy>) -> Result<SectionLoaderImpl, ConfigError> {
+    /// Build a loader using XDG-resolved config directories with `{{VAR}}` substitution.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
+    pub fn create_loader_with_substitution(
+        policy: Box<dyn SubstitutionPolicy>,
+    ) -> Result<SectionLoaderImpl, ConfigError> {
         let mut loader = crate::core::DefaultConfigBuilder {
             name: String::new(),
             version: String::new(),
@@ -211,7 +280,11 @@ impl ConfigLoaderFactory {
         })
     }
 
-    pub fn create_loader_for_dir_with_substitution(dir: impl Into<PathBuf>, policy: Box<dyn SubstitutionPolicy>) -> SectionLoaderImpl {
+    /// Build a loader that reads `application.toml` only from `dir`, with `{{VAR}}` substitution.
+    pub fn create_loader_for_dir_with_substitution(
+        dir: impl Into<PathBuf>,
+        policy: Box<dyn SubstitutionPolicy>,
+    ) -> SectionLoaderImpl {
         SectionLoaderImpl {
             ops: Box::new(crate::core::DefaultSectionLoader {
                 config_dirs: vec![dir.into()],
@@ -221,15 +294,27 @@ impl ConfigLoaderFactory {
         }
     }
 
+    /// Load one config section by XDG-resolving `app_name`'s config directories.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible or the section is missing.
     pub fn load_section_xdg<T>(app_name: &str, key: &str) -> Result<T, ConfigError>
     where
         T: serde::de::DeserializeOwned + Default,
     {
-        use crate::api::Loader as _;
         Self::create_loader_xdg(app_name)?.load_section(key)
     }
 
-    pub fn create_loader_xdg_with_substitution(app_name: &str, policy: Box<dyn SubstitutionPolicy>) -> Result<SectionLoaderImpl, ConfigError> {
+    /// Build a loader using XDG-resolved config directories for `app_name`, with `{{VAR}}` substitution.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if no config directory is accessible.
+    pub fn create_loader_xdg_with_substitution(
+        app_name: &str,
+        policy: Box<dyn SubstitutionPolicy>,
+    ) -> Result<SectionLoaderImpl, ConfigError> {
         let mut loader = crate::core::DefaultConfigBuilder {
             name: app_name.to_owned(),
             version: String::new(),
@@ -243,7 +328,10 @@ impl ConfigLoaderFactory {
         })
     }
 
-    pub fn create_config_builder_with_substitution(policy: Box<dyn SubstitutionPolicy>) -> SubstitutionConfigBuilderImpl {
+    /// Create an empty concrete config builder with `{{VAR}}` substitution support.
+    pub fn create_config_builder_with_substitution(
+        policy: Box<dyn SubstitutionPolicy>,
+    ) -> SubstitutionConfigBuilderImpl {
         SubstitutionConfigBuilderImpl {
             name: env!("CARGO_PKG_NAME").to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),

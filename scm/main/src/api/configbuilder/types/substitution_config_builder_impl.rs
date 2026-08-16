@@ -21,7 +21,7 @@ use std::path::PathBuf;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::ConfigLoaderFactory;
+/// use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _};
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// struct DbConfig { url: String }

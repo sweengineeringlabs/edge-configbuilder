@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 
-use crate::api::{ConfigBuilder, ConfigBuilderImpl, ConfigError, SectionLoaderImpl, SubstitutionConfigBuilderImpl};
+use crate::api::{
+    ConfigBuilder, ConfigBuilderImpl, ConfigError, SectionLoaderImpl, SubstitutionConfigBuilderImpl,
+};
 
 impl SubstitutionConfigBuilderImpl {
     /// Return the configured application name.
@@ -38,7 +40,8 @@ impl SubstitutionConfigBuilderImpl {
             version: self.version,
             config_dirs: self.config_dirs,
             read_timeout: crate::core::loader::DEFAULT_READ_TIMEOUT,
-        }.build_loader_internal()?;
+        }
+        .build_loader_internal()?;
         core.substitution_policy = Some(self.policy);
         Ok(SectionLoaderImpl {
             ops: Box::new(core),
@@ -57,11 +60,11 @@ impl crate::api::BuilderFinalizer for SubstitutionConfigBuilderImpl {
 
 impl ConfigBuilder for SubstitutionConfigBuilderImpl {
     fn name(&self) -> &str {
-        &self.name
+        SubstitutionConfigBuilderImpl::name(self)
     }
 
     fn version(&self) -> &str {
-        &self.version
+        SubstitutionConfigBuilderImpl::version(self)
     }
 
     fn with_name(self, name: impl Into<String>) -> Self {

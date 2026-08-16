@@ -25,13 +25,13 @@ impl SubstitutionPolicy for PatternWhitelistPolicy {
         } else {
             Err(SubstitutionError::VariableRejected {
                 var_name: var_name.to_string(),
-                reason: format!("does not match pattern: {}", self.pattern_str),
+                reason: format!("does not match pattern: {}", self.pattern()),
                 policy: self.description(),
             })
         }
     }
 
     fn description(&self) -> String {
-        format!("PatternWhitelist({})", self.pattern_str)
+        format!("PatternWhitelist({})", self.pattern())
     }
 }

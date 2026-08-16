@@ -38,8 +38,16 @@ fn test_new_returns_independent_instances_edge() {
     use swe_edge_configbuilder::ConfigBuilderImpl;
     let a = ConfigBuilderImpl::new();
     let b = ConfigBuilderImpl::new();
-    assert_eq!(a.name(), b.name(), "two new() instances must both have empty name");
-    assert_eq!(a.version(), b.version(), "two new() instances must both have empty version");
+    assert_eq!(
+        a.name(),
+        b.name(),
+        "two new() instances must both have empty name"
+    );
+    assert_eq!(
+        a.version(),
+        b.version(),
+        "two new() instances must both have empty version"
+    );
 }
 
 // ── with_read_timeout ─────────────────────────────────────────────────────────
@@ -51,7 +59,9 @@ fn test_with_read_timeout_overrides_default_timeout_happy() {
 
     #[derive(serde::Deserialize, Default)]
     #[serde(default)]
-    struct S { x: i32 }
+    struct S {
+        x: i32,
+    }
 
     let loader = ConfigLoaderFactory::create_config_builder()
         .with_config_dir(dir.path())
@@ -72,7 +82,10 @@ fn test_with_read_timeout_file_path_still_fails_build_error() {
         .with_read_timeout(Duration::from_millis(500))
         .with_config_dir(file.path())
         .build_loader();
-    assert!(result.is_err(), "build_loader must still reject a file-path config dir");
+    assert!(
+        result.is_err(),
+        "build_loader must still reject a file-path config dir"
+    );
 }
 
 #[test]
@@ -82,12 +95,17 @@ fn test_with_read_timeout_produces_functional_loader_edge() {
     std::fs::write(dir.path().join("application.toml"), "[s]\nv = 42\n").unwrap();
     #[derive(serde::Deserialize, Default)]
     #[serde(default)]
-    struct S { v: i32 }
+    struct S {
+        v: i32,
+    }
     let loader = ConfigBuilderImpl::new()
         .with_config_dir(dir.path())
         .with_read_timeout(Duration::from_secs(30))
         .build_loader()
         .unwrap();
     let s: S = loader.load_section("s").unwrap();
-    assert_eq!(s.v, 42, "loader with explicit timeout must read TOML correctly");
+    assert_eq!(
+        s.v, 42,
+        "loader with explicit timeout must read TOML correctly"
+    );
 }
