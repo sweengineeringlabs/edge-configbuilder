@@ -2,5 +2,5 @@
 
 mod default_validator;
 mod errors;
-mod types;
+mod vo;
 pub(crate) use default_validator::DefaultValidator;

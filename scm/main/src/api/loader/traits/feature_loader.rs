@@ -1,7 +1,7 @@
 //! [`FeatureLoader`] — presence-aware section loading with full metadata.
 
-use crate::api::loader::types::feature_state::FeatureState;
-use crate::api::loader::types::loaded_feature::LoadedFeature;
+use crate::api::loader::dto::loaded_feature::LoadedFeature;
+use crate::api::loader::vo::feature_state::FeatureState;
 use crate::api::ConfigError;
 
 /// Load optional TOML sections with configurable enable/disable precedence.
@@ -30,7 +30,7 @@ use crate::api::ConfigError;
 /// [`Loader`]: crate::api::loader::traits::loader::Loader
 /// [`load_feature`]: FeatureLoader::load_feature
 /// [`load_optional_section`]: FeatureLoader::load_optional_section
-/// [`FeatureRegistry`]: crate::api::loader::types::feature_registry::FeatureRegistry
+/// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
 pub trait FeatureLoader {
     /// Load the section at `key` with full metadata.
     ///
@@ -52,7 +52,7 @@ pub trait FeatureLoader {
     /// - `Err(ConfigError::Parse)` — malformed TOML or deserialisation failure.
     ///
     /// [`load_optional_section`]: FeatureLoader::load_optional_section
-    /// [`FeatureRegistry`]: crate::api::loader::types::feature_registry::FeatureRegistry
+    /// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
     fn load_feature<T>(&self, key: &str) -> Result<LoadedFeature<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned;
@@ -64,8 +64,8 @@ pub trait FeatureLoader {
     /// or [`FeatureRegistry`] when you need observability.
     ///
     /// [`load_feature`]: FeatureLoader::load_feature
-    /// [`FeatureRecord`]: crate::api::loader::types::feature_record::FeatureRecord
-    /// [`FeatureRegistry`]: crate::api::loader::types::feature_registry::FeatureRegistry
+    /// [`FeatureRecord`]: crate::api::loader::vo::feature_record::FeatureRecord
+    /// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
     fn load_optional_section<T>(&self, key: &str) -> Result<FeatureState<T>, ConfigError>
     where
         T: serde::de::DeserializeOwned,

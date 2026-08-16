@@ -1,4 +1,4 @@
-use crate::api::preflight::types::preflight_issue_kind::PreflightIssueKind;
+use crate::api::preflight::vo::preflight_issue_kind::PreflightIssueKind;
 
 /// A single issue captured during a [`preflight!`] dry-run.
 ///

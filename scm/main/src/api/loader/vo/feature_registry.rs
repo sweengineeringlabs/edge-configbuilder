@@ -1,6 +1,6 @@
 //! [`FeatureRegistry`] — startup feature collector and dependency validator.
 
-use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::vo::feature_record::FeatureRecord;
 
 type FeatureObserver = Box<dyn Fn(&FeatureRecord)>;
 

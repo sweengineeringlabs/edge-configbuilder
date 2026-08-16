@@ -1,7 +1,7 @@
 //! [`FeatureRecordBuilder`] — fluent builder for [`FeatureRecord`].
 
-use crate::api::loader::types::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::override_source::OverrideSource;
+use crate::api::loader::vo::feature_metadata::FeatureMetadata;
+use crate::api::loader::vo::override_source::OverrideSource;
 
 /// Fluent builder for [`FeatureRecord`].
 ///

@@ -1,4 +1,4 @@
-use crate::api::preflight::types::preflight_issue::PreflightIssue;
+use crate::api::preflight::vo::preflight_issue::PreflightIssue;
 
 /// Aggregated result of a preflight dry-run.
 pub struct PreflightReport {

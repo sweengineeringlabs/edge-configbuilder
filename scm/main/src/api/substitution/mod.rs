@@ -8,4 +8,4 @@
 pub mod error;
 pub mod substituter;
 pub mod traits;
-pub mod types;
+pub mod vo;

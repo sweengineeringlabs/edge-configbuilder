@@ -1,9 +1,9 @@
 //! [`OptionalSection`] — marks a typed struct as an opt-in TOML feature section.
 
-use crate::api::loader::types::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::feature_state::FeatureState;
-use crate::api::loader::types::on_error::OnError;
-use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+use crate::api::loader::vo::feature_metadata::FeatureMetadata;
+use crate::api::loader::vo::feature_state::FeatureState;
+use crate::api::loader::vo::on_error::OnError;
+use crate::api::loader::vo::section_loader_impl::SectionLoaderImpl;
 use crate::api::ConfigError;
 
 /// Marks a typed struct as an opt-in TOML feature section.
@@ -69,7 +69,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// Checked by [`FeatureRegistry::validate_dependencies`] after all features
     /// are loaded.  Default: no dependencies (`&[]`).
     ///
-    /// [`FeatureRegistry::validate_dependencies`]: crate::api::loader::types::feature_registry::FeatureRegistry::validate_dependencies
+    /// [`FeatureRegistry::validate_dependencies`]: crate::api::loader::vo::feature_registry::FeatureRegistry::validate_dependencies
     fn requires() -> &'static [&'static str] {
         &[]
     }
@@ -82,7 +82,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// Override at deploy time via env var
     /// `SWE_EDGE_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable`.
     ///
-    /// [`FeatureRegistry`]: crate::api::loader::types::feature_registry::FeatureRegistry
+    /// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
     /// [`validate_enabled`]: OptionalSection::validate_enabled
     fn on_error() -> OnError {
         OnError::Fail
@@ -93,7 +93,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// Used by [`FeatureSummary`] to produce self-documenting startup output.
     /// Default: all fields empty / `None`.
     ///
-    /// [`FeatureSummary`]: crate::api::loader::types::feature_summary::FeatureSummary
+    /// [`FeatureSummary`]: crate::api::loader::vo::feature_summary::FeatureSummary
     fn metadata() -> FeatureMetadata {
         FeatureMetadata::default()
     }
@@ -117,7 +117,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     ///
     /// [`on_error`]: OptionalSection::on_error
     /// [`requires`]: OptionalSection::requires
-    /// [`FeatureRegistry::load`]: crate::api::loader::types::feature_registry::FeatureRegistry::load
+    /// [`FeatureRegistry::load`]: crate::api::loader::vo::feature_registry::FeatureRegistry::load
     fn load_optional(loader: &SectionLoaderImpl) -> Result<FeatureState<Self>, ConfigError>
     where
         Self: Sized,

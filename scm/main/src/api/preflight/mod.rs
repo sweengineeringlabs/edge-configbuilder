@@ -3,9 +3,9 @@
 //! Owns the [`PreflightIssue`], [`PreflightIssueKind`], and [`PreflightReport`]
 //! types produced by the `preflight!` macro.
 //!
-//! [`PreflightIssue`]: types::preflight_issue::PreflightIssue
-//! [`PreflightIssueKind`]: types::preflight_issue_kind::PreflightIssueKind
-//! [`PreflightReport`]: types::preflight_report::PreflightReport
+//! [`PreflightIssue`]: vo::preflight_issue::PreflightIssue
+//! [`PreflightIssueKind`]: vo::preflight_issue_kind::PreflightIssueKind
+//! [`PreflightReport`]: vo::preflight_report::PreflightReport
 
 pub mod traits;
-pub mod types;
+pub mod vo;

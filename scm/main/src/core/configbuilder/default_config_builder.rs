@@ -125,7 +125,7 @@ impl ConfigBuilderBound for DefaultConfigBuilder {
 }
 
 /// Builder-style accessors used only by this module's unit tests.
-/// The production builder API lives on [`ConfigBuilderImpl`](crate::api::configbuilder::types::ConfigBuilderImpl).
+/// The production builder API lives on [`ConfigBuilderImpl`](crate::api::configbuilder::vo::ConfigBuilderImpl).
 #[cfg(test)]
 impl DefaultConfigBuilder {
     pub(crate) fn name(&self) -> &str {

@@ -1,6 +1,6 @@
 //! [`ConfigSection`] — marks a typed struct as the owner of a named TOML section.
 
-use crate::api::loader::types::section_loader_impl::SectionLoaderImpl;
+use crate::api::loader::vo::section_loader_impl::SectionLoaderImpl;
 use crate::api::ConfigError;
 
 /// Marks a typed struct as the owner of a named TOML section.

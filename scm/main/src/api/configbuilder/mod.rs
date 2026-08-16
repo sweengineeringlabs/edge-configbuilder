@@ -6,10 +6,10 @@
 //! marker for the core builder.
 //!
 //! [`ConfigBuilder`]: traits::config_builder::ConfigBuilder
-//! [`ConfigBuilderImpl`]: types::config_builder_impl::ConfigBuilderImpl
-//! [`SubstitutionConfigBuilderImpl`]: types::substitution_config_builder_impl::SubstitutionConfigBuilderImpl
-//! [`ConfigLoaderFactory`]: types::config_loader_factory::ConfigLoaderFactory
-//! [`ApplicationConfig`]: types::application_config::ApplicationConfig
+//! [`ConfigBuilderImpl`]: vo::config_builder_impl::ConfigBuilderImpl
+//! [`SubstitutionConfigBuilderImpl`]: vo::substitution_config_builder_impl::SubstitutionConfigBuilderImpl
+//! [`ConfigLoaderFactory`]: crate::ConfigLoaderFactory
+//! [`ApplicationConfig`]: vo::application_config::ApplicationConfig
 
 pub mod traits;
-pub mod types;
+pub mod vo;

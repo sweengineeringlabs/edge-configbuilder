@@ -2,5 +2,5 @@
 
 mod error;
 mod substituter;
-mod types;
+mod vo;
 pub(crate) use substituter::Substituter;

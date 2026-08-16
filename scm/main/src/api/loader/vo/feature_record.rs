@@ -1,7 +1,7 @@
 //! [`FeatureRecord`] — a snapshot of one feature's state and why it got there.
 
-use crate::api::loader::types::feature_metadata::FeatureMetadata;
-use crate::api::loader::types::override_source::OverrideSource;
+use crate::api::loader::vo::feature_metadata::FeatureMetadata;
+use crate::api::loader::vo::override_source::OverrideSource;
 
 /// A snapshot of one optional feature's resolved state.
 ///
@@ -11,7 +11,7 @@ use crate::api::loader::types::override_source::OverrideSource;
 /// Construct via [`FeatureRecordBuilder`] rather than struct literal syntax, as
 /// new fields may be added without a semver bump.
 ///
-/// [`FeatureRegistry`]: crate::api::loader::types::feature_registry::FeatureRegistry
+/// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
 /// [`FeatureRecordBuilder`]: crate::FeatureRecordBuilder
 ///
 /// # Examples

@@ -11,9 +11,10 @@
 //! [`LoaderOps`]: traits::loader_ops::LoaderOps
 //! [`ConfigSection`]: traits::config_section::ConfigSection
 //! [`OptionalSection`]: traits::optional_section::OptionalSection
-//! [`SectionLoaderImpl`]: types::section_loader_impl::SectionLoaderImpl
-//! [`Topology`]: types::topology::Topology
+//! [`SectionLoaderImpl`]: vo::section_loader_impl::SectionLoaderImpl
+//! [`Topology`]: vo::topology::Topology
 
+pub mod dto;
 pub mod errors;
 pub mod traits;
-pub mod types;
+pub mod vo;

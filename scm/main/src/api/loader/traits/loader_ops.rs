@@ -1,7 +1,7 @@
-use crate::api::loader::types::raw_feature::RawFeature;
+use crate::api::loader::dto::raw_feature::RawFeature;
 use crate::api::ConfigError;
 
-/// Type-erased view of a config source used internally by [`crate::api::loader::types::section_loader_impl::SectionLoaderImpl`].
+/// Type-erased view of a config source used internally by [`crate::api::loader::vo::section_loader_impl::SectionLoaderImpl`].
 ///
 /// Non-generic so it can be boxed as a trait object. All deserialization of
 /// the returned `toml::Value` is performed by the caller.

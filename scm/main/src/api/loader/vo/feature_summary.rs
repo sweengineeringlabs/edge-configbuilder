@@ -1,6 +1,6 @@
 //! [`FeatureSummary`] — point-in-time snapshot of all registered features.
 
-use crate::api::loader::types::feature_record::FeatureRecord;
+use crate::api::loader::vo::feature_record::FeatureRecord;
 
 /// A point-in-time snapshot of every feature loaded through the registry facade.
 pub struct FeatureSummary {
