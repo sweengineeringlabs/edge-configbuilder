@@ -12,13 +12,14 @@ All consumer-facing behavior is reached through `ConfigLoaderFactory` — the cr
 
 ```toml
 [dependencies]
-configbuilder = "0.6"
+configbuilder = "0.7"
 ```
 
 ## Features
 
 - **Layered config resolution** — merges config from multiple directories, later sources win
 - **XDG Base Directory support** — automatic path resolution via `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, `$SWE_EDGE_CONFIG_DIR`
+- **Overridable config filename** — searches for `application.toml` by default; override with `with_config_filename`
 - **Dotted key paths** — load nested sections with `"outer.inner"` syntax
 - **Optional feature sections** — `OptionalSection`/`FeatureRegistry` with dependency-ordered loading, env-var overrides, and graceful degradation
 - **Preflight validation** — dry-run every feature section at startup and collect all issues before serving traffic
@@ -183,6 +184,19 @@ use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFacto
 let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]);
 let loader = ConfigLoaderFactory::create_config_builder_with_substitution(Box::new(policy))
     .with_config_dir("/etc/myapp")
+    .build_loader()?;
+# Ok::<(), configbuilder::ConfigError>(())
+```
+
+Every directory is searched for a file named `application.toml` by default. Override the
+filename with `with_config_filename`:
+
+```rust,no_run
+use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
+
+let loader = ConfigLoaderFactory::create_config_builder()
+    .with_config_dir("/etc/myapp")
+    .with_config_filename("settings.toml")
     .build_loader()?;
 # Ok::<(), configbuilder::ConfigError>(())
 ```

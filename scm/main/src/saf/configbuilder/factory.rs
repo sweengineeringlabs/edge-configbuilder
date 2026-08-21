@@ -76,6 +76,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -91,6 +92,7 @@ impl ConfigLoaderFactory {
                 substitution_policy: None,
                 value_resolver: None,
                 read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+                config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
             }),
         }
     }
@@ -106,6 +108,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -242,6 +245,7 @@ impl ConfigLoaderFactory {
             version: env!("CARGO_PKG_VERSION").to_string(),
             config_dirs: Vec::new(),
             read_timeout: None,
+            config_filename: None,
         }
     }
 
@@ -273,6 +277,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -292,6 +297,7 @@ impl ConfigLoaderFactory {
                 substitution_policy: Some(policy),
                 value_resolver: None,
                 read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+                config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
             }),
         }
     }
@@ -322,6 +328,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -345,6 +352,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -367,6 +375,7 @@ impl ConfigLoaderFactory {
                 substitution_policy: Some(policy),
                 value_resolver: Some(resolver),
                 read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+                config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
             }),
         }
     }
@@ -387,6 +396,7 @@ impl ConfigLoaderFactory {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: crate::core::DEFAULT_READ_TIMEOUT,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
         .build_loader_internal()?;
         loader.substitution_policy = Some(policy);
@@ -405,6 +415,7 @@ impl ConfigLoaderFactory {
             version: env!("CARGO_PKG_VERSION").to_string(),
             config_dirs: Vec::new(),
             policy,
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
     }
 }

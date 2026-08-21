@@ -44,4 +44,5 @@ pub struct SubstitutionConfigBuilderImpl {
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
     pub(crate) policy: Box<dyn SubstitutionPolicy>,
+    pub(crate) config_filename: String,
 }

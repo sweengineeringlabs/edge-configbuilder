@@ -3,11 +3,12 @@ use std::path::PathBuf;
 /// Assemble application configuration from named sources.
 ///
 /// `ConfigBuilder` is a **builder-chain trait** — it covers only the configuration
-/// fields (`name`, `version`, `with_config_dir`).  It deliberately does **not**
-/// include `build_loader()`.  That finaliser is an inherent method on the concrete
-/// types ([`ConfigBuilderImpl`], [`SubstitutionConfigBuilderImpl`]) because the
-/// construction logic depends on `core/` internals that the `api/` trait layer must
-/// not reference (SEA rules 46 and 116).
+/// fields (`name`, `version`, `with_config_dir`, `with_config_filename`).  It
+/// deliberately does **not** include `build_loader()`.  That finaliser is an
+/// inherent method on the concrete types ([`ConfigBuilderImpl`],
+/// [`SubstitutionConfigBuilderImpl`]) because the construction logic depends on
+/// `core/` internals that the `api/` trait layer must not reference (SEA rules 46
+/// and 116).
 ///
 /// # Two usage patterns
 ///
@@ -51,4 +52,9 @@ pub trait ConfigBuilder: Sized {
     ///
     /// Multiple calls accumulate directories — later entries win on key conflicts.
     fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self;
+
+    /// Override the config filename searched for in each configured directory.
+    ///
+    /// Defaults to `application.toml` when not called.
+    fn with_config_filename(self, filename: impl Into<String>) -> Self;
 }

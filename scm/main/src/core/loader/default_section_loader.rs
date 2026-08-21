@@ -12,6 +12,9 @@ const NOT_A_DIR_MSG: &str = "config path exists but is not a directory";
 /// 30 seconds is generous enough for a slow spinning disk while still bounding
 /// the worst-case startup hang from a stalled NFS/FUSE mount.
 pub(crate) const DEFAULT_READ_TIMEOUT: Duration = Duration::from_secs(30);
+
+/// Default config filename searched for in each configured directory.
+pub(crate) const DEFAULT_CONFIG_FILENAME: &str = "application.toml";
 use crate::api::{
     ConfigError, FeatureLoader, FeatureMetadata, FeatureRecord, FeatureState, LoadedFeature,
     Loader, LoaderOps, OnError, OptionalSection, OverrideSource, Preflight, RawFeature,
@@ -37,8 +40,11 @@ pub(crate) struct DefaultSectionLoader {
     /// Value source for `{{VAR_NAME}}` substitution. Defaults to
     /// [`EnvValueResolver`] (`std::env::var`) when `None`.
     pub(crate) value_resolver: Option<Box<dyn ValueResolver>>,
-    /// Wall-clock deadline for each `application.toml` read.
+    /// Wall-clock deadline for each config file read.
     pub(crate) read_timeout: Duration,
+    /// Filename searched for in each configured directory. Defaults to
+    /// [`DEFAULT_CONFIG_FILENAME`] (`application.toml`).
+    pub(crate) config_filename: String,
 }
 
 impl DefaultSectionLoader {
@@ -149,7 +155,7 @@ impl DefaultSectionLoader {
         let mut section_found = false;
 
         for dir in &self.config_dirs {
-            let path = dir.join("application.toml");
+            let path = dir.join(&self.config_filename);
             if !path.exists() {
                 continue;
             }
@@ -217,7 +223,7 @@ impl LoaderOps for DefaultSectionLoader {
         let mut merged = toml::Value::Table(toml::map::Map::new());
 
         for dir in &self.config_dirs {
-            let path = dir.join("application.toml");
+            let path = dir.join(&self.config_filename);
             if !path.exists() {
                 continue;
             }
@@ -245,7 +251,8 @@ impl LoaderOps for DefaultSectionLoader {
         if matches!(merged, toml::Value::Table(ref t) if t.is_empty()) {
             if !any_file_found {
                 return Err(ConfigError::NotFound(format!(
-                    "no application.toml found in any configured directory for section '{key}'"
+                    "no {} found in any configured directory for section '{key}'",
+                    self.config_filename
                 )));
             }
             // Return the empty table as the absent-but-files-found sentinel.
@@ -427,6 +434,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         }
     }
 
@@ -502,6 +510,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
         assert_eq!(sec.value, "high");
@@ -518,6 +527,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let sec: DefaultSectionLoaderSection = must(loader.load_section("s"));
         assert_eq!(sec.value, "hi");
@@ -559,6 +569,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let srv: DefaultSectionLoaderServer = must(loader.load_section("s"));
         assert_eq!(
@@ -688,6 +699,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
             must(loader.load_optional_section("feat"));
@@ -712,6 +724,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let state: FeatureState<DefaultSectionLoaderSection> =
             must(loader.load_optional_section("feat"));
@@ -913,6 +926,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         assert!(matches!(loader.validate(), Ok(())));
     }
@@ -925,6 +939,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         assert_eq!(loader.config_dirs, vec![dir.path().to_path_buf()]);
         assert!(loader.validate().is_ok());
@@ -940,6 +955,7 @@ mod tests {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: DEFAULT_READ_TIMEOUT,
+            config_filename: DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let err = must_err(loader.validate());
         assert!(matches!(err, ConfigError::Io(_)));

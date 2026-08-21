@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.0] - 2026-08-21
+
+### Added
+
+- `ConfigBuilder::with_config_filename` — override the config filename searched for in each configured directory (was hardcoded to `application.toml` everywhere, issue #16). Defaults to `application.toml` when not called; the one-shot `create_loader_for_dir*` factory functions are unaffected and keep the default filename, consistent with how they don't expose `read_timeout` override either.
+
 ## [0.6.2] - 2026-08-21
 
 ### Fixed

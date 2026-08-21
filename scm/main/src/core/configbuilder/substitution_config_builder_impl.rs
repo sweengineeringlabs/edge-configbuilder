@@ -33,6 +33,12 @@ impl SubstitutionConfigBuilderImpl {
         self
     }
 
+    /// Override the config filename searched for in each configured directory.
+    pub(crate) fn with_config_filename(mut self, filename: impl Into<String>) -> Self {
+        self.config_filename = filename.into();
+        self
+    }
+
     /// Consume the builder and return a ready-to-use section loader with substitution support.
     pub(crate) fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
         let mut core = crate::core::DefaultConfigBuilder {
@@ -40,6 +46,7 @@ impl SubstitutionConfigBuilderImpl {
             version: self.version,
             config_dirs: self.config_dirs,
             read_timeout: crate::core::loader::DEFAULT_READ_TIMEOUT,
+            config_filename: self.config_filename,
         }
         .build_loader_internal()?;
         core.substitution_policy = Some(self.policy);
@@ -78,6 +85,10 @@ impl ConfigBuilder for SubstitutionConfigBuilderImpl {
     fn with_config_dir(self, dir: impl Into<std::path::PathBuf>) -> Self {
         SubstitutionConfigBuilderImpl::with_config_dir(self, dir)
     }
+
+    fn with_config_filename(self, filename: impl Into<String>) -> Self {
+        SubstitutionConfigBuilderImpl::with_config_filename(self, filename)
+    }
 }
 
 impl From<SubstitutionConfigBuilderImpl> for ConfigBuilderImpl {
@@ -87,6 +98,7 @@ impl From<SubstitutionConfigBuilderImpl> for ConfigBuilderImpl {
             version: value.version,
             config_dirs: value.config_dirs,
             read_timeout: None,
+            config_filename: Some(value.config_filename),
         }
     }
 }

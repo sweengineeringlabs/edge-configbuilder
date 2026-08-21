@@ -15,6 +15,7 @@ pub(crate) struct DefaultConfigBuilder {
     pub(crate) version: String,
     pub(crate) config_dirs: Vec<PathBuf>,
     pub(crate) read_timeout: Duration,
+    pub(crate) config_filename: String,
 }
 
 impl DefaultConfigBuilder {
@@ -40,6 +41,7 @@ impl DefaultConfigBuilder {
                 substitution_policy: None,
                 value_resolver: None,
                 read_timeout: self.read_timeout,
+                config_filename: self.config_filename,
             };
             loader.validate()?;
             return Ok(loader);
@@ -69,6 +71,7 @@ impl DefaultConfigBuilder {
                 substitution_policy: None,
                 value_resolver: None,
                 read_timeout: self.read_timeout,
+                config_filename: self.config_filename,
             };
             loader.validate()?;
             return Ok(loader);
@@ -87,6 +90,7 @@ impl DefaultConfigBuilder {
             substitution_policy: None,
             value_resolver: None,
             read_timeout: self.read_timeout,
+            config_filename: self.config_filename,
         };
         loader.validate()?;
         Ok(loader)
@@ -114,6 +118,11 @@ impl ConfigBuilder for DefaultConfigBuilder {
 
     fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dirs.push(dir.into());
+        self
+    }
+
+    fn with_config_filename(mut self, filename: impl Into<String>) -> Self {
+        self.config_filename = filename.into();
         self
     }
 }
@@ -150,6 +159,11 @@ impl DefaultConfigBuilder {
         self.config_dirs.push(dir.into());
         self
     }
+
+    pub(crate) fn with_config_filename(mut self, filename: impl Into<String>) -> Self {
+        self.config_filename = filename.into();
+        self
+    }
 }
 
 #[cfg(test)]
@@ -175,6 +189,7 @@ mod tests {
             version: "0.1.0".to_string(),
             config_dirs: Vec::new(),
             read_timeout: Duration::from_secs(30),
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         }
     }
 
@@ -212,6 +227,12 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_with_config_filename_overrides_default() {
+        let b = blank().with_config_filename("custom.toml");
+        assert_eq!(b.config_filename, "custom.toml");
+    }
+
     #[derive(Debug, Default, serde::Deserialize, PartialEq)]
     #[serde(default)]
     struct DefaultConfigBuilderFixture {
@@ -226,6 +247,25 @@ mod tests {
         let loader = must(blank().with_config_dir(dir.path()).build_loader_internal());
         let sec: DefaultConfigBuilderFixture = must(loader.load_section("svc"));
         assert_eq!(sec.value, "ok");
+    }
+
+    #[test]
+    fn test_build_loader_with_custom_filename_ignores_application_toml() {
+        let dir = must(tempfile::tempdir());
+        // A stray application.toml must NOT be read once a custom filename is set.
+        let mut wrong = must(std::fs::File::create(dir.path().join("application.toml")));
+        must(writeln!(wrong, "[svc]\nvalue = \"wrong\""));
+        let mut right = must(std::fs::File::create(dir.path().join("custom.toml")));
+        must(writeln!(right, "[svc]\nvalue = \"right\""));
+
+        let loader = must(
+            blank()
+                .with_config_dir(dir.path())
+                .with_config_filename("custom.toml")
+                .build_loader_internal(),
+        );
+        let sec: DefaultConfigBuilderFixture = must(loader.load_section("svc"));
+        assert_eq!(sec.value, "right");
     }
 
     #[test]
@@ -286,6 +326,7 @@ mod tests {
             version: String::new(),
             config_dirs: vec![dir.path().to_path_buf()],
             read_timeout: Duration::from_secs(30),
+            config_filename: crate::core::DEFAULT_CONFIG_FILENAME.to_string(),
         };
         let loader = must(builder.build_loader_internal());
         assert_eq!(loader.config_dirs, vec![dir.path().to_path_buf()]);

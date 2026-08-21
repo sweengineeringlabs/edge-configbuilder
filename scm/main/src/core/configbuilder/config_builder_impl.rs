@@ -11,6 +11,7 @@ impl ConfigBuilderImpl {
             version: String::new(),
             config_dirs: Vec::new(),
             read_timeout: None,
+            config_filename: None,
         }
     }
 
@@ -48,6 +49,12 @@ impl ConfigBuilderImpl {
         self
     }
 
+    /// Override the config filename searched for in each configured directory.
+    pub(crate) fn with_config_filename(mut self, filename: impl Into<String>) -> Self {
+        self.config_filename = Some(filename.into());
+        self
+    }
+
     /// Consume the builder and return a ready-to-use section loader.
     pub(crate) fn build_loader(self) -> Result<SectionLoaderImpl, ConfigError> {
         let core = super::DefaultConfigBuilder {
@@ -57,6 +64,9 @@ impl ConfigBuilderImpl {
             read_timeout: self
                 .read_timeout
                 .unwrap_or(crate::core::loader::DEFAULT_READ_TIMEOUT),
+            config_filename: self
+                .config_filename
+                .unwrap_or_else(|| crate::core::DEFAULT_CONFIG_FILENAME.to_string()),
         }
         .build_loader_internal()?;
         Ok(SectionLoaderImpl {
@@ -109,5 +119,9 @@ impl ConfigBuilder for ConfigBuilderImpl {
 
     fn with_config_dir(self, dir: impl Into<PathBuf>) -> Self {
         ConfigBuilderImpl::with_config_dir(self, dir)
+    }
+
+    fn with_config_filename(self, filename: impl Into<String>) -> Self {
+        ConfigBuilderImpl::with_config_filename(self, filename)
     }
 }

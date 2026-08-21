@@ -93,7 +93,7 @@ flowchart LR
 | Type | Role |
 |------|------|
 | `ConfigLoaderFactory` | SAF entry point — every `create_*` constructor and delegated operation |
-| `ConfigBuilder` / `BuilderFinalizer` | Fluent builder chain — accumulates name/version/dirs, finalises into a `Loader` |
+| `ConfigBuilder` / `BuilderFinalizer` | Fluent builder chain — accumulates name/version/dirs/filename, finalises into a `Loader` |
 | `Loader` / `LoaderOps` | Loads a typed TOML section by dotted key; validates configured dirs |
 | `OptionalSection` / `FeatureRegistryOps` | Optional, dependency-ordered feature sections with graceful degradation |
 | `SubstitutionPolicy` | Gates *which* `{{VAR_NAME}}` names may be substituted |
