@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.1] - 2026-08-21
+
+### Fixed
+
+- `Cargo.toml`'s `repository` field now points at the GitHub repo's current location, `sweengineeringlabs/configbuilder` (the repo was renamed from `edge-configbuilder` to match the crate rename below).
+
 ## [0.6.0] - 2026-08-21
 
 ### Changed
