@@ -8,6 +8,7 @@ Key capabilities:
 
 - **`ConfigSection` / `OptionalSection`** — typed TOML section loading for any `T: DeserializeOwned + Default`
 - **XDG-aware layered resolution** — searches `$XDG_CONFIG_DIRS`, `$XDG_CONFIG_HOME`, `$SWE_EDGE_CONFIG_DIR`, and explicit paths; later sources win at the key level
+- **Overridable config filename** — `application.toml` by default; `ConfigBuilder::with_config_filename` overrides it on the builder chain
 - **Dotted key paths** — load nested sections with `"outer.inner"` syntax
 - **`{{VAR_NAME}}` substitution** — pluggable name policies (`PrefixWhitelistPolicy`, `PatternWhitelistPolicy`, `CompositePolicy`) gate *which* variables are allowed; a pluggable `ValueResolver` (default: `EnvValueResolver`, backed by `std::env::var`) controls *where* their values come from — e.g. a secrets backend instead of the process environment
 - **Preflight validation** — validates config shape and reports structured `PreflightIssue` list before runtime
