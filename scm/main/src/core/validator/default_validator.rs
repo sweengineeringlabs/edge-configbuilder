@@ -43,7 +43,7 @@ mod tests {
 
     #[test]
     fn test_validate_path_accepts_nonexistent_path() {
-        let path = Path::new("/nonexistent/swe-edge-test-xyz");
+        let path = Path::new("/nonexistent/example-app-test-xyz");
         assert!(!path.exists(), "test path must remain absent");
         assert!(matches!(DefaultValidator.validate_path(path), Ok(())));
     }

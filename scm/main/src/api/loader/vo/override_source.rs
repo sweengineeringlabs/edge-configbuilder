@@ -15,13 +15,13 @@
 /// ```rust
 /// use configbuilder::OverrideSource;
 ///
-/// // Env-var override: operator set SWE_EDGE_FEATURE_CACHE=false.
+/// // Env-var override: operator set CONFIGBUILDER_FEATURE_CACHE=false.
 /// let src = OverrideSource::EnvVar {
-///     var_name: "SWE_EDGE_FEATURE_CACHE".to_string(),
+///     var_name: "CONFIGBUILDER_FEATURE_CACHE".to_string(),
 ///     value: "false".to_string(),
 /// };
 /// if let OverrideSource::EnvVar { var_name, .. } = &src {
-///     assert!(var_name.starts_with("SWE_EDGE_FEATURE_"));
+///     assert!(var_name.starts_with("CONFIGBUILDER_FEATURE_"));
 /// }
 ///
 /// // Explicit TOML flag: [cache] enabled = false.
@@ -34,7 +34,7 @@ pub enum OverrideSource {
     ///
     /// Takes precedence over both TOML section presence and the `enabled` field.
     EnvVar {
-        /// The full environment variable name (e.g. `SWE_EDGE_FEATURE_MESSAGE_BROKER`).
+        /// The full environment variable name (e.g. `CONFIGBUILDER_FEATURE_MESSAGE_BROKER`).
         var_name: String,
         /// The raw value that was set (e.g. `"false"`, `"true"`, `"0"`).
         value: String,

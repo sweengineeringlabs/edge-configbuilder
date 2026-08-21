@@ -21,11 +21,11 @@ fn test_load_section_absent_key_returns_not_found() {
     let _guard = ENV_LOCK.lock().unwrap();
     // Point to an empty temp dir so there is no application.toml to load from.
     let dir = tempfile::tempdir().unwrap();
-    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
+    std::env::set_var("CONFIGBUILDER_CONFIG_DIR", dir.path().to_str().unwrap());
     let result: Result<Cfg, _> = ConfigLoaderFactory::create_loader()
         .unwrap()
         .load_section("nonexistent_config_svc_xyz");
-    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+    std::env::remove_var("CONFIGBUILDER_CONFIG_DIR");
     assert!(
         matches!(result, Err(ConfigError::NotFound(_))),
         "expected NotFound for absent key, got {result:?}"
@@ -48,7 +48,7 @@ fn test_load_section_from_reads_section() {
 #[test]
 fn test_load_section_xdg_unknown_app_returns_not_found() {
     let result: Result<Cfg, _> =
-        ConfigLoaderFactory::create_loader_xdg("swe-edge-config-svc-nonexistent-xyz")
+        ConfigLoaderFactory::create_loader_xdg("example-app-config-svc-nonexistent-xyz")
             .unwrap()
             .load_section("cfg");
     assert!(

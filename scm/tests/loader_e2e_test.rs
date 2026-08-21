@@ -12,14 +12,14 @@ struct Cfg {
 /// @covers: create_loader
 #[test]
 fn test_create_loader_returns_not_found_for_absent_section() {
-    // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no
+    // Point CONFIGBUILDER_CONFIG_DIR to an empty temp dir so there is no
     // application.toml — the loader must return NotFound.
     let dir = tempfile::tempdir().unwrap();
-    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
+    std::env::set_var("CONFIGBUILDER_CONFIG_DIR", dir.path().to_str().unwrap());
     let result: Result<Cfg, _> = ConfigLoaderFactory::create_loader()
         .unwrap()
         .load_section("nonexistent_default_xyz");
-    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+    std::env::remove_var("CONFIGBUILDER_CONFIG_DIR");
     assert!(
         matches!(result, Err(ConfigError::NotFound(_))),
         "expected NotFound for absent section, got {result:?}"
@@ -42,7 +42,7 @@ fn test_create_loader_for_dir_returns_not_found_when_no_toml() {
 #[test]
 fn test_create_loader_xdg_returns_not_found_for_unknown_app() {
     let result: Result<Cfg, _> =
-        ConfigLoaderFactory::create_loader_xdg("swe-edge-default-loader-test-nonexistent-xyz")
+        ConfigLoaderFactory::create_loader_xdg("example-app-default-loader-test-nonexistent-xyz")
             .unwrap()
             .load_section("any");
     assert!(

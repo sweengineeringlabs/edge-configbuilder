@@ -477,7 +477,7 @@ fn test_feature_registry_load_disable_on_error_summary_shows_off() {
 fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
     let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     // SAFETY: single-threaded access guaranteed by ENV_LOCK; no other thread reads this var concurrently.
-    unsafe { std::env::set_var("SWE_EDGE_FEATURE_BROKER_DISABLE_ON_ERROR", "fail") };
+    unsafe { std::env::set_var("CONFIGBUILDER_FEATURE_BROKER_DISABLE_ON_ERROR", "fail") };
 
     let dir = TempDir::new().unwrap();
     write_toml(
@@ -490,7 +490,7 @@ fn test_feature_registry_env_var_fail_overrides_on_error_disable() {
     let result = registry.load::<BrokerConfigDisable>(&loader);
 
     // SAFETY: restoring env state; same lock guarantees exclusivity.
-    unsafe { std::env::remove_var("SWE_EDGE_FEATURE_BROKER_DISABLE_ON_ERROR") };
+    unsafe { std::env::remove_var("CONFIGBUILDER_FEATURE_BROKER_DISABLE_ON_ERROR") };
 
     assert!(
         result.is_err(),

@@ -1,4 +1,4 @@
-//! Integration tests for swe-edge-config section loading.
+//! Integration tests for config section loading.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use configbuilder::{ConfigLoaderFactory, Loader as _};
 
@@ -98,7 +98,7 @@ fn test_load_section_from_rejects_oversized_file() {
 #[test]
 fn test_load_section_xdg_unknown_app_returns_not_found() {
     let result: Result<AppSection, _> =
-        ConfigLoaderFactory::create_loader_xdg("swe-edge-config-test-nonexistent-xyz")
+        ConfigLoaderFactory::create_loader_xdg("example-app-config-test-nonexistent-xyz")
             .unwrap()
             .load_section("application.completion");
     assert!(

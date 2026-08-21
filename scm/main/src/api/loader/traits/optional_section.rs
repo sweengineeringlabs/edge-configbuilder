@@ -80,7 +80,7 @@ pub trait OptionalSection: serde::de::DeserializeOwned + Send + Sync + 'static {
     /// - [`OnError::Disable`] — treat the feature as disabled and continue startup.
     ///
     /// Override at deploy time via env var
-    /// `SWE_EDGE_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable`.
+    /// `CONFIGBUILDER_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable`.
     ///
     /// [`FeatureRegistry`]: crate::api::loader::vo::feature_registry::FeatureRegistry
     /// [`validate_enabled`]: OptionalSection::validate_enabled

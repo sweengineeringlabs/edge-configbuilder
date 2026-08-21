@@ -63,7 +63,7 @@ fn test_load_section_xdg_reads_section_and_returns_default_when_absent(
     }
 
     let dir = tempfile::tempdir()?;
-    std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path());
+    std::env::set_var("CONFIGBUILDER_CONFIG_DIR", dir.path());
 
     let mut f = std::fs::File::create(dir.path().join("application.toml"))?;
     f.write_all(b"[goal]\ntarget = \"prod\"\n")?;
@@ -80,6 +80,6 @@ fn test_load_section_xdg_reads_section_and_returns_default_when_absent(
         "absent section must return default"
     );
 
-    std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+    std::env::remove_var("CONFIGBUILDER_CONFIG_DIR");
     Ok(())
 }

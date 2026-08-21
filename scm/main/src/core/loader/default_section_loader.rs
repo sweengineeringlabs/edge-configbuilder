@@ -114,10 +114,10 @@ impl DefaultSectionLoader {
         Some(current.clone())
     }
 
-    /// Convert a TOML section key to its `SWE_EDGE_FEATURE_*` env var name.
+    /// Convert a TOML section key to its `CONFIGBUILDER_FEATURE_*` env var name.
     fn feature_env_var_name(key: &str) -> String {
         let suffix = key.to_uppercase().replace('.', "_");
-        format!("SWE_EDGE_FEATURE_{suffix}")
+        format!("CONFIGBUILDER_FEATURE_{suffix}")
     }
 
     /// Parse an env var value as a boolean toggle.
@@ -135,10 +135,10 @@ impl DefaultSectionLoader {
         }
     }
 
-    /// Resolve the `SWE_EDGE_FEATURE_*_ON_ERROR` policy for a feature key.
+    /// Resolve the `CONFIGBUILDER_FEATURE_*_ON_ERROR` policy for a feature key.
     pub(crate) fn resolve_feature_on_error<T: OptionalSection>(key: &str) -> OnError {
         let var_name = format!(
-            "SWE_EDGE_FEATURE_{}_ON_ERROR",
+            "CONFIGBUILDER_FEATURE_{}_ON_ERROR",
             key.to_uppercase().replace('.', "_")
         );
         match std::env::var(&var_name).as_deref() {
@@ -787,7 +787,7 @@ mod tests {
     #[test]
     fn test_load_feature_env_var_false_disables_present_section() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_FEAT_LF_ENV_OFF";
+        let var = "CONFIGBUILDER_FEATURE_FEAT_LF_ENV_OFF";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "false") };
         let dir = must(TempDir::new());
@@ -815,7 +815,7 @@ mod tests {
     #[test]
     fn test_load_feature_env_var_true_enables_present_section() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_FEAT_LF_ENV_ON";
+        let var = "CONFIGBUILDER_FEATURE_FEAT_LF_ENV_ON";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "true") };
         let dir = must(TempDir::new());
@@ -843,7 +843,7 @@ mod tests {
     #[test]
     fn test_load_feature_env_var_true_overrides_enabled_false_in_toml() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_FEAT_LF_FORCE_ON";
+        let var = "CONFIGBUILDER_FEATURE_FEAT_LF_FORCE_ON";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "1") };
         let dir = must(TempDir::new());
@@ -866,7 +866,7 @@ mod tests {
     #[test]
     fn test_load_feature_env_var_true_section_absent_returns_not_found() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_FEAT_LF_ABSENT";
+        let var = "CONFIGBUILDER_FEATURE_FEAT_LF_ABSENT";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "true") };
         let dir = must(TempDir::new());
@@ -884,7 +884,7 @@ mod tests {
     #[test]
     fn test_load_feature_invalid_env_var_value_returns_io_error() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_FEAT_LF_INVALID";
+        let var = "CONFIGBUILDER_FEATURE_FEAT_LF_INVALID";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "maybe") };
         let dir = must(TempDir::new());
@@ -906,7 +906,7 @@ mod tests {
     #[test]
     fn test_resolve_feature_on_error_prefers_env_override_over_trait_default() {
         let _g = must(ENV_LOCK.lock());
-        let var = "SWE_EDGE_FEATURE_ENV_FALLBACK_ON_ERROR";
+        let var = "CONFIGBUILDER_FEATURE_ENV_FALLBACK_ON_ERROR";
         // SAFETY: test-only, serialized by ENV_LOCK
         unsafe { std::env::set_var(var, "disable") };
         let resolved = DefaultSectionLoader::resolve_feature_on_error::<DefaultSectionLoaderSection>(
@@ -919,7 +919,7 @@ mod tests {
 
     #[test]
     fn test_validate_accepts_nonexistent_dir() {
-        let path = PathBuf::from("/nonexistent/swe-edge-test-xyz");
+        let path = PathBuf::from("/nonexistent/example-app-test-xyz");
         assert!(!path.exists(), "test path must remain absent");
         let loader = DefaultSectionLoader {
             config_dirs: vec![path],

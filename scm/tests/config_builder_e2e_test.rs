@@ -25,8 +25,8 @@ fn test_create_config_builder_returns_package_name_and_version() {
 /// @covers: create_config_builder
 #[test]
 fn test_with_name_sets_application_name() {
-    let b = ConfigLoaderFactory::create_config_builder().with_name("swe-edge");
-    assert_eq!(b.name(), "swe-edge");
+    let b = ConfigLoaderFactory::create_config_builder().with_name("example-app");
+    assert_eq!(b.name(), "example-app");
 }
 
 /// @covers: create_config_builder
@@ -107,7 +107,7 @@ fn test_build_loader_with_name_unknown_app_returns_not_found() {
 
 /// @covers: create_config_builder / build_loader
 ///
-/// No name, no dir — falls back to `SWE_EDGE_CONFIG_DIR` or `config/`;
+/// No name, no dir — falls back to `CONFIGBUILDER_CONFIG_DIR` or `config/`;
 /// absent application.toml returns NotFound.
 #[test]
 fn test_build_loader_no_name_no_dir_returns_not_found_for_absent_section() {

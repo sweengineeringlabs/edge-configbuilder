@@ -20,7 +20,7 @@ use crate::api::ConfigError;
 /// |-----------|------------|---------|
 /// | Section presence | Add/remove `[section]` in TOML | `[message_broker]` |
 /// | Explicit disable | Set `enabled = false` inside the section | `enabled = false` |
-/// | Env-var override | Set `SWE_EDGE_FEATURE_<UPPER_KEY>=false/true` | `SWE_EDGE_FEATURE_MESSAGE_BROKER=false` |
+/// | Env-var override | Set `CONFIGBUILDER_FEATURE_<UPPER_KEY>=false/true` | `CONFIGBUILDER_FEATURE_MESSAGE_BROKER=false` |
 ///
 /// ## Methods
 ///

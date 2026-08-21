@@ -1,6 +1,27 @@
-//! `ConfigLoaderFactory::create_config_builder_with_substitution` — the
-//! fluent builder-chain entry point with `{{VAR_NAME}}` substitution attached
-//! from the start.
+//! `ConfigLoaderFactory::create_config_builder_with_substitution(policy)` —
+//! the fluent builder-chain entry point, with `{{VAR_NAME}}` substitution
+//! attached from construction.
+//!
+//! ## When to use this
+//!
+//! The substitution-enabled counterpart to `create_config_builder`
+//! (`docs_create_config_builder`): use it when you need both the flexible
+//! builder chain (custom directories, custom filename) *and* `{{VAR_NAME}}`
+//! substitution, but don't need a custom `ValueResolver` — this returns a
+//! `SubstitutionConfigBuilderImpl`, a distinct type from the plain
+//! `ConfigBuilderImpl` `create_config_builder()` returns, and notably does
+//! **not** support `with_read_timeout` (see `docs_with_read_timeout`) —
+//! only the plain, non-substitution builder does.
+//!
+//! ## What this example does
+//!
+//! 1. Writes an `application.toml` with a
+//!    `{{DOCS_EXAMPLE_BUILDER_GREETING}}` placeholder.
+//! 2. Creates a `PrefixWhitelistPolicy` allowing only that name prefix.
+//! 3. Sets the env var the placeholder resolves to.
+//! 4. Chains `create_config_builder_with_substitution(policy)` →
+//!    `with_config_dir(dir)` → `build_loader()`, loads the section, and
+//!    asserts substitution happened.
 #![allow(unsafe_code)]
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 

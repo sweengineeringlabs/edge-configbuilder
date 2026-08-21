@@ -1,12 +1,12 @@
 [package]
 name             = "configbuilder"
-version      = "0.7.0"
+version      = "0.8.0"
 edition          = "2021"
 license          = "MIT OR Apache-2.0"
 rust-version     = "1.95"
 authors          = ["SWE Engineering Labs"]
 repository       = "https://github.com/sweengineeringlabs/configbuilder"
-description      = "Standalone, runtime-independent TOML section loader for swe-edge services."
+description      = "Standalone, runtime-independent TOML section loader for any Rust application."
 keywords         = ["config", "toml", "xdg", "loader", "swe"]
 categories       = ["config"]
 

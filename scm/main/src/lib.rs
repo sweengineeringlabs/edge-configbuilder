@@ -1,8 +1,8 @@
-//! Standalone, runtime-independent TOML section loader for swe-edge services.
+//! Standalone, runtime-independent TOML section loader for any Rust application.
 //!
 //! Provides XDG-aware, layered config section loading for any
-//! `T: DeserializeOwned + Default`. Library crates can depend on this crate
-//! directly without pulling in `swe-edge-runtime-main`.
+//! `T: DeserializeOwned + Default`. It has no dependency on any application
+//! runtime, so library crates can depend on it directly.
 //!
 //! # Usage
 //!

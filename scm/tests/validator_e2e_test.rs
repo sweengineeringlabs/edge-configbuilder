@@ -5,7 +5,7 @@ use configbuilder::{ConfigLoaderFactory, Loader as _};
 /// @covers: create_loader_for_dir
 #[test]
 fn test_validate_section_dir_nonexistent_path_succeeds() {
-    let path = std::path::Path::new("/nonexistent/swe-edge-test-path-xyz");
+    let path = std::path::Path::new("/nonexistent/example-app-test-path-xyz");
     assert!(!path.exists(), "test path must remain absent");
     assert!(matches!(
         ConfigLoaderFactory::create_loader_for_dir(path).validate(),

@@ -4,7 +4,7 @@
 /// returns an error for an otherwise-enabled section.
 ///
 /// Set per feature by overriding [`OptionalSection::on_error`].
-/// Override at deploy time via env var `SWE_EDGE_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable`.
+/// Override at deploy time via env var `CONFIGBUILDER_FEATURE_<UPPER_KEY>_ON_ERROR=fail|disable`.
 ///
 /// The env var takes precedence over the trait default.
 ///

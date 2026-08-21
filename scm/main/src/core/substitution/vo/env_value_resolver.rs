@@ -22,21 +22,20 @@ mod tests {
     #[test]
     fn test_resolve_existing_env_var_returns_value() {
         // SAFETY: test-only; no concurrent env access in this test binary at this point.
-        unsafe { std::env::set_var("SWE_EDGE_CONFIGBUILDER_TEST_RESOLVE_VAR", "value123") };
-        let result = EnvValueResolver.resolve("SWE_EDGE_CONFIGBUILDER_TEST_RESOLVE_VAR", "loc");
+        unsafe { std::env::set_var("CONFIGBUILDER_TEST_RESOLVE_VAR", "value123") };
+        let result = EnvValueResolver.resolve("CONFIGBUILDER_TEST_RESOLVE_VAR", "loc");
         // SAFETY: cleanup
-        unsafe { std::env::remove_var("SWE_EDGE_CONFIGBUILDER_TEST_RESOLVE_VAR") };
+        unsafe { std::env::remove_var("CONFIGBUILDER_TEST_RESOLVE_VAR") };
         assert_eq!(must(result), "value123");
     }
 
     #[test]
     fn test_resolve_missing_env_var_returns_variable_not_found_with_location() {
-        let result =
-            EnvValueResolver.resolve("SWE_EDGE_CONFIGBUILDER_TEST_ABSENT_XYZ", "app.toml:key");
+        let result = EnvValueResolver.resolve("CONFIGBUILDER_TEST_ABSENT_XYZ", "app.toml:key");
         assert_eq!(
             result,
             Err(SubstitutionError::VariableNotFound {
-                var_name: "SWE_EDGE_CONFIGBUILDER_TEST_ABSENT_XYZ".to_string(),
+                var_name: "CONFIGBUILDER_TEST_ABSENT_XYZ".to_string(),
                 location: "app.toml:key".to_string(),
             })
         );

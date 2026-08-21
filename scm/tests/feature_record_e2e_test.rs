@@ -51,7 +51,7 @@ fn test_feature_record_overridden_by_env_var() {
         section_name: "tracing".to_owned(),
         enabled: false,
         override_source: Some(OverrideSource::EnvVar {
-            var_name: "SWE_EDGE_FEATURE_TRACING".to_owned(),
+            var_name: "CONFIGBUILDER_FEATURE_TRACING".to_owned(),
             value: "false".to_owned(),
         }),
         requires: &[],

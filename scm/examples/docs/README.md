@@ -38,5 +38,5 @@ All chained from `ConfigLoaderFactory::create_config_builder()`.
 | `docs_with_read_timeout` | `with_read_timeout(duration)` | Overrides the 30s default read deadline |
 
 Every example that depends on XDG/env-based resolution sets
-`$SWE_EDGE_CONFIG_DIR` to a temp directory first, so they're deterministic
+`$CONFIGBUILDER_CONFIG_DIR` to a temp directory first, so they're deterministic
 regardless of the machine they run on, and clears it afterward.

@@ -1,6 +1,25 @@
-//! `ConfigLoaderFactory::create_loader_for_dir` — loader scoped to one explicit directory.
+//! `ConfigLoaderFactory::create_loader_for_dir(dir)` — loader scoped to one
+//! explicit directory, no resolution at all.
 //!
-//! No XDG resolution, no env vars — reads `application.toml` only from `dir`.
+//! ## When to use this
+//!
+//! Use it whenever the config directory is already known — a CLI `--config-dir`
+//! flag, a container-mounted volume, a path baked into a deployment manifest.
+//! It's the simplest, fastest, and most predictable constructor: no env vars
+//! are consulted, no XDG chain is walked, nothing is inferred. This is also
+//! the right choice for tests and examples (as used throughout this crate's
+//! own test suite) because behavior never depends on the machine's ambient
+//! environment.
+//!
+//! Compare with `create_loader` (`docs_create_loader`) and `create_loader_xdg`
+//! (`docs_create_loader_xdg`), both of which fall back to env-var/XDG
+//! resolution when no directory is supplied.
+//!
+//! ## What this example does
+//!
+//! 1. Creates a temp directory and writes an `application.toml` into it.
+//! 2. Calls `create_loader_for_dir(dir)` directly — no env vars touched.
+//! 3. Loads the `[app]` section and asserts the value round-trips correctly.
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use configbuilder::{ConfigLoaderFactory, Loader as _};

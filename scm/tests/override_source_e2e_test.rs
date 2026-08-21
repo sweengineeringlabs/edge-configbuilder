@@ -11,27 +11,27 @@ fn test_override_source_explicit_toml_flag_variant_is_constructible() {
 #[test]
 fn test_override_source_env_var_variant_stores_name_and_value() {
     let src = OverrideSource::EnvVar {
-        var_name: "SWE_EDGE_FEATURE_CACHE".to_owned(),
+        var_name: "CONFIGBUILDER_FEATURE_CACHE".to_owned(),
         value: "false".to_owned(),
     };
     let OverrideSource::EnvVar { var_name, value } = &src else {
         panic!("expected EnvVar variant");
     };
-    assert_eq!(var_name, "SWE_EDGE_FEATURE_CACHE");
+    assert_eq!(var_name, "CONFIGBUILDER_FEATURE_CACHE");
     assert_eq!(value, "false");
 }
 
 #[test]
 fn test_override_source_env_var_clone_preserves_contents() {
     let original = OverrideSource::EnvVar {
-        var_name: "SWE_EDGE_FEATURE_X".to_owned(),
+        var_name: "CONFIGBUILDER_FEATURE_X".to_owned(),
         value: "true".to_owned(),
     };
     let cloned = original.clone();
     let OverrideSource::EnvVar { var_name, value } = cloned else {
         panic!("expected EnvVar variant after clone");
     };
-    assert_eq!(var_name, "SWE_EDGE_FEATURE_X");
+    assert_eq!(var_name, "CONFIGBUILDER_FEATURE_X");
     assert_eq!(value, "true");
 }
 

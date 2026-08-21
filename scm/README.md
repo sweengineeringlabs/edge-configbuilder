@@ -1,9 +1,9 @@
 # configbuilder
 
-Standalone, runtime-independent TOML section loader for swe-edge services.
+Standalone, runtime-independent TOML section loader for any Rust application.
 
 Provides XDG-aware, layered config section loading for any `T: DeserializeOwned + Default`.
-Library crates can depend on this crate directly without pulling in `swe-edge-runtime-main`.
+It has no dependency on any application runtime, so library crates can depend on it directly.
 
 All consumer-facing behavior is reached through `ConfigLoaderFactory` — the crate's SAF
 (Service Access Facade). You never construct a loader, builder, or policy type directly.
@@ -12,13 +12,13 @@ All consumer-facing behavior is reached through `ConfigLoaderFactory` — the cr
 
 ```toml
 [dependencies]
-configbuilder = "0.7"
+configbuilder = "0.8"
 ```
 
 ## Features
 
 - **Layered config resolution** — merges config from multiple directories, later sources win
-- **XDG Base Directory support** — automatic path resolution via `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, `$SWE_EDGE_CONFIG_DIR`
+- **XDG Base Directory support** — automatic path resolution via `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, `$CONFIGBUILDER_CONFIG_DIR`
 - **Overridable config filename** — searches for `application.toml` by default; override with `with_config_filename`
 - **Dotted key paths** — load nested sections with `"outer.inner"` syntax
 - **Optional feature sections** — `OptionalSection`/`FeatureRegistry` with dependency-ordered loading, env-var overrides, and graceful degradation
@@ -38,7 +38,7 @@ let cfg: BrokerConfig = loader.load_section("broker")?;
 # Ok::<(), configbuilder::ConfigError>(())
 ```
 
-`create_loader()` resolves config directories via the XDG chain (`$SWE_EDGE_CONFIG_DIR`,
+`create_loader()` resolves config directories via the XDG chain (`$CONFIGBUILDER_CONFIG_DIR`,
 `$XDG_CONFIG_DIRS`, `$XDG_CONFIG_HOME`, falling back to `./config`). Use
 `ConfigLoaderFactory::create_loader_for_dir(path)` to read from an explicit directory instead,
 or `ConfigLoaderFactory::create_loader_xdg(app_name)` to XDG-resolve under a named app.

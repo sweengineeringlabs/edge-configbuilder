@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0] - 2026-08-22
+
+### Changed
+
+- **Breaking:** removed all remaining `swe-edge` branding — this crate is now documented and named as a standalone, ecosystem-neutral library.
+  - Env vars renamed: `SWE_EDGE_CONFIG_DIR` → `CONFIGBUILDER_CONFIG_DIR`; `SWE_EDGE_FEATURE_<KEY>` / `SWE_EDGE_FEATURE_<KEY>_ON_ERROR` → `CONFIGBUILDER_FEATURE_<KEY>` / `CONFIGBUILDER_FEATURE_<KEY>_ON_ERROR`. Anyone currently setting the old names needs to update them — the crate no longer recognizes them.
+  - Prose in `README.md`, `docs/README.md`, `docs/architecture.md`, and the crate-level rustdoc rewritten to drop "swe-edge services" / `swe-edge-runtime-main` framing.
+
+### Added
+
+- One runnable, self-verifying `cargo run --example` per config method (11 `ConfigLoaderFactory::create_*` constructors, 5 `ConfigBuilder`/`ConfigBuilderInit` fluent setters), each thoroughly documented with a "when to use this" comparison against sibling methods. Indexed in `scm/examples/docs/README.md`.
+
 ## [0.7.0] - 2026-08-21
 
 ### Added

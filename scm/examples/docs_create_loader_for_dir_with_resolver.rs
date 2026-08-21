@@ -1,5 +1,26 @@
-//! `ConfigLoaderFactory::create_loader_for_dir_with_resolver` — explicit
-//! directory, with substitution values sourced from a custom `ValueResolver`.
+//! `ConfigLoaderFactory::create_loader_for_dir_with_resolver(dir, policy, resolver)`
+//! — explicit directory, `{{VAR_NAME}}` substitution, values from a custom
+//! `ValueResolver` instead of `std::env::var`.
+//!
+//! ## When to use this
+//!
+//! Combines `create_loader_for_dir`'s "no resolution, directory already
+//! known" simplicity with a pluggable value source for substitution — the
+//! most explicit and deterministic of the three `_with_resolver`
+//! constructors, since neither the directory nor the substituted values
+//! depend on anything ambient (no env vars are read at all in this
+//! example). Good for tests and for services that mount config at a fixed
+//! path and pull secrets from a non-env-var backend.
+//!
+//! ## What this example does
+//!
+//! 1. Defines `StaticResolver`, a trivial `ValueResolver` returning a
+//!    hardcoded value for one known name (a stand-in for a real secrets
+//!    backend).
+//! 2. Writes an `application.toml` with a `{{APP_GREETING}}` placeholder.
+//! 3. Calls the constructor directly with the temp dir — no env vars
+//!    involved anywhere in this example.
+//! 4. Loads the section and asserts the resolver supplied the value.
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use configbuilder::{ConfigLoaderFactory, Loader as _, SubstitutionError, ValueResolver};

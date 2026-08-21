@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::api::{ConfigBuilder, ConfigBuilderBound, ConfigError, Loader as _};
 use crate::core::DefaultSectionLoader;
 
-const CONFIG_DIR_ENV_VAR: &str = "SWE_EDGE_CONFIG_DIR";
+const CONFIG_DIR_ENV_VAR: &str = "CONFIGBUILDER_CONFIG_DIR";
 const FALLBACK_CONFIG_DIR: &str = "config";
 
 pub(crate) struct DefaultConfigBuilder {
@@ -202,8 +202,8 @@ mod tests {
 
     #[test]
     fn test_with_name_sets_application_name() {
-        let b = blank().with_name("swe-edge-config");
-        assert_eq!(b.name(), "swe-edge-config");
+        let b = blank().with_name("example-app-config");
+        assert_eq!(b.name(), "example-app-config");
     }
 
     #[test]
@@ -272,7 +272,7 @@ mod tests {
     fn test_build_loader_with_unknown_name_returns_not_found() {
         let loader = must(
             blank()
-                .with_name("swe-edge-nonexistent-test-xyz")
+                .with_name("example-app-nonexistent-test-xyz")
                 .build_loader_internal(),
         );
         let result: Result<DefaultConfigBuilderFixture, _> = loader.load_section("any");
@@ -284,14 +284,14 @@ mod tests {
 
     #[test]
     fn test_build_loader_no_name_no_dirs_no_application_toml_returns_not_found() {
-        // Point SWE_EDGE_CONFIG_DIR to an empty temp dir so there is no
+        // Point CONFIGBUILDER_CONFIG_DIR to an empty temp dir so there is no
         // application.toml — load_section must return NotFound.
         let dir = must(tempfile::tempdir());
-        std::env::set_var("SWE_EDGE_CONFIG_DIR", path_str(dir.path()));
+        std::env::set_var("CONFIGBUILDER_CONFIG_DIR", path_str(dir.path()));
         let loader = must(blank().build_loader_internal());
         let result: Result<DefaultConfigBuilderFixture, _> =
             loader.load_section("nonexistent_section_xyz");
-        std::env::remove_var("SWE_EDGE_CONFIG_DIR");
+        std::env::remove_var("CONFIGBUILDER_CONFIG_DIR");
         assert!(
             matches!(result, Err(ConfigError::NotFound(_))),
             "expected NotFound when no application.toml exists in config dir, got {result:?}"

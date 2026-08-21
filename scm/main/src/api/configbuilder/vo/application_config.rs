@@ -11,7 +11,7 @@
 /// ```rust
 /// use configbuilder::ApplicationConfig;
 ///
-/// // Default: no override, uses XDG / SWE_EDGE_CONFIG_DIR resolution.
+/// // Default: no override, uses XDG / CONFIGBUILDER_CONFIG_DIR resolution.
 /// let cfg = ApplicationConfig::default();
 /// assert!(cfg.config_dir.is_none());
 ///
@@ -23,6 +23,6 @@
 #[serde(default)]
 pub struct ApplicationConfig {
     /// Override the default config directory path (normally resolved from XDG or
-    /// `SWE_EDGE_CONFIG_DIR`). Leave `None` to use the default resolution chain.
+    /// `CONFIGBUILDER_CONFIG_DIR`). Leave `None` to use the default resolution chain.
     pub config_dir: Option<String>,
 }

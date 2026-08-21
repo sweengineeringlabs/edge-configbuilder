@@ -1,6 +1,6 @@
 //! Integration tests for feature section loading with env-var overrides.
 //! std::env::set_var/remove_var are unsafe in Rust ≥1.80 (multi-thread UB risk).
-//! Tests that exercise the SWE_EDGE_FEATURE_* env-var override path require it;
+//! Tests that exercise the CONFIGBUILDER_FEATURE_* env-var override path require it;
 //! ENV_LOCK serializes all such tests within this binary to prevent data races.
 #![allow(unsafe_code)]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
@@ -223,7 +223,7 @@ fn test_load_feature_explicit_enabled_false_record_carries_toml_flag_source() {
 #[test]
 fn test_load_feature_env_var_false_disables_present_section() {
     let _g = ENV_LOCK.lock().unwrap();
-    let var = "SWE_EDGE_FEATURE_FL_E2E_OFF";
+    let var = "CONFIGBUILDER_FEATURE_FL_E2E_OFF";
     // SAFETY: serialized by ENV_LOCK; test-only process mutation
     unsafe { std::env::set_var(var, "false") };
     let dir = TempDir::new().unwrap();
@@ -246,7 +246,7 @@ fn test_load_feature_env_var_false_disables_present_section() {
 #[test]
 fn test_load_feature_env_var_true_enables_present_section_and_records_env_source() {
     let _g = ENV_LOCK.lock().unwrap();
-    let var = "SWE_EDGE_FEATURE_FL_E2E_ON";
+    let var = "CONFIGBUILDER_FEATURE_FL_E2E_ON";
     // SAFETY: serialized by ENV_LOCK; test-only process mutation
     unsafe { std::env::set_var(var, "true") };
     let dir = TempDir::new().unwrap();
@@ -270,7 +270,7 @@ fn test_load_feature_env_var_true_enables_present_section_and_records_env_source
 #[test]
 fn test_load_feature_env_var_true_overrides_enabled_false_in_toml() {
     let _g = ENV_LOCK.lock().unwrap();
-    let var = "SWE_EDGE_FEATURE_FL_E2E_FORCE";
+    let var = "CONFIGBUILDER_FEATURE_FL_E2E_FORCE";
     // SAFETY: serialized by ENV_LOCK; test-only process mutation
     unsafe { std::env::set_var(var, "1") };
     let dir = TempDir::new().unwrap();
@@ -292,7 +292,7 @@ fn test_load_feature_env_var_true_overrides_enabled_false_in_toml() {
 #[test]
 fn test_load_feature_env_var_true_with_absent_section_returns_not_found() {
     let _g = ENV_LOCK.lock().unwrap();
-    let var = "SWE_EDGE_FEATURE_FL_E2E_ABSENT";
+    let var = "CONFIGBUILDER_FEATURE_FL_E2E_ABSENT";
     // SAFETY: serialized by ENV_LOCK; test-only process mutation
     unsafe { std::env::set_var(var, "yes") };
     let dir = TempDir::new().unwrap();
@@ -311,7 +311,7 @@ fn test_load_feature_env_var_true_with_absent_section_returns_not_found() {
 #[test]
 fn test_load_feature_invalid_env_var_value_returns_io_error() {
     let _g = ENV_LOCK.lock().unwrap();
-    let var = "SWE_EDGE_FEATURE_FL_E2E_INVALID";
+    let var = "CONFIGBUILDER_FEATURE_FL_E2E_INVALID";
     // SAFETY: serialized by ENV_LOCK; test-only process mutation
     unsafe { std::env::set_var(var, "maybe") };
     let dir = TempDir::new().unwrap();
