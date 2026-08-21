@@ -1,9 +1,9 @@
 //! End-to-end tests for `SectionLoaderImpl`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{Loader, SectionLoaderImpl};
+use configbuilder::{Loader, SectionLoaderImpl};
 use tempfile::TempDir;
 
 fn make_loader(content: &str) -> (TempDir, SectionLoaderImpl) {
@@ -56,7 +56,7 @@ fn test_section_loader_impl_validate_existing_dir_returns_ok() {
 #[test]
 fn test_load_section_times_out_on_stalled_read() {
     use std::time::Duration;
-    use swe_edge_configbuilder::ConfigError;
+    use configbuilder::ConfigError;
 
     let dir = TempDir::new().unwrap();
     let toml_path = dir.path().join("application.toml");
@@ -68,7 +68,7 @@ fn test_load_section_times_out_on_stalled_read() {
         .expect("mkfifo must be available on this Unix system");
     assert!(status.success(), "mkfifo failed to create named pipe");
 
-    let loader = swe_edge_configbuilder::ConfigBuilderImpl::new()
+    let loader = configbuilder::ConfigBuilderImpl::new()
         .with_config_dir(dir.path())
         .with_read_timeout(Duration::from_millis(100))
         .build_loader()

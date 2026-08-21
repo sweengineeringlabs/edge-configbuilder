@@ -12,7 +12,7 @@ use crate::api::ConfigError;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::ConfigSection;
+/// use configbuilder::ConfigSection;
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// pub struct MtlsAuthConfig { pub allowed_cns: Vec<String> }
@@ -21,7 +21,7 @@ use crate::api::ConfigError;
 ///     fn section_name() -> &'static str { "mtls" }
 /// }
 ///
-/// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
+/// # let loader: configbuilder::SectionLoaderImpl = panic!();
 /// let cfg = MtlsAuthConfig::load(&loader).expect("mtls section required");
 /// ```
 pub trait ConfigSection: serde::de::DeserializeOwned + Default + Send + Sync + 'static {

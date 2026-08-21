@@ -1,4 +1,4 @@
-# swe-edge-configbuilder
+# configbuilder
 
 > **TLDR:** Standalone TOML section loader for swe-edge — XDG-aware layered resolution, `{{VAR_NAME}}` substitution with pluggable name policies and value sources, and preflight validation. No runtime dependency.
 
@@ -19,4 +19,4 @@ previously did.
 | [Overview](scm/docs/README.md) | WHAT + WHY — capabilities and design rationale |
 | [Architecture](scm/docs/architecture.md) | SEA module layout, sequence/data-flow diagrams, key contracts |
 | [Changelog](scm/CHANGELOG.md) | Version history |
-| [Rustdoc](https://docs.rs/swe-edge-configbuilder) | Full API reference |
+| [Rustdoc](https://docs.rs/configbuilder) | Full API reference |

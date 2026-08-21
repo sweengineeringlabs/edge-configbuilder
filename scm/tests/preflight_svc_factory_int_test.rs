@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-use swe_edge_configbuilder::PREFLIGHT_SVC_FACTORY;
+use configbuilder::PREFLIGHT_SVC_FACTORY;
 
 #[test]
 fn test_preflight_svc_factory_has_constant() {

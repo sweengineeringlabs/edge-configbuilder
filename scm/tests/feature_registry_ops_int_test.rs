@@ -1,6 +1,6 @@
 //! Integration tests for `FeatureRegistryOps` — `new`, `on_load`, `records`, `summary`, `validate_dependencies`.
 #![allow(missing_docs, clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, FeatureSummaryOps as _,
     OptionalSection,
 };

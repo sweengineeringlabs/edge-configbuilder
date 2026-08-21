@@ -1,6 +1,6 @@
 //! Tests for `ConfigBuilder` trait via `create_config_builder`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigError, ConfigLoaderFactory, Loader as _,
 };
 
@@ -95,7 +95,7 @@ fn test_build_loader_loads_message_broker_style_config() {
 #[test]
 fn test_build_loader_with_name_unknown_app_returns_not_found() {
     let result: Result<Cfg, _> = ConfigLoaderFactory::create_config_builder()
-        .with_name("swe-edge-configbuilder-nonexistent-xyz")
+        .with_name("configbuilder-nonexistent-xyz")
         .build_loader()
         .unwrap()
         .load_section("any_section");

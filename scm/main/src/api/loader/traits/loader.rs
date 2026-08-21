@@ -17,7 +17,7 @@ use crate::api::ConfigError;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::Loader;
+/// use configbuilder::Loader;
 ///
 /// #[derive(serde::Deserialize, Default)]
 /// struct AuthConfig { token_ttl_secs: u64 }
@@ -28,7 +28,7 @@ use crate::api::ConfigError;
 ///     loader.load_section("auth").unwrap_or_default()
 /// }
 ///
-/// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
+/// # let loader: configbuilder::SectionLoaderImpl = panic!();
 /// let cfg = load_auth(&loader);
 /// ```
 pub trait Loader {
@@ -42,12 +42,12 @@ pub trait Loader {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::Loader;
+    /// use configbuilder::Loader;
     ///
     /// #[derive(serde::Deserialize, Default)]
     /// struct TlsConfig { cert_path: String }
     ///
-    /// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
+    /// # let loader: configbuilder::SectionLoaderImpl = panic!();
     /// let tls: TlsConfig = loader.load_section("tls").expect("readable");
     /// ```
     fn load_section<T>(&self, key: &str) -> Result<T, ConfigError>
@@ -62,8 +62,8 @@ pub trait Loader {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use swe_edge_configbuilder::Loader;
-    /// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
+    /// use configbuilder::Loader;
+    /// # let loader: configbuilder::SectionLoaderImpl = panic!();
     /// loader.validate().expect("must be a directory if it exists");
     /// ```
     fn validate(&self) -> Result<(), ConfigError>;

@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-use swe_edge_configbuilder::SUBSTITUTER_SVC_FACTORY;
+use configbuilder::SUBSTITUTER_SVC_FACTORY;
 
 #[test]
 fn test_substituter_svc_factory_has_constant() {

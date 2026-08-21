@@ -1,9 +1,9 @@
 //! Tests for `RawFeature` — the type-erased feature load result.
 #![allow(clippy::unwrap_used)]
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use configbuilder::ConfigLoaderFactory;
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{FeatureLoader as _, FeatureState, FeatureStateOps as _};
+use configbuilder::{FeatureLoader as _, FeatureState, FeatureStateOps as _};
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {

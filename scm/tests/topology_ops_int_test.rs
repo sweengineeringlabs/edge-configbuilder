@@ -1,6 +1,6 @@
 //! Integration tests for `TopologyOps` — `sort`.
 #![allow(missing_docs, clippy::unwrap_used)]
-use swe_edge_configbuilder::{Topology, TopologyOps as _};
+use configbuilder::{Topology, TopologyOps as _};
 
 // ── sort ──────────────────────────────────────────────────────────────────────
 

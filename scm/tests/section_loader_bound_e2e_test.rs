@@ -1,7 +1,7 @@
 //! Contract tests for the section loader boundary constants.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+use configbuilder::{ConfigLoaderFactory, Loader as _};
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]
 struct Sec {
@@ -46,14 +46,14 @@ fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
     // application.toml — the loader must return NotFound, not Ok(Default).
     let dir = tempfile::tempdir().unwrap();
     std::env::set_var("SWE_EDGE_CONFIG_DIR", dir.path().to_str().unwrap());
-    let result: Result<Sec, _> = swe_edge_configbuilder::ConfigLoaderFactory::create_loader()
+    let result: Result<Sec, _> = configbuilder::ConfigLoaderFactory::create_loader()
         .unwrap()
         .load_section("nonexistent_xyz");
     std::env::remove_var("SWE_EDGE_CONFIG_DIR");
     assert!(
         matches!(
             result,
-            Err(swe_edge_configbuilder::ConfigError::NotFound(_))
+            Err(configbuilder::ConfigError::NotFound(_))
         ),
         "config dir with no application.toml must return NotFound: {result:?}"
     );

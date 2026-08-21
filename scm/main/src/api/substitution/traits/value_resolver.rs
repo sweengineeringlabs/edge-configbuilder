@@ -16,7 +16,7 @@ use crate::api::SubstitutionError;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{SubstitutionError, ValueResolver};
+/// use configbuilder::{SubstitutionError, ValueResolver};
 ///
 /// struct StaticResolver;
 ///

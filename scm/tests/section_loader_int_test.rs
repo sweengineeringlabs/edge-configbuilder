@@ -1,11 +1,11 @@
 //! Integration tests for swe-edge-config section loading.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+use configbuilder::{ConfigLoaderFactory, Loader as _};
 
 use std::io::Write as _;
 use tempfile::TempDir;
 
-use swe_edge_configbuilder::ConfigError;
+use configbuilder::ConfigError;
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]

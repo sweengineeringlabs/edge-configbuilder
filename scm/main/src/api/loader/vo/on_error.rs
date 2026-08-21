@@ -15,7 +15,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::OnError;
+/// use configbuilder::OnError;
 ///
 /// // Default policy halts startup on misconfiguration.
 /// assert_eq!(OnError::default(), OnError::Fail);

@@ -1,6 +1,6 @@
 [package]
-name             = "swe-edge-configbuilder"
-version      = "0.5.3"
+name             = "configbuilder"
+version      = "0.6.0"
 edition          = "2021"
 license          = "MIT OR Apache-2.0"
 rust-version     = "1.95"
@@ -15,14 +15,14 @@ application_type = "lib"
 service_type     = "config"
 
 [lib]
-name = "swe_edge_configbuilder"
+name = "configbuilder"
 path = "main/src/lib.rs"
 
 [features]
 ## Exposes `AllowAllPolicy` for use in tests.
 ##
 ## Add to `[dev-dependencies]` only:
-##   swe-edge-configbuilder = { ..., features = ["test-utils"] }
+##   configbuilder = { ..., features = ["test-utils"] }
 ##
 ## Never enable in `[dependencies]` — `AllowAllPolicy` bypasses all variable
 ## restrictions and must not reach production binaries.

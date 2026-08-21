@@ -1,4 +1,4 @@
-# swe-edge-configbuilder
+# configbuilder
 
 ## WHAT
 

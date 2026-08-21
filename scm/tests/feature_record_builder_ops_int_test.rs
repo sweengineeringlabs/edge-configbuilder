@@ -1,6 +1,6 @@
 //! Integration tests for `FeatureRecordBuilderOps` — `new`, `enabled`, `override_source`.
 #![allow(missing_docs)]
-use swe_edge_configbuilder::{FeatureRecordBuilder, FeatureRecordBuilderOps as _, OverrideSource};
+use configbuilder::{FeatureRecordBuilder, FeatureRecordBuilderOps as _, OverrideSource};
 
 // ── new ───────────────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 //! Tests for `LoadedFeature<T>` — full result of loading an optional config section.
 
-use swe_edge_configbuilder::{
+use configbuilder::{
     FeatureMetadata, FeatureRecord, FeatureState, FeatureStateOps as _, LoadedFeature,
 };
 

@@ -23,7 +23,7 @@ use std::path::PathBuf;
 /// # Obtaining a concrete instance
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
+/// use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
 ///
 /// let loader = ConfigLoaderFactory::create_config_builder()
 ///     .with_name("my-service")

@@ -2,7 +2,7 @@
 #![allow(clippy::unwrap_used)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{
+use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
 };
 /// @covers: config_builder_impl::ConfigBuilderImpl::with_name

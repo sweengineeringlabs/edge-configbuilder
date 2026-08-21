@@ -1,7 +1,7 @@
 //! Tests for `Validator::validate_path` via `create_loader_for_dir`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+use configbuilder::{ConfigLoaderFactory, Loader as _};
 /// @covers: create_loader_for_dir
 #[test]
 fn test_validate_section_dir_nonexistent_path_succeeds() {
@@ -31,6 +31,6 @@ fn test_validate_section_dir_file_path_returns_error() {
     let err = ConfigLoaderFactory::create_loader_for_dir(&file_path)
         .validate()
         .unwrap_err();
-    assert!(matches!(err, swe_edge_configbuilder::ConfigError::Io(_)));
+    assert!(matches!(err, configbuilder::ConfigError::Io(_)));
     assert!(err.to_string().contains("not a directory"));
 }

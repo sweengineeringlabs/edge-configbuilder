@@ -1,6 +1,6 @@
 //! End-to-end tests for `PreflightReport`, `PreflightIssue`, and `PreflightIssueKind`.
 
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport,
 };
 

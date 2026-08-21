@@ -1,6 +1,6 @@
 //! Tests for `OverrideSource` — records which control overrode natural TOML state.
 
-use swe_edge_configbuilder::OverrideSource;
+use configbuilder::OverrideSource;
 
 #[test]
 fn test_override_source_explicit_toml_flag_variant_is_constructible() {

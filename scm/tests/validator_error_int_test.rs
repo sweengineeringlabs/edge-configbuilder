@@ -1,6 +1,6 @@
 //! Tests for `ValidatorError` display and public conversion.
 
-use swe_edge_configbuilder::{ConfigError, ValidatorError};
+use configbuilder::{ConfigError, ValidatorError};
 
 #[test]
 fn test_validator_error_display_io() {

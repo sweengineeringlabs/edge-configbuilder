@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0] - 2026-08-21
+
+### Changed
+
+- **Breaking:** renamed the crate from `swe-edge-configbuilder` to `configbuilder` on crates.io, and the Rust module from `swe_edge_configbuilder` to `configbuilder`. Update `Cargo.toml` dependency declarations and every `use swe_edge_configbuilder::...` import accordingly.
+
 ## [0.5.3] - 2026-08-16
 
 ### Fixed

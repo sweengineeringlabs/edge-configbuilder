@@ -12,7 +12,7 @@ use std::path::Path;
 ///
 /// ```rust,no_run
 /// use std::path::Path;
-/// use swe_edge_configbuilder::Validator;
+/// use configbuilder::Validator;
 ///
 /// fn check(v: &dyn Validator, path: &str) {
 ///     match v.validate_path(Path::new(path)) {
@@ -21,7 +21,7 @@ use std::path::Path;
 ///     }
 /// }
 ///
-/// # let validator: swe_edge_configbuilder::PathValidatorImpl = panic!();
+/// # let validator: configbuilder::PathValidatorImpl = panic!();
 /// check(&validator, "/etc/my-app");
 /// ```
 pub trait Validator {
@@ -36,9 +36,9 @@ pub trait Validator {
     ///
     /// ```rust,no_run
     /// use std::path::Path;
-    /// use swe_edge_configbuilder::Validator;
+    /// use configbuilder::Validator;
     ///
-    /// # let v: swe_edge_configbuilder::PathValidatorImpl = panic!();
+    /// # let v: configbuilder::PathValidatorImpl = panic!();
     /// // Non-existent paths are always valid.
     /// assert!(v.validate_path(Path::new("/tmp/no-such-dir-xyzzy")).is_ok());
     /// ```

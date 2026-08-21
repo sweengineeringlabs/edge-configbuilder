@@ -12,7 +12,7 @@ use crate::api::preflight::vo::preflight_issue_kind::PreflightIssueKind;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{PreflightIssue, PreflightIssueKind};
+/// use configbuilder::{PreflightIssue, PreflightIssueKind};
 ///
 /// let issue = PreflightIssue {
 ///     section: "message_broker".to_string(),

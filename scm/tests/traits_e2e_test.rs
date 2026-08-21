@@ -1,7 +1,7 @@
 //! Tests for `Loader::validate` behaviour via `create_loader_for_dir`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+use configbuilder::{ConfigLoaderFactory, Loader as _};
 /// @covers: create_loader_for_dir
 #[test]
 fn test_validator_trait_accepts_valid_dir() {
@@ -20,7 +20,7 @@ fn test_validator_trait_rejects_file_as_dir() {
     let err = ConfigLoaderFactory::create_loader_for_dir(&file_path)
         .validate()
         .unwrap_err();
-    assert!(matches!(err, swe_edge_configbuilder::ConfigError::Io(_)));
+    assert!(matches!(err, configbuilder::ConfigError::Io(_)));
 }
 
 fn trait_marker(name: &str) -> String {

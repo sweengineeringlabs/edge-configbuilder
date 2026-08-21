@@ -1,6 +1,6 @@
 //! Integration tests for `PreflightIssueKindOps` — `variant_name`.
 #![allow(missing_docs)]
-use swe_edge_configbuilder::{PreflightIssueKind, PreflightIssueKindOps as _};
+use configbuilder::{PreflightIssueKind, PreflightIssueKindOps as _};
 
 // ── variant_name ──────────────────────────────────────────────────────────────
 

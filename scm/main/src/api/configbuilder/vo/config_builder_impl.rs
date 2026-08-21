@@ -26,7 +26,7 @@ use std::time::Duration;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{
+/// use configbuilder::{
 ///     BuilderFinalizer as _, ConfigBuilder as _, ConfigBuilderImpl, ConfigBuilderInit as _,
 ///     Loader as _,
 /// };

@@ -12,7 +12,7 @@ use thiserror::Error;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{ConfigError, ConfigLoaderFactory};
+/// use configbuilder::{ConfigError, ConfigLoaderFactory};
 ///
 /// // Construct a validation error with an actionable message.
 /// let err = ConfigError::Validation {

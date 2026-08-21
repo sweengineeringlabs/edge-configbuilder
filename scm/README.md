@@ -1,4 +1,4 @@
-# swe-edge-configbuilder
+# configbuilder
 
 Standalone, runtime-independent TOML section loader for swe-edge services.
 
@@ -20,14 +20,14 @@ All consumer-facing behavior is reached through `ConfigLoaderFactory` — the cr
 ## Basic Usage
 
 ```rust,no_run
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+use configbuilder::{ConfigLoaderFactory, Loader as _};
 
 #[derive(serde::Deserialize, Default)]
 struct BrokerConfig { host: String, port: u16 }
 
 let loader = ConfigLoaderFactory::create_loader()?;
 let cfg: BrokerConfig = loader.load_section("broker")?;
-# Ok::<(), swe_edge_configbuilder::ConfigError>(())
+# Ok::<(), configbuilder::ConfigError>(())
 ```
 
 `create_loader()` resolves config directories via the XDG chain (`$SWE_EDGE_CONFIG_DIR`,
@@ -46,7 +46,7 @@ that variable name.
 Gated behind the `test-utils` feature; never use in production.
 
 ```rust,no_run
-use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+use configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
 
 let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
     "config/",
@@ -59,7 +59,7 @@ let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
 Restrict substitution to variable names with an allowed prefix:
 
 ```rust,no_run
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use configbuilder::ConfigLoaderFactory;
 
 let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec![
     "APP_".to_string(),
@@ -79,7 +79,7 @@ let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
 ### `PatternWhitelistPolicy` (regex-based)
 
 ```rust,no_run
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use configbuilder::ConfigLoaderFactory;
 
 let policy = ConfigLoaderFactory::create_pattern_whitelist_policy(
     "^(APP|SERVICE)_[A-Z_]+$".to_string(),
@@ -94,7 +94,7 @@ let loader = ConfigLoaderFactory::create_loader_for_dir_with_substitution(
 ### `CompositePolicy` (combine policies — any one allowing is enough)
 
 ```rust,no_run
-use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
+use configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
 
 let policies: Vec<Box<dyn SubstitutionPolicy>> = vec![
     Box::new(ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()])),
@@ -114,7 +114,7 @@ the name policy still gates which variable names are allowed; the resolver only 
 *where the value comes from*:
 
 ```rust,no_run
-use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionError, ValueResolver};
+use configbuilder::{ConfigLoaderFactory, SubstitutionError, ValueResolver};
 
 struct StaticResolver;
 impl ValueResolver for StaticResolver {
@@ -147,7 +147,7 @@ To use literal `{{`/`}}` without substitution, escape them: `\{\{VAR_NAME\}\}` r
 Dry-run every feature section, collecting **all** issues instead of stopping at the first:
 
 ```rust,no_run
-use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
+use configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
 
 # #[derive(serde::Deserialize)] struct CacheConfig;
 # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
@@ -171,13 +171,13 @@ Load a set of `OptionalSection` types in dependency order via `load_in_order!`, 
 For more control over directories and substitution together:
 
 ```rust,no_run
-use swe_edge_configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
+use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory};
 
 let policy = ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]);
 let loader = ConfigLoaderFactory::create_config_builder_with_substitution(Box::new(policy))
     .with_config_dir("/etc/myapp")
     .build_loader()?;
-# Ok::<(), swe_edge_configbuilder::ConfigError>(())
+# Ok::<(), configbuilder::ConfigError>(())
 ```
 
 ## Documentation
@@ -186,7 +186,7 @@ let loader = ConfigLoaderFactory::create_config_builder_with_substitution(Box::n
 |----------|-------------|
 | [Overview](docs/README.md) | WHAT + WHY — capabilities and design rationale |
 | [Architecture](docs/architecture.md) | SEA module layout, data flow, key contracts |
-| [Rustdoc](https://docs.rs/swe-edge-configbuilder) | Full API reference |
+| [Rustdoc](https://docs.rs/configbuilder) | Full API reference |
 
-[`ConfigLoaderFactory`]: https://docs.rs/swe-edge-configbuilder/latest/swe_edge_configbuilder/struct.ConfigLoaderFactory.html
-[`OptionalSection`]: https://docs.rs/swe-edge-configbuilder/latest/swe_edge_configbuilder/trait.OptionalSection.html
+[`ConfigLoaderFactory`]: https://docs.rs/configbuilder/latest/configbuilder/struct.ConfigLoaderFactory.html
+[`OptionalSection`]: https://docs.rs/configbuilder/latest/configbuilder/trait.OptionalSection.html

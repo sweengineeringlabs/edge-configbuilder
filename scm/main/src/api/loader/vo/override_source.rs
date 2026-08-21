@@ -13,7 +13,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::OverrideSource;
+/// use configbuilder::OverrideSource;
 ///
 /// // Env-var override: operator set SWE_EDGE_FEATURE_CACHE=false.
 /// let src = OverrideSource::EnvVar {

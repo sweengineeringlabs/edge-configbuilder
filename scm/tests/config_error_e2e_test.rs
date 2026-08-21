@@ -1,7 +1,7 @@
 //! Tests for `ConfigError` display formatting.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::ConfigError;
+use configbuilder::ConfigError;
 
 #[test]
 fn test_config_error_display_parse() {

@@ -1,6 +1,6 @@
 //! Tests for FeatureSummary counts and Display.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, FeatureSummary,
     FeatureSummaryOps as _, OptionalSection,
 };

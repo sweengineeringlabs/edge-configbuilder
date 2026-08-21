@@ -16,14 +16,14 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::SubstitutionPolicy;
+/// use configbuilder::SubstitutionPolicy;
 ///
 /// /// Allows only variables whose names are all-uppercase ASCII.
 /// struct UppercaseOnlyPolicy;
 ///
 /// impl SubstitutionPolicy for UppercaseOnlyPolicy {
-///     fn validate(&self, var_name: &str) -> Result<(), swe_edge_configbuilder::SubstitutionError> {
-///         use swe_edge_configbuilder::SubstitutionError;
+///     fn validate(&self, var_name: &str) -> Result<(), configbuilder::SubstitutionError> {
+///         use configbuilder::SubstitutionError;
 ///         if var_name.chars().all(|c| c.is_ascii_uppercase() || c == '_') {
 ///             Ok(())
 ///         } else {
@@ -53,7 +53,7 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
+    /// use configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
     /// assert!(ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()])
     ///     .validate("APP_HOST")
     ///     .is_ok());
@@ -68,7 +68,7 @@ pub trait SubstitutionPolicy: Send + Sync {
     /// # Examples
     ///
     /// ```rust
-    /// use swe_edge_configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
+    /// use configbuilder::{ConfigLoaderFactory, SubstitutionPolicy};
     /// assert_eq!(
     ///     ConfigLoaderFactory::create_prefix_whitelist_policy(vec!["APP_".to_string()]).description(),
     ///     "PrefixWhitelist(APP_)"

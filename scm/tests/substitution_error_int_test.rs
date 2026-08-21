@@ -1,5 +1,5 @@
 //! Integration tests for substitution-related error display.
-use swe_edge_configbuilder::ConfigError;
+use configbuilder::ConfigError;
 
 #[test]
 fn test_substitution_error_variable_not_found_displays() {

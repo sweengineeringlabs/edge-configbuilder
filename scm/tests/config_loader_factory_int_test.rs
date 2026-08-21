@@ -1,6 +1,6 @@
 //! Integration tests for [`ConfigLoaderFactory`].
 
-use swe_edge_configbuilder::{
+use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _, Validator as _,
 };
 

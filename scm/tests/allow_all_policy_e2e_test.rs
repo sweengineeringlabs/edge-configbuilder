@@ -1,7 +1,7 @@
 //! Tests for AllowAllPolicy.
 #![cfg(feature = "test-utils")]
 // @covers: api/types/loader/allow_all_policy.rs — AllowAllPolicy accepts any var
-use swe_edge_configbuilder::{AllowAllPolicy, SubstitutionPolicy};
+use configbuilder::{AllowAllPolicy, SubstitutionPolicy};
 
 #[test]
 fn test_allow_all_policy_accepts_any_variable_name() {

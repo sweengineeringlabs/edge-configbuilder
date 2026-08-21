@@ -1,6 +1,6 @@
 //! Tests for `FeatureRecord` — startup feature state snapshot.
 
-use swe_edge_configbuilder::{FeatureMetadata, FeatureRecord, OverrideSource};
+use configbuilder::{FeatureMetadata, FeatureRecord, OverrideSource};
 
 #[test]
 fn test_feature_record_enabled_section_without_override() {

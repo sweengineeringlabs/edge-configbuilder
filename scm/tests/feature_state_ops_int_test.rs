@@ -1,6 +1,6 @@
 //! Integration tests for `FeatureStateOps` trait methods.
 #![allow(missing_docs)]
-use swe_edge_configbuilder::{FeatureState, FeatureStateOps as _};
+use configbuilder::{FeatureState, FeatureStateOps as _};
 
 // ── is_enabled ────────────────────────────────────────────────────────────────
 

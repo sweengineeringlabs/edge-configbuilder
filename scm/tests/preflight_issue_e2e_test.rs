@@ -1,6 +1,6 @@
 //! Tests for PreflightIssue struct fields.
 // @covers: api/types/preflight/preflight_issue.rs — PreflightIssue struct fields
-use swe_edge_configbuilder::{PreflightIssue, PreflightIssueKind};
+use configbuilder::{PreflightIssue, PreflightIssueKind};
 
 #[test]
 fn test_preflight_issue_section_field_stores_section_name() {

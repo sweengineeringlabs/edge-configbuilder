@@ -1,6 +1,6 @@
 //! Integration tests for `FeatureSummaryOps` — `enabled_count`, `disabled_count`, `total_count`, `all_enabled`.
 #![allow(missing_docs, clippy::unwrap_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _, FeatureSummaryOps as _,
     OptionalSection,
 };

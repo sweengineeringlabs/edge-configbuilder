@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 use std::io::Write as _;
-use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _, SubstitutionError, ValueResolver};
+use configbuilder::{ConfigLoaderFactory, Loader as _, SubstitutionError, ValueResolver};
 use tempfile::TempDir;
 
 fn write_toml(dir: &std::path::Path, content: &str) {

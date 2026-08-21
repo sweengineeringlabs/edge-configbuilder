@@ -3,7 +3,7 @@
 #![allow(unsafe_code)]
 
 use serde::Deserialize;
-use swe_edge_configbuilder::{
+use configbuilder::{
     preflight, ConfigError, ConfigLoaderFactory, OnError, OptionalSection, PreflightIssueKind,
     PreflightReportOps as _,
 };

@@ -1,4 +1,4 @@
-# Default runtime configuration for swe-edge-configbuilder.
+# Default runtime configuration for configbuilder.
 # Consumers override these values in their own config/ directory.
 
 [configbuilder]

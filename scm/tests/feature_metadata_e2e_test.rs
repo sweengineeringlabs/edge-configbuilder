@@ -1,6 +1,6 @@
 //! Tests for `FeatureMetadata` — static annotations attached to an optional section.
 
-use swe_edge_configbuilder::FeatureMetadata;
+use configbuilder::FeatureMetadata;
 
 #[test]
 fn test_feature_metadata_default_has_empty_description_and_owner() {

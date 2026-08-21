@@ -28,7 +28,7 @@ use crate::api::ConfigError;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{ConfigError, FeatureState, OptionalSection};
+/// use configbuilder::{ConfigError, FeatureState, OptionalSection};
 ///
 /// #[derive(serde::Deserialize)]
 /// pub struct MessageBrokerConfig {
@@ -52,7 +52,7 @@ use crate::api::ConfigError;
 ///     }
 /// }
 ///
-/// # let loader: swe_edge_configbuilder::SectionLoaderImpl = panic!();
+/// # let loader: configbuilder::SectionLoaderImpl = panic!();
 /// match MessageBrokerConfig::load_optional(&loader).expect("load failed") {
 ///     FeatureState::Enabled(cfg) => println!("broker at {}:{}", cfg.host, cfg.port),
 ///     FeatureState::Disabled     => println!("broker not configured"),

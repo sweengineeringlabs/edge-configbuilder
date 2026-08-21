@@ -1,6 +1,6 @@
 //! Tests for `OnError` — graceful-degradation policy for optional config sections.
 
-use swe_edge_configbuilder::OnError;
+use configbuilder::OnError;
 
 #[test]
 fn test_on_error_default_is_fail() {

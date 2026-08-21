@@ -16,7 +16,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{FeatureState, FeatureStateOps as _};
+/// use configbuilder::{FeatureState, FeatureStateOps as _};
 ///
 /// let enabled: FeatureState<u32> = FeatureState::Enabled(42);
 /// assert!(enabled.is_enabled());

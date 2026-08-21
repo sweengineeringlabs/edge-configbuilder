@@ -16,7 +16,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::FeatureMetadata;
+/// use configbuilder::FeatureMetadata;
 ///
 /// let meta = FeatureMetadata {
 ///     description: "Async message bus backed by NATS",

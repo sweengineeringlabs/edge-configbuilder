@@ -17,7 +17,7 @@ use crate::api::loader::vo::override_source::OverrideSource;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{FeatureRecordBuilder, FeatureRecordBuilderOps as _};
+/// use configbuilder::{FeatureRecordBuilder, FeatureRecordBuilderOps as _};
 ///
 /// let record = FeatureRecordBuilder::new("cache")
 ///     .enabled(true)

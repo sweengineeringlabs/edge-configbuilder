@@ -1,6 +1,6 @@
 //! Integration tests for the `BuilderFinalizer` trait — `build_loader`.
 #![allow(missing_docs, clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
 };
 
@@ -42,7 +42,7 @@ fn test_build_loader_with_file_path_instead_of_dir_error() {
 
 #[test]
 fn test_build_loader_nonexistent_dir_load_returns_not_found_edge() {
-    use swe_edge_configbuilder::ConfigError;
+    use configbuilder::ConfigError;
     // A nonexistent dir passes validate() (only existing-but-not-dir paths fail).
     // Loading a section from it must return NotFound.
     let loader = ConfigLoaderFactory::create_config_builder()

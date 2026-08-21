@@ -9,7 +9,7 @@
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::ApplicationConfig;
+/// use configbuilder::ApplicationConfig;
 ///
 /// // Default: no override, uses XDG / SWE_EDGE_CONFIG_DIR resolution.
 /// let cfg = ApplicationConfig::default();

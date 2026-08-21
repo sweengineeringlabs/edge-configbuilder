@@ -1,7 +1,7 @@
 //! Tests for substitution policy implementations.
 #![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PatternWhitelistPolicy,
     PrefixWhitelistPolicy, SubstitutionError, SubstitutionPolicy,
 };

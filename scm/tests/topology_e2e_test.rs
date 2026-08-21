@@ -1,7 +1,7 @@
 //! End-to-end tests for the internal topological sort utility.
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{Topology, TopologyOps as _};
+use configbuilder::{Topology, TopologyOps as _};
 
 #[test]
 fn test_topo_sort_single_node_no_deps_returns_index_zero() {

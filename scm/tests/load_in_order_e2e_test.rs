@@ -2,7 +2,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use serde::Deserialize;
-use swe_edge_configbuilder::{
+use configbuilder::{
     load_in_order, ConfigError, ConfigLoaderFactory, FeatureRegistry, FeatureRegistryOps as _,
     OptionalSection,
 };

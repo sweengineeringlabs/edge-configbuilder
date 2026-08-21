@@ -1,6 +1,6 @@
 //! @covers: api/types/preflight/preflight_issue_kind.rs — PreflightIssueKind classification
 #![allow(clippy::unwrap_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigError, ConfigLoaderFactory, OptionalSection, PreflightIssueKind,
     PreflightIssueKindOps as _,
 };
@@ -14,9 +14,9 @@ fn write_toml(dir: &std::path::Path, content: &str) {
 fn first_issue_kind<T: OptionalSection + serde::de::DeserializeOwned + 'static>(
     dir: &std::path::Path,
 ) -> Option<PreflightIssueKind> {
-    use swe_edge_configbuilder::PreflightReportOps as _;
+    use configbuilder::PreflightReportOps as _;
     let loader = ConfigLoaderFactory::create_loader_for_dir(dir);
-    let report = swe_edge_configbuilder::preflight!(&loader, T);
+    let report = configbuilder::preflight!(&loader, T);
     report.issues().first().map(|i| i.kind.clone())
 }
 

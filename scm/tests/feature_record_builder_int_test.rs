@@ -1,6 +1,6 @@
 //! Integration tests for [`FeatureRecordBuilder`].
 
-use swe_edge_configbuilder::{
+use configbuilder::{
     FeatureMetadata, FeatureRecordBuilder, FeatureRecordBuilderOps as _, OverrideSource,
 };
 

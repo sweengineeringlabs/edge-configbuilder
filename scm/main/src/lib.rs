@@ -7,7 +7,7 @@
 //! # Usage
 //!
 //! ```rust,no_run
-//! use swe_edge_configbuilder::{ConfigLoaderFactory, Loader as _};
+//! use configbuilder::{ConfigLoaderFactory, Loader as _};
 //!
 //! #[derive(serde::Deserialize, Default)]
 //! struct CompletionConfig { model: String, max_tokens: u32 }
@@ -41,7 +41,7 @@ pub use saf::*;
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{load_in_order, ConfigLoaderFactory, OptionalSection};
+/// use configbuilder::{load_in_order, ConfigLoaderFactory, OptionalSection};
 ///
 /// # #[derive(serde::Deserialize)] struct CacheConfig;
 /// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }
@@ -101,7 +101,7 @@ macro_rules! load_in_order {
 /// # Examples
 ///
 /// ```rust,no_run
-/// use swe_edge_configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
+/// use configbuilder::{preflight, ConfigLoaderFactory, OptionalSection, PreflightReportOps as _};
 ///
 /// # #[derive(serde::Deserialize)] struct CacheConfig;
 /// # impl OptionalSection for CacheConfig { fn section_name() -> &'static str { "cache" } }

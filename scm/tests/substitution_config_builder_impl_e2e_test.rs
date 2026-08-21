@@ -4,7 +4,7 @@
 #![allow(unsafe_code)]
 
 use std::io::Write as _;
-use swe_edge_configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+use configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
 
 /// @covers: substitution_config_builder_impl::SubstitutionConfigBuilderImpl::build_loader
 #[test]

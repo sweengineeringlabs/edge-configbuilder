@@ -4,7 +4,7 @@
 //! ENV_LOCK serializes all such tests within this binary to prevent data races.
 #![allow(unsafe_code)]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigError, ConfigLoaderFactory,
     FeatureLoader as _, FeatureState, FeatureStateOps as _,
 };
@@ -150,7 +150,7 @@ fn test_load_feature_section_high_priority_dir_wins_on_key_conflict() {
         high.path(),
         "[message_broker]\nhost = \"high-host\"\nport = 2222",
     );
-    let loader = swe_edge_configbuilder::ConfigLoaderFactory::create_config_builder()
+    let loader = configbuilder::ConfigLoaderFactory::create_config_builder()
         .with_config_dir(low.path())
         .with_config_dir(high.path())
         .build_loader()
@@ -169,7 +169,7 @@ fn test_load_feature_section_section_absent_in_both_dirs_returns_disabled() {
     let high = TempDir::new().unwrap();
     write_toml(low.path(), "[other]\nvalue = \"x\"");
     write_toml(high.path(), "[also_other]\nvalue = \"y\"");
-    let loader = swe_edge_configbuilder::ConfigLoaderFactory::create_config_builder()
+    let loader = configbuilder::ConfigLoaderFactory::create_config_builder()
         .with_config_dir(low.path())
         .with_config_dir(high.path())
         .build_loader()
@@ -212,7 +212,7 @@ fn test_load_feature_explicit_enabled_false_record_carries_toml_flag_source() {
     assert!(
         matches!(
             loaded.record.override_source,
-            Some(swe_edge_configbuilder::OverrideSource::ExplicitTomlFlag)
+            Some(configbuilder::OverrideSource::ExplicitTomlFlag)
         ),
         "override source must be ExplicitTomlFlag"
     );
@@ -261,7 +261,7 @@ fn test_load_feature_env_var_true_enables_present_section_and_records_env_source
     assert!(
         matches!(
             loaded.record.override_source,
-            Some(swe_edge_configbuilder::OverrideSource::EnvVar { .. })
+            Some(configbuilder::OverrideSource::EnvVar { .. })
         ),
         "record must carry EnvVar override source"
     );

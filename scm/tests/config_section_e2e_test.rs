@@ -1,8 +1,8 @@
 //! Tests for ConfigSection trait behaviour.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use swe_edge_configbuilder::ConfigLoaderFactory;
+use configbuilder::ConfigLoaderFactory;
 // @covers: api/traits/config/section.rs — ConfigSection trait behaviour
-use swe_edge_configbuilder::ConfigSection;
+use configbuilder::ConfigSection;
 
 use std::io::Write as _;
 use tempfile::TempDir;

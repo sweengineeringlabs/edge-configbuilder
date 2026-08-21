@@ -2,7 +2,7 @@
 //! @covers: spi::OptionalSection, spi::ConfigSection
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, ConfigSection, FeatureState, FeatureStateOps as _, OnError,
     OptionalSection,
 };
@@ -124,9 +124,9 @@ impl OptionalSection for StrictFeature {
         OnError::Fail
     }
 
-    fn validate_enabled(&self) -> Result<(), swe_edge_configbuilder::ConfigError> {
+    fn validate_enabled(&self) -> Result<(), configbuilder::ConfigError> {
         if self.require_tls && self.cert_path.is_none() {
-            return Err(swe_edge_configbuilder::ConfigError::Validation {
+            return Err(configbuilder::ConfigError::Validation {
                 section: Self::section_name().to_string(),
                 reason: "cert_path is required when require_tls = true".to_string(),
             });

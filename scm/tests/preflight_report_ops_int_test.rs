@@ -1,6 +1,6 @@
 //! Integration tests for `PreflightReportOps` — `is_ok`, `issues`, `issue_count`.
 #![allow(missing_docs)]
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport,
     PreflightReportOps as _,
 };

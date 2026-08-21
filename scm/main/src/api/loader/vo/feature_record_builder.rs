@@ -17,7 +17,7 @@ use crate::api::loader::vo::override_source::OverrideSource;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{
+/// use configbuilder::{
 ///     FeatureMetadata, FeatureRecordBuilder, FeatureRecordBuilderOps as _, OverrideSource,
 /// };
 ///

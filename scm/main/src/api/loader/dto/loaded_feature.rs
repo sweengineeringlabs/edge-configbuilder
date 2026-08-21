@@ -20,7 +20,7 @@ use crate::api::loader::vo::feature_state::FeatureState;
 /// # Examples
 ///
 /// ```rust
-/// use swe_edge_configbuilder::{
+/// use configbuilder::{
 ///     FeatureRecordBuilderOps as _, FeatureRecordBuilder, FeatureState, FeatureStateOps as _,
 ///     LoadedFeature,
 /// };

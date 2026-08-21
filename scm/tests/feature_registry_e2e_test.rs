@@ -3,7 +3,7 @@
 #![allow(unsafe_code)]
 
 use std::sync::{Arc, Mutex};
-use swe_edge_configbuilder::{
+use configbuilder::{
     ConfigError, ConfigLoaderFactory, FeatureMetadata, FeatureRegistry, FeatureRegistryOps as _,
     FeatureState, FeatureStateOps as _, FeatureSummaryOps as _, OnError, OptionalSection,
     OverrideSource,
