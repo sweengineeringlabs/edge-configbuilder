@@ -1,8 +1,6 @@
 //! Integration tests for the `BuilderFinalizer` trait — `build_loader`.
 #![allow(missing_docs, clippy::unwrap_used, clippy::expect_used)]
-use configbuilder::{
-    BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
-};
+use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _};
 
 #[test]
 fn test_build_loader_with_valid_config_dir_happy() {

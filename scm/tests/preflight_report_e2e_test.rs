@@ -1,8 +1,6 @@
 //! End-to-end tests for `PreflightReport`, `PreflightIssue`, and `PreflightIssueKind`.
 
-use configbuilder::{
-    ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport,
-};
+use configbuilder::{ConfigLoaderFactory, PreflightIssue, PreflightIssueKind, PreflightReport};
 
 // ── PreflightReport construction ──────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-# Architecture — edge-configbuilder
+# Architecture — configbuilder
 
 ## SEA module layout
 

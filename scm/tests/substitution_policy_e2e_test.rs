@@ -1,10 +1,7 @@
 //! Tests for substitution policy implementations.
 #![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use configbuilder::{
-    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PatternWhitelistPolicy,
-    PrefixWhitelistPolicy, SubstitutionError, SubstitutionPolicy,
-};
+use configbuilder::{AllowAllPolicy, ConfigLoaderFactory, SubstitutionError, SubstitutionPolicy};
 
 #[test]
 fn test_allow_all_policy_accepts_any_variable() {

@@ -1,8 +1,8 @@
 //! Tests for the LoaderOps internal trait via SectionLoaderImpl.
 #![allow(clippy::unwrap_used)]
 
-use std::io::Write as _;
 use configbuilder::{ConfigLoaderFactory, Loader as _};
+use std::io::Write as _;
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {

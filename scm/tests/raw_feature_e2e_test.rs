@@ -2,8 +2,8 @@
 #![allow(clippy::unwrap_used)]
 use configbuilder::ConfigLoaderFactory;
 
-use std::io::Write as _;
 use configbuilder::{FeatureLoader as _, FeatureState, FeatureStateOps as _};
+use std::io::Write as _;
 use tempfile::TempDir;
 
 fn dir_with(content: &str) -> TempDir {

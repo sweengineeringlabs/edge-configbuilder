@@ -1,10 +1,10 @@
 //! Integration tests for the `ConfigBuilderInit` trait — `new`, `with_read_timeout`.
 #![allow(missing_docs, clippy::unwrap_used)]
-use std::time::Duration;
 use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigBuilderInit as _, ConfigLoaderFactory,
     Loader as _,
 };
+use std::time::Duration;
 
 // ── new ───────────────────────────────────────────────────────────────────────
 

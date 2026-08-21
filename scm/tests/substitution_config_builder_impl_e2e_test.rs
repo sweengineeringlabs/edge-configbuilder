@@ -3,8 +3,10 @@
 #![allow(clippy::unwrap_used)]
 #![allow(unsafe_code)]
 
+use configbuilder::{
+    AllowAllPolicy, BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
+};
 use std::io::Write as _;
-use configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
 
 /// @covers: substitution_config_builder_impl::SubstitutionConfigBuilderImpl::build_loader
 #[test]

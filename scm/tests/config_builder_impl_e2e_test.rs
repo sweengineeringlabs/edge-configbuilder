@@ -1,10 +1,8 @@
 //! End-to-end tests for `ConfigBuilderImpl`.
 #![allow(clippy::unwrap_used)]
 
+use configbuilder::{BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _};
 use std::io::Write as _;
-use configbuilder::{
-    BuilderFinalizer as _, ConfigBuilder as _, ConfigLoaderFactory, Loader as _,
-};
 /// @covers: config_builder_impl::ConfigBuilderImpl::with_name
 #[test]
 fn test_config_builder_impl_with_name_is_reflected() {

@@ -8,6 +8,13 @@ Library crates can depend on this crate directly without pulling in `swe-edge-ru
 All consumer-facing behavior is reached through `ConfigLoaderFactory` — the crate's SAF
 (Service Access Facade). You never construct a loader, builder, or policy type directly.
 
+## Installation
+
+```toml
+[dependencies]
+configbuilder = "0.6"
+```
+
 ## Features
 
 - **Layered config resolution** — merges config from multiple directories, later sources win

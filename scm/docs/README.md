@@ -21,4 +21,4 @@ Key capabilities:
 | Different services implement their own TOML parsing | Single typed `load_section("key")` API; deserialization and merging handled once |
 | Credentials injected as hardcoded strings | Env var substitution with explicit security policies; `AllowAllPolicy` is test-only, `PrefixWhitelistPolicy` is the production default |
 | Config errors discovered at handler execution time | Preflight report surfaces missing keys and malformed sections at startup, before any request is served |
-| Diamond dep conflicts from multiple config-loading crates | One crate, one tag — all edge consumers pin the same version; kgraph detects conflicts pre-commit |
+| Diamond dep conflicts from multiple config-loading crates | One crate, published on crates.io — all edge consumers pin the same version; kgraph detects conflicts pre-commit |

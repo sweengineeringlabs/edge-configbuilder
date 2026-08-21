@@ -51,10 +51,7 @@ fn test_load_section_without_env_var_returns_not_found_for_absent_section() {
         .load_section("nonexistent_xyz");
     std::env::remove_var("SWE_EDGE_CONFIG_DIR");
     assert!(
-        matches!(
-            result,
-            Err(configbuilder::ConfigError::NotFound(_))
-        ),
+        matches!(result, Err(configbuilder::ConfigError::NotFound(_))),
         "config dir with no application.toml must return NotFound: {result:?}"
     );
 }

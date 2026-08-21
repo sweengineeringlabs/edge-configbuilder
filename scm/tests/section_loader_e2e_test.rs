@@ -1,8 +1,8 @@
 //! Tests for the public section-loading operations on `Loader`.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use std::io::Write as _;
 use configbuilder::{ConfigError, ConfigLoaderFactory, Loader as _};
+use std::io::Write as _;
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]

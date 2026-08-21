@@ -2,8 +2,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 use configbuilder::ConfigLoaderFactory;
 
-use std::io::Write as _;
 use configbuilder::{Loader, SectionLoaderImpl};
+use std::io::Write as _;
 use tempfile::TempDir;
 
 fn make_loader(content: &str) -> (TempDir, SectionLoaderImpl) {
@@ -55,8 +55,8 @@ fn test_section_loader_impl_validate_existing_dir_returns_ok() {
 #[cfg(unix)]
 #[test]
 fn test_load_section_times_out_on_stalled_read() {
-    use std::time::Duration;
     use configbuilder::ConfigError;
+    use std::time::Duration;
 
     let dir = TempDir::new().unwrap();
     let toml_path = dir.path().join("application.toml");

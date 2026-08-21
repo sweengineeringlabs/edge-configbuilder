@@ -2,12 +2,12 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(unsafe_code)]
 
-use std::sync::{Arc, Mutex};
 use configbuilder::{
     ConfigError, ConfigLoaderFactory, FeatureMetadata, FeatureRegistry, FeatureRegistryOps as _,
     FeatureState, FeatureStateOps as _, FeatureSummaryOps as _, OnError, OptionalSection,
     OverrideSource,
 };
+use std::sync::{Arc, Mutex};
 
 static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 use tempfile::TempDir;

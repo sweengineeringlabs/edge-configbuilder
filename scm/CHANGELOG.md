@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.2] - 2026-08-21
+
+### Fixed
+
+- 4 integration tests (`substituter_e2e_test`, `substitution_config_builder_impl_e2e_test`, plus 2 with stray unused imports) failed to compile — missing `Loader`/`ConfigBuilder`/`BuilderFinalizer` trait imports and dead `CompositePolicy`/`PatternWhitelistPolicy`/`PrefixWhitelistPolicy` imports left over from the crate rename. `cargo test --workspace --all-features` now passes clean (99 test binaries, 598 tests).
+- Reformatted 25 files with `cargo fmt` — the crate rename shortened `swe_edge_configbuilder` to `configbuilder`, shifting rustfmt's import-wrapping decisions everywhere that name appeared.
+
+### Documentation
+
+- Fixed `docs/architecture.md`'s stale `edge-configbuilder` title.
+- Added an `## Installation` section to `README.md` now that the crate is live on crates.io.
+- Updated `docs/README.md`'s dependency-pinning rationale to reflect crates.io publishing instead of git+tag.
+
 ## [0.6.1] - 2026-08-21
 
 ### Fixed

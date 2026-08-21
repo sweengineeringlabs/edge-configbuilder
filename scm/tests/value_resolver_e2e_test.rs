@@ -2,9 +2,9 @@
 #![allow(clippy::unwrap_used)]
 #![allow(unsafe_code)]
 
+use configbuilder::{ConfigLoaderFactory, Loader as _, SubstitutionError, ValueResolver};
 use std::collections::HashMap;
 use std::io::Write as _;
-use configbuilder::{ConfigLoaderFactory, Loader as _, SubstitutionError, ValueResolver};
 use tempfile::TempDir;
 
 fn write_toml(dir: &std::path::Path, content: &str) {

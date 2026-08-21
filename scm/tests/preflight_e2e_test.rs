@@ -2,11 +2,11 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(unsafe_code)]
 
-use serde::Deserialize;
 use configbuilder::{
     preflight, ConfigError, ConfigLoaderFactory, OnError, OptionalSection, PreflightIssueKind,
     PreflightReportOps as _,
 };
+use serde::Deserialize;
 use tempfile::TempDir;
 
 static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

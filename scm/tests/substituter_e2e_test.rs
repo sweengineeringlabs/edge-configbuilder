@@ -6,7 +6,7 @@
 use std::io::Write as _;
 use tempfile::TempDir;
 
-use configbuilder::{AllowAllPolicy, ConfigLoaderFactory};
+use configbuilder::{AllowAllPolicy, ConfigLoaderFactory, Loader as _};
 
 fn write_toml(dir: &std::path::Path, content: &str) {
     let mut f = std::fs::File::create(dir.join("application.toml")).unwrap();

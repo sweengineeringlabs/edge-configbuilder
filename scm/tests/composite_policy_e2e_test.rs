@@ -2,10 +2,7 @@
 #![cfg(feature = "test-utils")]
 // @covers: api/types/loader/composite_policy.rs — CompositePolicy AND logic
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use configbuilder::{
-    AllowAllPolicy, CompositePolicy, ConfigLoaderFactory, PrefixWhitelistPolicy, SubstitutionError,
-    SubstitutionPolicy,
-};
+use configbuilder::{AllowAllPolicy, ConfigLoaderFactory, SubstitutionError, SubstitutionPolicy};
 
 #[test]
 fn test_composite_policy_empty_policies_accepts_any_var() {

@@ -1,10 +1,10 @@
 //! Tests for public config service factory functions.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use std::io::Write as _;
 use configbuilder::{
     BuilderFinalizer as _, ConfigBuilder as _, ConfigError, ConfigLoaderFactory, Loader as _,
     Validator as _, ValidatorError,
 };
+use std::io::Write as _;
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
 #[serde(default)]
