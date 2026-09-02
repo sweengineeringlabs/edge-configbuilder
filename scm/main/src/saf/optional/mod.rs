@@ -1,3 +1,3 @@
 //! SAF optional-section facade module.
 
-mod section_svc;
+mod section_saf;

@@ -1,3 +1,3 @@
 //! SAF substitution-policy facade module.
 
-mod policy_svc;
+mod policy_saf;

@@ -1,3 +1,3 @@
 //! SAF policy facade module.
 
-mod catalog_svc;
+mod catalog_saf;

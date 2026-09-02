@@ -1,3 +1,3 @@
 //! SAF feature facade module.
 
-mod loader_svc;
+mod loader_saf;
