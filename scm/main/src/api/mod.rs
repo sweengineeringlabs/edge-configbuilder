@@ -12,7 +12,6 @@ pub use configbuilder::traits::config_builder::ConfigBuilder;
 pub use configbuilder::traits::config_builder_bound::ConfigBuilderBound;
 pub use configbuilder::traits::config_builder_init::ConfigBuilderInit;
 pub use configbuilder::vo::application_config::ApplicationConfig;
-pub use configbuilder::vo::substitution_config_builder_impl::SubstitutionConfigBuilderImpl;
 pub use configbuilder::vo::ConfigBuilderImpl;
 pub use loader::dto::loaded_feature::LoadedFeature;
 pub use loader::dto::raw_feature::RawFeature;

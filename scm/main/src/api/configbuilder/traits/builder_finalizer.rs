@@ -1,6 +1,6 @@
 /// Consume a configured builder and produce a ready-to-use section loader.
 ///
-/// Implemented by `ConfigBuilderImpl` and `SubstitutionConfigBuilderImpl`
+/// Implemented by `ConfigBuilderImpl` and `DefaultSubstitutionConfigBuilder`
 /// in the `core/` layer so construction logic can access internal types.
 pub trait BuilderFinalizer {
     /// The concrete loader type produced by this builder.

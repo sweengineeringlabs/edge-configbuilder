@@ -3,8 +3,9 @@ use std::path::PathBuf;
 use crate::api::{
     CompositePolicy, ConfigBuilderImpl, ConfigError, FeatureRegistry, PathValidatorImpl,
     PatternWhitelistPolicy, PrefixWhitelistPolicy, PreflightReport, SectionLoaderImpl,
-    SubstitutionConfigBuilderImpl, SubstitutionPolicy, ValueResolver,
+    SubstitutionPolicy, ValueResolver,
 };
+use crate::core::DefaultSubstitutionConfigBuilder;
 
 /// SAF facade: the single supported entry point for constructing loaders,
 /// builders, and policies without depending on `core/` or `api/` directly.
@@ -409,8 +410,8 @@ impl ConfigLoaderFactory {
     /// Create an empty concrete config builder with `{{VAR}}` substitution support.
     pub fn create_config_builder_with_substitution(
         policy: Box<dyn SubstitutionPolicy>,
-    ) -> SubstitutionConfigBuilderImpl {
-        SubstitutionConfigBuilderImpl {
+    ) -> DefaultSubstitutionConfigBuilder {
+        DefaultSubstitutionConfigBuilder {
             name: env!("CARGO_PKG_NAME").to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),
             config_dirs: Vec::new(),

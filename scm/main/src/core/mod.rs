@@ -5,6 +5,7 @@ mod substitution;
 mod validator;
 
 pub(crate) use configbuilder::DefaultConfigBuilder;
+pub use configbuilder::DefaultSubstitutionConfigBuilder;
 pub(crate) use loader::DefaultSectionLoader;
 pub(crate) use loader::DEFAULT_CONFIG_FILENAME;
 pub(crate) use loader::DEFAULT_READ_TIMEOUT;

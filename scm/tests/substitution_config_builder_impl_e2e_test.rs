@@ -1,4 +1,4 @@
-//! End-to-end tests for `SubstitutionConfigBuilderImpl`.
+//! End-to-end tests for `DefaultSubstitutionConfigBuilder`.
 #![cfg(feature = "test-utils")]
 #![allow(clippy::unwrap_used)]
 #![allow(unsafe_code)]
@@ -8,7 +8,7 @@ use configbuilder::{
 };
 use std::io::Write as _;
 
-/// @covers: substitution_config_builder_impl::SubstitutionConfigBuilderImpl::build_loader
+/// @covers: default_substitution_config_builder::DefaultSubstitutionConfigBuilder::build_loader
 #[test]
 fn test_substitution_config_builder_impl_build_loader_applies_policy() {
     let dir = tempfile::tempdir().unwrap();

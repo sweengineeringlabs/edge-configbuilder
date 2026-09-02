@@ -8,7 +8,7 @@
 //! (`docs_create_config_builder`): use it when you need both the flexible
 //! builder chain (custom directories, custom filename) *and* `{{VAR_NAME}}`
 //! substitution, but don't need a custom `ValueResolver` — this returns a
-//! `SubstitutionConfigBuilderImpl`, a distinct type from the plain
+//! `DefaultSubstitutionConfigBuilder`, a distinct type from the plain
 //! `ConfigBuilderImpl` `create_config_builder()` returns, and notably does
 //! **not** support `with_read_timeout` (see `docs_with_read_timeout`) —
 //! only the plain, non-substitution builder does.

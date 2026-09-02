@@ -130,7 +130,7 @@ impl ConfigBuilder for DefaultConfigBuilder {
 impl ConfigBuilderBound for DefaultConfigBuilder {
     type ApplicationConfig = crate::api::ApplicationConfig;
     type Builder = crate::api::ConfigBuilderImpl;
-    type SubstitutionBuilder = crate::api::SubstitutionConfigBuilderImpl;
+    type SubstitutionBuilder = crate::core::DefaultSubstitutionConfigBuilder;
 }
 
 /// Builder-style accessors used only by this module's unit tests.

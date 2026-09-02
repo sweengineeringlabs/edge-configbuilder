@@ -5,10 +5,9 @@ use std::path::PathBuf;
 /// `ConfigBuilder` is a **builder-chain trait** — it covers only the configuration
 /// fields (`name`, `version`, `with_config_dir`, `with_config_filename`).  It
 /// deliberately does **not** include `build_loader()`.  That finaliser is an
-/// inherent method on the concrete types ([`ConfigBuilderImpl`],
-/// [`SubstitutionConfigBuilderImpl`]) because the construction logic depends on
-/// `core/` internals that the `api/` trait layer must not reference (SEA rules 46
-/// and 116).
+/// inherent method on the concrete builder types ([`ConfigBuilderImpl`] and
+/// `DefaultSubstitutionConfigBuilder`) because the construction logic depends
+/// on `core/` internals that this trait itself must not reference.
 ///
 /// # Two usage patterns
 ///
@@ -34,7 +33,6 @@ use std::path::PathBuf;
 /// ```
 ///
 /// [`ConfigBuilderImpl`]: crate::ConfigBuilderImpl
-/// [`SubstitutionConfigBuilderImpl`]: crate::SubstitutionConfigBuilderImpl
 pub trait ConfigBuilder: Sized {
     /// Return the configured application name.
     fn name(&self) -> &str;

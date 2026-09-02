@@ -12,7 +12,7 @@
 //!
 //! **Availability note:** this setter is only on `ConfigBuilderImpl` (via
 //! the `ConfigBuilderInit` trait) — the plain builder from
-//! `create_config_builder()`. `SubstitutionConfigBuilderImpl` (from
+//! `create_config_builder()`. `DefaultSubstitutionConfigBuilder` (from
 //! `create_config_builder_with_substitution`, see
 //! `docs_create_config_builder_with_substitution`) does **not** expose it.
 //!
